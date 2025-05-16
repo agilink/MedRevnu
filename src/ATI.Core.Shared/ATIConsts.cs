@@ -3,7 +3,7 @@
     public class ATIConsts
     {
         public const string LocalizationSourceName = "ATI";
-        
+
         /// <summary>
         /// Name of the product if the app itself is sold as a SAAS product.
         /// </summary>
@@ -11,8 +11,8 @@
 
         public const string ConnectionStringName = "Default";
 
-        public const bool MultiTenancyEnabled = true;
-        
+        public const bool MultiTenancyEnabled = false;
+
         /// <summary>
         /// Redirects users to host URL when using subdomain as tenancy name for not existing tenants
         /// </summary>
@@ -32,7 +32,7 @@
         //For example, you use Stripe and PayPal. Let say that stripe accepts min 5$ and PayPal accepts min 3$. If your payment amount is 4$.
         // User will prefer to use a payment method with the highest accept value which is a Stripe in this case.
         public const decimal MinimumUpgradePaymentAmount = 1M;
-        
+
 
         public const string DateTimeOffsetFormat = "yyyy-MM-ddTHH:mm:sszzz";
     }

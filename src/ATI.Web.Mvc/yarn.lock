@@ -196,10 +196,10 @@ abort-controller@^3.0.0:
   dependencies:
     event-target-shim "^5.0.0"
 
-abp-web-resources@^5.9.2:
-  version "5.9.2"
-  resolved "https://registry.yarnpkg.com/abp-web-resources/-/abp-web-resources-5.9.2.tgz#5559b3f1c4c9e4e3438b2de1a3f6b9917f9a9f6d"
-  integrity sha512-Q6LFx5IHKUi7FECitEW+0SqO4has3J5Q4J4/5i5p3o+F2FuZ+j3QDHJBl51pSiti4eG4GqLe0oVVeQQp0Ox2uw==
+abp-web-resources@^5.9.3:
+  version "5.9.3"
+  resolved "https://registry.yarnpkg.com/abp-web-resources/-/abp-web-resources-5.9.3.tgz#4b16bceb531b5ccc71cee036a803c98896519fbf"
+  integrity sha512-AUXBUYn9pvxEbzw2JJkKrMIHHle7H7gANHAukDUtqrZLHdFCimiTqes1CAE0jtvRyBXTWiPymdsDHuuRzsUfaA==
 
 acorn-node@^1.8.2:
   version "1.8.2"
