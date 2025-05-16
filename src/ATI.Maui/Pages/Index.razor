@@ -1,0 +1,10 @@
+﻿@page "/"
+@using ATI.Maui.Services.Navigation
+@inherits ATIMainLayoutPageComponentBase
+
+@code {
+    protected override void OnInitialized()
+    {
+        Resolve<INavigationService>().NavigateTo(NavigationUrlConsts.User);
+    }
+}

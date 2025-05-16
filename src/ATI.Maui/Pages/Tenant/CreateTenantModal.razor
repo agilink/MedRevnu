@@ -1,0 +1,138 @@
+﻿@inherits ModalBase
+
+<div class="modal fade" id="@ModalId" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded">
+            <div class="modal-body scroll-y pt-15 pb-15">
+                <div class="mb-13 text-center">
+                    <h1 class="mb-3">@L("CreateNewTenant")</h1>
+                </div>
+                <EditForm Model="CreateTenantModel" OnValidSubmit="@CreateTenantAsync">
+                    <DataAnnotationsValidator/>
+                    <div class="d-flex flex-column mb-8 fv-row fv-plugins-icon-container">
+                        <label class="d-flex align-items-center fs-6 fw-semibold mb-2">
+                            <span class="required">
+                                @L("TenancyName")
+                            </span>
+                            <i class="fas fa-exclamation-circle ms-2 fs-7"></i>
+                        </label>
+                        <InputText @bind-Value="CreateTenantModel.TenancyName" class="form-control form-control-solid" placeholder="@L("TenancyName")"/>
+                        <ValidationMessage For="@(() => CreateTenantModel.TenancyName)"/>
+                    </div>
+                    <div class="d-flex flex-column mb-8 fv-row fv-plugins-icon-container">
+                        <label class="d-flex align-items-center fs-6 fw-semibold mb-2">
+                            <span class="required">@L("Name")</span>
+                            <i class="fas fa-exclamation-circle ms-2 fs-7"></i>
+                        </label>
+                        <InputText @bind-Value="CreateTenantModel.Name" class="form-control form-control-solid" placeholder="@L("Name")"/>
+                        <ValidationMessage For="@(() => CreateTenantModel.Name)"/>
+                    </div>
+                    <div class="d-flex flex-column mb-8 fv-row fv-plugins-icon-container">
+                        <label class="d-flex align-items-center fs-6 fw-semibold mb-2">
+                            <span class="required">@L("AdminEmailAddress")</span>
+                            <i class="fas fa-exclamation-circle ms-2 fs-7"></i>
+                        </label>
+                        <InputText @bind-Value="CreateTenantModel.AdminEmailAddress" class="form-control form-control-solid" placeholder="@L("AdminEmailAddress")"/>
+                        <ValidationMessage For="@(() => CreateTenantModel.AdminEmailAddress)"/>
+                    </div>
+                    <div class="form-check form-check-solid form-switch form-check-custom fv-row">
+                        <InputCheckbox @bind-Value="CreateTenantModel.IsSetRandomPassword" class="form-check-input w-45px h-30px" type="checkbox" id="isSetRandomPassword"/>
+                        <label class="form-check-label" for="isSetRandomPassword">@L("SetRandomPassword")</label>
+                        <ValidationMessage For="@(() => CreateTenantModel.IsSetRandomPassword)"/>
+                    </div>
+                    @if (!CreateTenantModel.IsSetRandomPassword)
+                    {
+                        <div class="d-flex flex-column mb-8 fv-row fv-plugins-icon-container">
+                            <label class="d-flex align-items-center fs-6 fw-semibold mb-2">
+                                <span class="required">@L("AdminPassword")</span>
+                                <i class="fas fa-exclamation-circle ms-2 fs-7"></i>
+                            </label>
+                            <InputText @bind-Value="CreateTenantModel.AdminPassword" type="password" class="form-control form-control-solid" placeholder="@L("AdminPassword")"/>
+                            <ValidationMessage For="@(() => CreateTenantModel.AdminPassword)"/>
+                        </div>
+                        <div class="d-flex flex-column mb-8 fv-row fv-plugins-icon-container">
+                            <label class="d-flex align-items-center fs-6 fw-semibold mb-2">
+                                <span class="required">@L("AdminPasswordRepeat")</span>
+                                <i class="fas fa-exclamation-circle ms-2 fs-7"></i>
+                            </label>
+                            <InputText @bind-Value="CreateTenantModel.AdminPasswordRepeat" type="password" class="form-control form-control-solid" placeholder="@L("AdminPasswordRepeat")"/>
+                            <ValidationMessage For="@(() => CreateTenantModel.AdminPasswordRepeat)"/>
+                        </div>
+                    }
+
+                    <div class="form-check form-check-solid form-switch form-check-custom fv-row mt-1">
+                        <InputCheckbox @bind-Value="CreateTenantModel.UseHostDatabase" class="form-check-input w-45px h-30px" id="useHostDatabase"/>
+                        <label class="form-check-label" for="useHostDatabase">@L("UseHostDatabase")</label>
+                        <ValidationMessage For="@(() => CreateTenantModel.UseHostDatabase)"/>
+                    </div>
+
+                    @if (!CreateTenantModel.UseHostDatabase)
+                    {
+                        <div class="d-flex flex-column mb-8 fv-row fv-plugins-icon-container">
+                            <label class="d-flex align-items-center fs-6 fw-semibold mb-2">
+                                <span class="required">@L("DatabaseConnectionString")</span>
+                                <i class="fas fa-exclamation-circle ms-2 fs-7"></i>
+                            </label>
+                            <InputText @bind-Value="CreateTenantModel.ConnectionString" class="form-control form-control-solid" placeholder="@L("DatabaseConnectionString")"/>
+                            <ValidationMessage For="@(() => CreateTenantModel.ConnectionString)"/>
+                        </div>
+                    }
+
+                    <div class="form-check form-check-solid form-switch form-check-custom fv-row mt-1">
+                        <InputCheckbox @bind-Value="CreateTenantModel.IsActive" class="form-check-input w-45px h-30px" type="checkbox" id="isActive"/>
+                        <label class="form-check-label" for="isActive">@L("Active")</label>
+                        <ValidationMessage For="@(() => CreateTenantModel.IsActive)"/>
+                    </div>
+                    <hr/>
+                    <div class="col-md-6 fv-row fv-plugins-icon-container" data-select2-id="select2-data-119-f5bj">
+                        <label class="required fs-6 fw-semibold mb-2">@L("Edition")</label>
+                        <InputSelect @bind-Value="CreateTenantModel.SelectedEdition" class="form-select form-select-solid" data-control="select2"
+                                     data-hide-search="true" tabindex="-1" aria-hidden="true" data-kt-initialized="1">
+                            @foreach (var edition in CreateTenantModel.Editions)
+                            {
+                                <option value="@edition.Value">@edition.DisplayText</option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    @if (CreateTenantModel.IsSubscriptionFieldVisible)
+                    {
+                        <label class="form-check form-switch form-check-custom form-check-solid mt-2">
+                            <InputCheckbox @bind-Value="CreateTenantModel.IsUnlimitedTimeSubscription" class="form-check-input"/>
+                            <span class="form-check-label fw-semibold text-muted">@L("UnlimitedTimeSubscription")</span>
+                            <ValidationMessage For="@(() => CreateTenantModel.IsUnlimitedTimeSubscription)"/>
+                        </label>
+                        @if (!CreateTenantModel.IsUnlimitedTimeSubscription)
+                        {
+                            <div class="d-flex flex-column mb-8 fv-row fv-plugins-icon-container mt-2">
+                                <label class="d-flex align-items-center fs-6 fw-semibold mb-2">
+                                    <span class="required">@L("SubscriptionEndDateUtc")</span>
+                                    <i class="fas fa-exclamation-circle ms-2 fs-7"></i>
+                                </label>
+                                <InputDate @bind-Value="CreateTenantModel.SubscriptionEndDateUtc" class="form-control form-control-solid datetimepicker-input"
+                                           id="subscription-end-date-utc" data-toggle="datetimepicker" data-target="#subscription-end-date-utc"/>
+                                <ValidationMessage For="@(() => CreateTenantModel.SubscriptionEndDateUtc)"/>
+                            </div>
+                        }
+
+                        if (!CreateTenantModel.IsSelectedEditionFree)
+                        {
+                            <label class="form-check form-switch form-check-custom form-check-solid mt-2">
+                                <InputCheckbox @bind-Value="CreateTenantModel.IsInTrialPeriod" class="form-check-input"/>
+                                <span class="form-check-label fw-semibold text-muted">@L("IsInTrialPeriod")</span>
+                                <ValidationMessage For="@(() => CreateTenantModel.IsInTrialPeriod)"/>
+                            </label>
+                        }
+                    }
+
+                    <div class="text-center mt-3">
+                        <button type="reset" data-dismiss="modal" class="btn btn-light me-3" @onclick="Hide">@L("Cancel")</button>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="indicator-label">@L("Save")</span>
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>

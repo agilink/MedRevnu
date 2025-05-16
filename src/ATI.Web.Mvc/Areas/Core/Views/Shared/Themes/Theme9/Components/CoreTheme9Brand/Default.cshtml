@@ -1,0 +1,10 @@
+﻿@using ATI.Web.Areas.Core.Models.Layout
+@using ATI.Web.Areas.Core.Views.Shared.Components.CoreLogo
+@model HeaderViewModel
+@{
+    Layout = null;
+    var skin = @Model.LoginInformations.Theme.BaseSettings.Layout.DarkMode ? "dark" : "light";
+}
+<a href="@Url.Action("Index", "Home", new {area = string.Empty})" target="_blank" class="brand-logo">
+    @await Component.InvokeAsync(typeof(CoreLogoViewComponent), new {logoSkin = skin + "-sm", logoClass="h-40px"})
+</a>

@@ -1,0 +1,14 @@
+﻿@using ATI.Web.Areas.Core.Models.Layout
+@using ATI.Web.Areas.Core.Views.Shared.Components.CoreLogo
+@model HeaderViewModel
+@{
+    Layout = null;
+    var theme = await GetTheme();
+}
+<a href="@Url.Action("Index", "Home", new {area = string.Empty})">
+    @await Component.InvokeAsync(typeof(CoreLogoViewComponent), new
+    {
+        logoSkin = theme.BaseSettings.Layout.DarkMode ? "dark": "light", 
+        logoClass = "h-30px logo theme-"+(theme.BaseSettings.Layout.DarkMode ? "dark": "light")+"-show"
+    })
+</a>

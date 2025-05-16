@@ -1,0 +1,13 @@
+﻿@using ATI.Web.Areas.Core.Models.Layout
+@using ATI.Web.Areas.Core.Views.Shared.Components.CoreLogo
+@model HeaderViewModel
+@{
+    Layout = null;
+}
+<a href="@Url.Action("Index", "Home", new {area = string.Empty})" class="d-flex align-items-center">
+    @await Component.InvokeAsync(typeof(CoreLogoViewComponent), new
+    {
+        LogoSkin = ViewBag.BrandLogoSkin,
+        logoClass = "h-45px logo"
+    })
+</a>

@@ -1,0 +1,22 @@
+{
+  "name": "abpzerotemplate",
+  "scripts": {
+    "create-bundles": "yarn && gulp buildDev",
+    "build": "yarn && gulp build"
+  },
+  "version": "13.4.0",
+  "license": "MIT",
+  "devDependencies": {
+    "globby": "^9.2.0",
+    "gulp": "^4.0.2",
+    "gulp-clean-css": "^4.3.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-less": "^5.0.0",
+    "gulp-postcss": "^8.0.0",
+    "gulp-uglify-es": "^3.0.0",
+    "merge-stream": "^2.0.0",
+    "postcss-url": "^9.0.0",
+    "prettier": "3.3.3",
+    "yarn": "^1.22.22"
+  }
+}

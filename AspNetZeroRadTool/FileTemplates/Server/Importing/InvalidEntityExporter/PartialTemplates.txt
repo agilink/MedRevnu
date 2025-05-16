@@ -1,0 +1,65 @@
+{
+"propertyTemplates":[
+		{
+			"placeholder" : "{{Property_Template_Looped_Here}}",
+			"templates" : [
+			        {
+			        "type" : "file",
+			        "content" : ""
+			        },
+					{
+					"type" : "default",
+					"content" : ",
+					{\"{{Property_Name_Here}}\", {{entity_Name_Here}}.{{Property_Name_Here}}}"
+					}
+				]
+		},
+	],
+"navigationPropertyTemplates":[
+		{
+			"placeholder" : "{{NP_Using_Looped_Template_Here}}",
+			"preventDuplicate":true,
+			"templates" : [
+					{
+					"relation" : "single",
+					"content" : "using {{NP_Namespace_Here}};
+"
+					},
+					{
+					"relation" : "multi",
+					"content" : "using {{NP_Namespace_Here}};
+"
+					},
+					{
+					"relation" : "single",
+					"viewType": "Dropdown",						
+					"preventDuplicate":true,
+					"content" : "using {{NP_Namespace_Here}};
+"
+					},
+				]
+		},
+        {
+            "placeholder" : "{{NP_Header_And_Value_Here}}",
+            "templates" : [
+                    {
+                    "relation" : "single",
+                    "content" : ",
+                    {\"{{NP_Name_Here}}\", {{entity_Name_Here}}.{{NP_Name_Here}}},
+                    {\"{{NP_Foreign_Entity_Name_Here}}{{NP_Display_Property_Name_Here}}{{NP_Duplication_Number_Here}}\", {{entity_Name_Here}}.{{NP_Foreign_Entity_Name_Here}}{{NP_Display_Property_Name_Here}}{{NP_Duplication_Number_Here}}},
+                    "
+                    }
+                ]
+        },
+	],
+	"enumTemplates":[
+    		{
+    			"placeholder" : "{{Enum_Using_Looped_Template_Here}}",
+    			"preventDuplicate":true,
+    			"content" : "using {{Enum_Namespace_Here}};
+    "
+    		}
+    	],
+	"conditionalTemplates":[
+	]
+}

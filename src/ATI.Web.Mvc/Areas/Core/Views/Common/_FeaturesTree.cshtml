@@ -1,0 +1,5 @@
+﻿@using ATI.Web.Areas.Core.Models.Common
+@model IFeatureEditViewModel
+<div class="feature-tree">
+    @await Html.PartialAsync("~/Areas/Core/Views/Common/_FeaturesTreeItem.cshtml", new FeatureTreeItemModel(Model, null))
+</div>

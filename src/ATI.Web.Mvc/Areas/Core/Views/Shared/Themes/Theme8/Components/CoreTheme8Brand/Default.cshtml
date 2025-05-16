@@ -1,0 +1,14 @@
+﻿@using ATI.Web.Areas.Core.Models.Layout
+@using ATI.Web.Areas.Core.Views.Shared.Components.CoreLogo
+@model HeaderViewModel
+@{
+    Layout = null;
+}
+
+<a href="@Url.Action("Index", "Home", new {area = string.Empty})">
+    @await Component.InvokeAsync(typeof(CoreLogoViewComponent), new
+    {
+        logoSkin = "dark",
+        logoClass = "h-25px h-lg-25px"
+    })
+</a>
