@@ -2,6 +2,10 @@
 {
     public class CorePageNames
     {
+        public static class MedRevnuPages
+        {
+            public const string Revenue = "Revenue";
+        }
         public static class Common
         {
             public const string Administration = "Administration";

@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Abp.AspNetCore" Version="9.4.2" />
+    <PackageReference Include="Abp.AspNetCore.SignalR" Version="9.4.2" />
+    <PackageReference Include="Abp.AspNetZeroCore.Web" Version="5.0.0" />
+    <PackageReference Include="Abp.Castle.Log4Net" Version="9.4.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ViewModels\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ATI.Core\ATI.Core.csproj" />
+    <ProjectReference Include="..\..\src\ATI.EntityFrameworkCore\ATI.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\MedRevnu.Application\ATI.MedRevnu.Application.csproj" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="(robocopy &quot;../MedRevnu.Web\Views&quot; &quot;../../src\ATI.Web.Mvc\Areas\MedRevnu\Views&quot; /MIR /R:0 /W:0 /XF *.pdb *.xml *.dll /NP /NJH /IS ) &#xD;&#xA;(robocopy &quot;../MedRevnu.Web\ViewModels&quot; &quot;../../src\ATI.Web.Mvc\wwwroot\view-resources\Areas\MedRevnu\Views&quot; /MIR /R:0 /W:0 /XF *.pdb *.xml *.dll /NP /NJH /IS ) ^&amp; IF %25ERRORLEVEL%25 LEQ 3 (exit 0) ELSE (exit %25ERRORLEVEL%25)" Condition=" '$(OS)' == 'Windows_NT' " />
+  </Target>
+
+</Project>

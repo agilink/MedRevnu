@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29025.244
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34701.34
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{AFAA0841-BD93-466F-B8F4-FB4EEC86F1FC}"
 EndProject
@@ -40,7 +40,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ATI.GraphQL.Tests", "test\A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ATI.Test.Base", "test\ATI.Test.Base\ATI.Test.Base.csproj", "{62EC592B-CC95-43C2-9736-0EC6E46B01FA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ATI.ConsoleApiClient", "test\ATI.ConsoleApiClient\ATI.ConsoleApiClient.csproj", "{666F9B8F-1D07-4B00-A5FF-36F4BFF5302F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ATI.ConsoleApiClient", "test\ATI.ConsoleApiClient\ATI.ConsoleApiClient.csproj", "{666F9B8F-1D07-4B00-A5FF-36F4BFF5302F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MedRevnu", "MedRevnu", "{8B24F701-7A33-4CBC-8DE1-07253120C10E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ATI.MedRevnu.Application", "MedRevnu\MedRevnu.Application\ATI.MedRevnu.Application.csproj", "{064D8B25-8083-4350-AE92-9E905D0E3DF2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ATI.MedRevnu.Web", "MedRevnu\MedRevnu.Web\ATI.MedRevnu.Web.csproj", "{39669019-4471-40A6-B281-412CD4FD89B3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -108,6 +114,14 @@ Global
 		{666F9B8F-1D07-4B00-A5FF-36F4BFF5302F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{666F9B8F-1D07-4B00-A5FF-36F4BFF5302F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{666F9B8F-1D07-4B00-A5FF-36F4BFF5302F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{064D8B25-8083-4350-AE92-9E905D0E3DF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{064D8B25-8083-4350-AE92-9E905D0E3DF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{064D8B25-8083-4350-AE92-9E905D0E3DF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{064D8B25-8083-4350-AE92-9E905D0E3DF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39669019-4471-40A6-B281-412CD4FD89B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39669019-4471-40A6-B281-412CD4FD89B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39669019-4471-40A6-B281-412CD4FD89B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39669019-4471-40A6-B281-412CD4FD89B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -128,6 +142,9 @@ Global
 		{E09101B3-F77E-4C72-8465-7B430FA93AD1} = {F10AA149-2626-486E-85BB-9CD5365F3016}
 		{62EC592B-CC95-43C2-9736-0EC6E46B01FA} = {F10AA149-2626-486E-85BB-9CD5365F3016}
 		{666F9B8F-1D07-4B00-A5FF-36F4BFF5302F} = {F10AA149-2626-486E-85BB-9CD5365F3016}
+		{8B24F701-7A33-4CBC-8DE1-07253120C10E} = {AFAA0841-BD93-466F-B8F4-FB4EEC86F1FC}
+		{064D8B25-8083-4350-AE92-9E905D0E3DF2} = {8B24F701-7A33-4CBC-8DE1-07253120C10E}
+		{39669019-4471-40A6-B281-412CD4FD89B3} = {8B24F701-7A33-4CBC-8DE1-07253120C10E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {23CD4D4B-B131-473D-9ECB-5DD96E739671}

@@ -40,6 +40,14 @@ namespace ATI.Web.Areas.Core.Startup
                             permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Editions)
                         )
                     )
+                )
+                .AddItem(new MenuItemDefinition(
+                        CorePageNames.MedRevnuPages.Revenue,
+                        L("Revenue"),
+                        url: "MedRevnuHome/Index",
+                        icon: "flaticon-line-graph",
+                        permissionDependency: new SimplePermissionDependency(AppPermissions.Pages)
+                    )
                 ).AddItem(new MenuItemDefinition(
                         CorePageNames.Tenant.Dashboard,
                         L("Dashboard"),

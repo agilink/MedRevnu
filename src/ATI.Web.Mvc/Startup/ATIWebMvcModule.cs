@@ -13,11 +13,13 @@ using ATI.EntityFrameworkCore;
 using ATI.MultiTenancy;
 using ATI.MultiTenancy.Subscription;
 using ATI.Web.Areas.Core.Startup;
+using ATI.MedRevnu.Web;
 
 namespace ATI.Web.Startup
 {
     [DependsOn(
-        typeof(ATIWebCoreModule)
+        typeof(ATIWebCoreModule),
+        typeof(MedRevnuWebModule)
     )]
     public class ATIWebMvcModule : AbpModule
     {
