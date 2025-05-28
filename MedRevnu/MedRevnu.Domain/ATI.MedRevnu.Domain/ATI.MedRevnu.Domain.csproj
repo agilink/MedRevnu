@@ -7,8 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ATI.Application\ATI.Application.csproj" />
-    <ProjectReference Include="..\MedRevnu.Domain\ATI.MedRevnu.Domain\ATI.MedRevnu.Domain.csproj" />
+    <PackageReference Include="Abp.AutoMapper" Version="9.4.2" />
+    <PackageReference Include="Abp.Zero.Ldap" Version="9.4.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\ATI.Core\ATI.Core.csproj" />
   </ItemGroup>
 
 </Project>
