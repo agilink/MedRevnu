@@ -21,6 +21,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Admin\ATI.Admin.Domain\ATI.Admin.Domain.csproj" />
     <ProjectReference Include="..\ATI.Core\ATI.Core.csproj" />
   </ItemGroup>
 </Project>

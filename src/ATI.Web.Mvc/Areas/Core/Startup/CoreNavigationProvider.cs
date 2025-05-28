@@ -42,13 +42,6 @@ namespace ATI.Web.Areas.Core.Startup
                     )
                 )
                 .AddItem(new MenuItemDefinition(
-                        CorePageNames.MedRevnuPages.Revenue,
-                        L("Revenue"),
-                        url: "MedRevnuHome/Index",
-                        icon: "flaticon-line-graph",
-                        permissionDependency: new SimplePermissionDependency(AppPermissions.Pages)
-                    )
-                ).AddItem(new MenuItemDefinition(
                         CorePageNames.Tenant.Dashboard,
                         L("Dashboard"),
                         url: "Core/TenantDashboard",
@@ -185,6 +178,13 @@ namespace ATI.Web.Areas.Core.Startup
                         url: "Core/DemoUiComponents",
                         icon: "flaticon-shapes",
                         permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_DemoUiComponents)
+                    )
+                ).AddItem(new MenuItemDefinition(
+                        CorePageNames.MedRevnuPages.Revenue,
+                        L("Revenue"),
+                        url: "MedRevnu/Med",
+                        icon: "flaticon-line-graph",
+                        permissionDependency: new SimplePermissionDependency(AppPermissions.Pages)
                     )
                 );
         }

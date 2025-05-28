@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Abp.AutoMapper" Version="9.4.2" />
+    <PackageReference Include="Abp.Zero.Ldap" Version="9.4.2" />
+    <PackageReference Include="Abp.ZeroCore.EntityFrameworkCore" Version="9.4.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ATI.Core\ATI.Core.csproj" />
+  </ItemGroup>
+
+</Project>

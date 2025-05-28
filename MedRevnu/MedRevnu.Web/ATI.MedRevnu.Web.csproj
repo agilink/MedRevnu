@@ -19,8 +19,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Admin\ATI.Admin.Application\ATI.Admin.Application.csproj" />
     <ProjectReference Include="..\..\src\ATI.Core\ATI.Core.csproj" />
     <ProjectReference Include="..\..\src\ATI.EntityFrameworkCore\ATI.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\..\src\ATI.Web.Core\ATI.Web.Core.csproj" />
     <ProjectReference Include="..\MedRevnu.Application\ATI.MedRevnu.Application.csproj" />
   </ItemGroup>
 

@@ -1,12 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Text.Json;
-using Abp.OpenIddict.Applications;
+﻿using Abp.OpenIddict.Applications;
 using Abp.OpenIddict.Authorizations;
 using Abp.OpenIddict.EntityFrameworkCore;
 using Abp.OpenIddict.Scopes;
 using Abp.OpenIddict.Tokens;
 using Abp.Zero.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
+using ATI.Admin.Domain.Entities;
 using ATI.Authorization.Delegation;
 using ATI.Authorization.Roles;
 using ATI.Authorization.Users;
@@ -18,12 +16,29 @@ using ATI.MultiTenancy;
 using ATI.MultiTenancy.Accounting;
 using ATI.MultiTenancy.Payments;
 using ATI.Storage;
+using Castle.MicroKernel;
+using Microsoft.EntityFrameworkCore;
+using Stripe;
+using System.Collections.Generic;
+using System.Data;
+using System.Text.Json;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+
 
 namespace ATI.EntityFrameworkCore
 {
     public class ATIDbContext : AbpZeroDbContext<Tenant, Role, User, ATIDbContext>, IOpenIddictDbContext
     {
         /* Define an IDbSet for each entity of the application */
+
+        public virtual DbSet<State> State { get; set; }
+        public virtual DbSet<Company> Company { get; set; }
+        public virtual DbSet<Admin.Domain.Entities.Address> Address { get; set; }
+        public virtual DbSet<Facility> Facility { get; set; }
+        public virtual DbSet<UserCompany> UserCompany { get; set; }
+        public virtual DbSet<CompanyType> CompanyType { get; set; }
+        public virtual DbSet<UomType> UomType { get; set; }
+        public virtual DbSet<Uom> Uom { get; set; }
 
         public virtual DbSet<OpenIddictApplication> Applications { get; }
         
@@ -45,7 +60,7 @@ namespace ATI.EntityFrameworkCore
         
         public virtual DbSet<SubscriptionPaymentProduct> SubscriptionPaymentProducts { get; set; }
 
-        public virtual DbSet<Invoice> Invoices { get; set; }
+        public virtual DbSet<MultiTenancy.Accounting.Invoice> Invoices { get; set; }
 
         public virtual DbSet<UserDelegation> UserDelegations { get; set; }
 
@@ -125,8 +140,48 @@ namespace ATI.EntityFrameworkCore
                 b.HasIndex(e => new { e.TenantId, e.SourceUserId });
                 b.HasIndex(e => new { e.TenantId, e.TargetUserId });
             });
-            
+
+          
+             // Add this method to the ATIDbContext class
+             // Replace the selected code in OnModelCreating with this call
+             ModelCreatingAdminModule(ref modelBuilder);
+
+
             modelBuilder.ConfigureOpenIddict();
+        }
+
+        private void ModelCreatingAdminModule(ref ModelBuilder modelBuilder)
+        {
+            var admSchema = "ADM";
+            modelBuilder.Entity<Admin.Domain.Entities.Address>(b =>
+            {
+                b.ToTable("Address", admSchema);
+            });
+            modelBuilder.Entity<Admin.Domain.Entities.Company>(b =>
+            {
+                b.ToTable("Company", admSchema);
+            });
+            modelBuilder.Entity<Admin.Domain.Entities.Facility>(b =>
+            {
+                b.ToTable("Facility", admSchema);
+            });
+            modelBuilder.Entity<Admin.Domain.Entities.State>(b =>
+            {
+                b.ToTable("State", admSchema);
+            });
+            modelBuilder.Entity<Admin.Domain.Entities.UserCompany>(b =>
+            {
+                b.ToTable("UserCompany", admSchema);
+            });
+            modelBuilder.Entity<Admin.Domain.Entities.UomType>(b =>
+            {
+                b.ToTable("UomType", admSchema);
+            });
+            modelBuilder.Entity<Admin.Domain.Entities.Uom>(b =>
+            {
+                b.ToTable("Uom", admSchema);
+            });
+            // Add additional Admin.Domain.Entities here as needed
         }
     }
 }
