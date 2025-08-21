@@ -8,7 +8,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\ATI.Application\ATI.Application.csproj" />
+    <ProjectReference Include="..\..\src\ATI.Application.Shared\ATI.Application.Shared.csproj" />
     <ProjectReference Include="..\MedRevnu.Domain\ATI.MedRevnu.Domain\ATI.MedRevnu.Domain.csproj" />
+    <ProjectReference Include="..\..\Admin\ATI.Admin.Domain\ATI.Admin.Domain.csproj" />
   </ItemGroup>
 
 </Project>
