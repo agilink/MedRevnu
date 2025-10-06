@@ -1,0 +1,118 @@
+﻿@using System.Globalization
+@using ATI.Pharmacy.Web.PageModel.Prescriptions
+@using Abp.AspNetCore.Mvc.RazorPages
+@using Abp.AspNetCore.Localization
+@using ATI.Authorization
+@model PrescriptionsViewModel
+@{
+    ViewBag.CurrentPageName = PharmacyConstants.Prescriptions;
+}
+@section Scripts
+{
+    <script abp-src="/view-resources/Areas/Pharmacy/Views/Prescriptions/Index.js" asp-append-version="true"></script>
+}
+
+<abp-page-subheader title='@L("Prescription List")'>
+
+    <div class="btn-group">
+        <div class="dropdown-menu dropdown-menu-right">
+            <a class="dropdown-item" id="ExportToExcelButton" href="#">Export To Excel</a>
+
+        </div>
+    </div>
+
+    @if (IsGranted(AppPermissions.Pages_Prescriptions_Create))
+    {
+        <button id="CreateNewPrescriptionButton" class="btn btn-primary"><i class="fa fa-plus"></i> Create New Prescription</button>
+    }
+    @if (IsGranted(AppPermissions.Pages_Prescriptions_Submit))
+    {
+        <button id="BulkSubmitPrescription" class="btn btn-primary"><i class="fa fa-fax"></i>Bulk Submit</button>
+    }
+    @if (IsGranted(AppPermissions.Pages_Prescriptions_Complete))
+    {
+        <button id="BulkCompletePrescription" class="btn btn-primary"><i class="fa fa-check"></i>Bulk Complete</button>
+    }
+</abp-page-subheader>
+
+<div class="@(await GetContainerClass())">
+    <div class="card card-custom gutter-b">
+        <div class="card-body">
+            <div class="form">
+                <div class="row align-items-center mb-4">
+                  @*   @if (Model.FacilityList.Count > 1)
+                    {
+                        <div class="col-md-3">
+                            <div class="my-3">
+                                <label class="form-label" for="FacilityList">Location</label>
+                                <select id="FacilityList" class="form-select m-input m-input--square" name="defaultFacilityId" required asp-for="@Model.DefaultFacilityId" asp-items="@Model.FacilityList">
+                                </select>
+                            </div>
+                        </div>
+                    } *@
+                    <div class="col-md-3">
+                        <div class="my-3">
+                            <label class="form-label" for="PrescriptionStatus">Prescription Status</label>
+                            @Html.DropDownListFor(m => m.PrescriptionStatus,
+                                     new SelectList(Model.PrescriptionStatus, "Value", "Text"),
+                                     "- All -",
+                                     new
+                                     {
+                                         @class = "form-control",
+                                         id = "PrescriptionStatus"
+                                     })
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-9">
+
+                        <div class="my-3">
+                            <div class="input-group" style="margin-top:36px;">
+                                <input type="text" id="PrescriptionsTableFilter" class="form-control reload-on-change" placeholder="Search patient's name or prescriber's name...">
+                                <button id="GetPrescriptionButton" class="btn btn-primary" type="submit"><i class="flaticon-search-1"></i></button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div id="AdvacedAuditFiltersArea" class="row mb-4" style="display:none">
+                <div class="col-md-12">
+                </div>
+                <div class="col-md-12 mt-5">
+                    <button class="btn btn-secondary btn-sm" id="btn-reset-filters">Reset</button>
+                </div>
+            </div>
+
+            <div class="row align-items-center">
+                <table id="PrescriptionTable" class="table align-middle table-row-dashed fs-6 gy-5 dataTable no-footer" width="100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>@* <input type="checkbox" id="select-all" /> *@</th>
+                            <th>Patient First Name</th>
+                            <th>Patient Last Name</th>
+                            <th>Patient DOB</th>
+                            <th>Patient Contact</th>
+                            <th>Medication</th>
+                            <th>Prescriber Name</th>
+                            <th>Delivery Type</th>
+                            <th>Bill To</th>
+                            <th>Fax Number</th>
+                            @if (IsGranted(AppPermissions.Pages_Prescriptions_Grid_View_Company))
+                            {
+                                <th>Company Name</th>
+                            }
+                            <th>Last Modification Date</th>
+                            <th>Submission Date & Time</th>
+                            <th>Status</th>
+                            <th>@L("Actions")</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

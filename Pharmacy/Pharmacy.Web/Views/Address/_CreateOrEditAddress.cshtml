@@ -1,0 +1,44 @@
+﻿@using ATI.Admin.Application.Addresses.Dtos
+@using ATI.Pharmacy.Web.PageModel.Doctors
+@using ATI.Pharmacy
+@model AddressDto
+
+<div class="row">
+    <div class="my-3 col">
+        <label class="form-label" for="Address1">Address <span class="required"></span></label>
+        <input class="form-control" id="Address1" value="@Model.Address1" type="text" name="Address1" required />
+    </div>
+    <div class="my-3 col">
+        <label class="form-label" for="City">City <span class="required"></span></label>
+        <input class="form-control" id="City" value="@Model.City" type="text" name="City" required />
+    </div>
+    <div class="my-3 col">
+        <label class="form-label" for="StateId">State <span class="required"></span></label>
+        @Html.DropDownList(
+                 "StateId",
+                 Model.States,
+                 new
+                 {
+                     @class = "form-select select2",
+                     data_control = "select2",
+                     @required = "required",
+                     id = "StateId"
+                 })
+    </div>
+</div>
+
+<div class="row">
+    <div class="my-3 col-md-4">
+        <label class="form-label" for="ZipCode">Zip Code <span class="required"></span></label>
+        <input class="form-control" id="ZipCode" value="@Model.ZipCode" type="text" name="ZipCode" required />
+    </div>
+    <div class="my-3 col-md-4">
+        @if (Model.IsFaxRequired)
+        {
+
+            <label class="form-label" for="FaxNo">Fax No <span class="required"></span></label>
+            <input class="form-control" id="FaxNo" value="@Model.FaxNo" type="text" name="FaxNo" required />
+
+        }
+    </div>
+</div>

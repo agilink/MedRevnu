@@ -1,0 +1,111 @@
+﻿@using Abp.AspNetCore.Mvc.RazorPages
+@using Abp.AspNetCore.Localization
+
+
+@{
+    ViewBag.CurrentPageName = "Home Page";
+}
+@section Scripts
+{
+    @*  <script abp-src="/view-resources/Areas/LMS/Views/TrainingCourses/Index.js" asp-append-version="true"></script> *@
+}
+
+<div id="appPrescriber">
+    <abp-page-subheader title='Training Course'>
+        @* <button id="ExportToExcelButton" class="btn btn-outline btn-outline-success btn-active-light-success me-1"><i class="fa fa-file-excel"></i> @L("ExportToExcel")</button> *@
+
+    </abp-page-subheader>
+
+    <div class="@(await GetContainerClass())">
+
+        <div class="row g-lg-7" style="margin-top:50px;">
+            <!--begin::Col-->
+            <div class="col-sm-3"></div>
+            <div class="col-sm-3">
+                <!--begin::Card-->
+                <a href="#" data-bs-toggle="modal" data-bs-target="#kt_modal_create_project" class="card border-0 shadow-none min-h-150px mb-7" style="background-color: #F9666E">
+                    <!--begin::Card body-->
+                    <div class="card-body d-flex flex-column flex-center text-center">
+                        <!--begin::Illustrations-->
+                        <i class="far fa-user-circle" style="font-size:50px"></i>
+                        <!--end::Illustrations-->
+                        <!--begin::Heading-->
+                        <h4 class="text-white fw-bold text-uppercase">Patients</h4>
+                        <!--end::Heading-->
+                    </div>
+                    <!--end::Card body-->
+                </a>
+                <!--end::Card-->
+            </div>
+            <!--end::Col-->
+            <!--begin::Col-->
+            <div class="col-sm-3">
+                <!--begin::Card-->
+                <a href="#" data-bs-toggle="modal" data-bs-target="#kt_modal_create_account" class="card border-0 shadow-none min-h-200px mb-7" style="background-color: #35D29A">
+                    <!--begin::Card body-->
+                    <div class="card-body d-flex flex-column flex-center text-center">
+                        <!--begin::Illustrations-->
+                        <i class="far fa-user-circle" style="font-size:50px"></i>
+                        <!--end::Illustrations-->
+                        <!--begin::Heading-->
+                        <h4 class="text-white fw-bold text-uppercase">Prescribers</h4>
+                        <!--end::Heading-->
+                    </div>
+                    <!--end::Card body-->
+                </a>
+                <!--end::Card-->
+            </div>
+            <!--end::Col-->
+        </div>
+        <div class="row g-lg-7">
+            <!--begin::Col-->
+            <div class="col-sm-3"></div>
+            <div class="col-sm-3">
+                <!--begin::Card-->
+                <a href="#" data-bs-toggle="modal" data-bs-target="#kt_modal_create_project" class="card border-0 shadow-none min-h-200px mb-7" style="background-color: #F9666E">
+                    <!--begin::Card body-->
+                    <div class="card-body d-flex flex-column flex-center text-center">
+                        <!--begin::Illustrations-->
+                        <i class="far fa-user" style="font-size:50px"></i>
+                        <!--end::Illustrations-->
+                        <!--begin::Heading-->
+                        <h4 class="text-white fw-bold text-uppercase">Enrollments</h4>
+                        <!--end::Heading-->
+                    </div>
+                    <!--end::Card body-->
+                </a>
+                <!--end::Card-->
+            </div>
+            <!--end::Col-->
+            <!--begin::Col-->
+            <div class="col-sm-3">
+                <!--begin::Card-->
+                <a href="#" data-bs-toggle="modal" data-bs-target="#kt_modal_create_account" class="card border-0 shadow-none min-h-200px mb-7" style="background-color: #35D29A">
+                    <!--begin::Card body-->
+                    <div class="card-body d-flex flex-column flex-center text-center">
+                        <!--begin::Illustrations-->
+                        <i class="far fa-user-circle" style="font-size:50px"></i>
+                        <!--end::Illustrations-->
+                        <!--begin::Heading-->
+                        <h4 class="text-white fw-bold text-uppercase">Admin</h4>
+                        <!--end::Heading-->
+                    </div>
+                    <!--end::Card body-->
+                </a>
+                <!--end::Card-->
+            </div>
+            <!--end::Col-->
+        </div>
+        <div class="card card-custom gutter-b">
+            <div class="card-body">
+
+                <div class="row align-items-center">
+                    <h2>Hey</h2>
+                    <h1>  Prescriber Portal is under maintenance ! We will back soon. Thanks.  </h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+

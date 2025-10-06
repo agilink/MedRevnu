@@ -1,0 +1,31 @@
+﻿@using System.Globalization
+@using ATI.Pharmacy.Web.PageModel.Doctors
+@using Abp.AspNetCore.Mvc.RazorPages
+@using Abp.AspNetCore.Localization
+@model DoctorViewModel
+
+@await Html.PartialAsync("~/Areas/Pharmacy/Views/Common/Modals/_PharmacyModalHeader.cshtml", new PharmacyModalHeaderViewModel(@L("Details")))
+
+<div class="modal-body">
+    <div id="DoctorInformationsTab">
+
+        <div class="row">
+            <div class="col-6 mb-3">
+                <h6>@L("DoctorID") :</h6>
+                @Model.Doctor.DoctorID
+            </div>
+            <div class="col-6 mb-3">
+                <h6>@L("Specialty") :</h6>
+                @Model.Doctor.Specialty
+            </div>
+            <div class="col-6 mb-3">
+                <h6>@L("LicenseNumber") :</h6>
+                @Model.Doctor.LicenseNumber
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@await Html.PartialAsync("~/Areas/Core/Views/Common/Modals/_ModalFooterWithClose.cshtml")

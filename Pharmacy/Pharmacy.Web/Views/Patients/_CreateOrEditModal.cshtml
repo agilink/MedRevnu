@@ -1,0 +1,24 @@
+﻿@using Abp.AspNetCore.Mvc.RazorPages
+@using Abp.AspNetCore.Localization
+@using System.Globalization
+@using ATI.Pharmacy.Web
+@model CreateOrEditPatientModalViewModel
+@using ATI.Pharmacy.Application.Patients
+@using ATI.Pharmacy.Web.PageModel.Patients
+@using Abp.Extensions
+@await Html.PartialAsync("~/Areas/Pharmacy/Views/Common/Modals/_PharmacyModalHeader.cshtml", new PharmacyModalHeaderViewModel(Model.IsEditMode ? "Edit Patient" : "Create New Patient"))
+
+<div class="modal-body">
+    <div id="PatientInformationsTab">
+        <form name="PatientInformationsForm" role="form" novalidate class="form-validation">
+
+            @await Html.PartialAsync("~/Areas/Pharmacy/Views/Patients/_CreateOrEditPatient.cshtml", Model)
+
+        </form>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var hideDelete = @(Model.HideDelete);
+</script>
+@await Html.PartialAsync("~/Areas/Pharmacy/Views/Common/Modals/_PharmacyModalFooterWithSaveDeleteAndCancel.cshtml")

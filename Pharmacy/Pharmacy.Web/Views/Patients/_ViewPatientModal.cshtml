@@ -1,0 +1,40 @@
+﻿@using ATI.Pharmacy.Web.PageModel.Patients
+@using Abp.AspNetCore.Mvc.RazorPages
+@using Abp.AspNetCore.Localization
+@using System.Globalization
+@using ATI.Pharmacy.Web
+@model PatientViewModel
+
+@await Html.PartialAsync("~/Areas/Pharmacy/Views/Common/Modals/_PharmacyModalHeader.cshtml", new PharmacyModalHeaderViewModel(L("Details")))
+
+<div class="modal-body">
+    <div id="PatientInformationsTab">
+
+        <div class="row">
+            <div class="col-6 mb-3">
+                <h6>@L("Name") :</h6>
+                @Model.Patient.Name
+            </div>
+            <div class="col-6 mb-3">
+                <h6>@L("Surname") :</h6>
+                @Model.Patient.Surname
+            </div>
+            <div class="col-6 mb-3">
+                <h6>@L("EmailAddress") :</h6>
+                @Model.Patient.EmailAddress
+            </div>
+            <div class="col-6 mb-3">
+                <h6>@L("PhoneNumber") :</h6>
+                @Model.Patient.PhoneNumber
+            </div>
+            <div class="col-6 mb-3">
+                <h6>@L("Gender") :</h6>
+                @L("Enum_enum_" + (int)Model.Patient.Gender)
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@await Html.PartialAsync("~/Areas/Core/Views/Common/Modals/_ModalFooterWithClose.cshtml")

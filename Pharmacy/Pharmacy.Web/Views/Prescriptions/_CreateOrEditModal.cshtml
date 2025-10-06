@@ -1,0 +1,217 @@
+﻿@using System.Globalization
+@using ATI.Pharmacy.Application.Patients
+@using ATI.Pharmacy.Web.PageModel.Prescriptions
+@using Abp.AspNetCore.Mvc.RazorPages
+@using Abp.AspNetCore.Localization
+@model CreateOrEditPrescriptionModalViewModel
+@using Abp.Extensions
+@using Newtonsoft.Json
+@await Html.PartialAsync("~/Areas/Pharmacy/Views/Common/Modals/_PharmacyModalHeader.cshtml", new PharmacyModalHeaderViewModel((Model.IsEditMode ? "Edit Prescription" : "Create New Prescription"), Model.DoctorDefaultFacilityName))
+
+<div class="modal-body">
+    <div id="PrescriptionInformationsTab">
+        <form name="PrescriptionInformationsForm" role="form" novalidate class="form-validation">
+
+            @* @if (Model.IsEditMode)
+            { *@
+            <input type="hidden" id="hdnPrescriptionId" name="id" value="@Model.Prescription.Id" />
+            @* } *@
+            <div class="container">
+                <div class="progress-container">
+                    <ul id="progressbar">
+                        <li class="active"
+                            id="step1">
+                            <strong>Patient</strong>
+                        </li>
+                        <li id="step2">
+                            <strong>Prescriber</strong>
+                        </li>
+                        <li id="step3">
+                            <strong>Medication</strong>
+                        </li>
+                        <li id="step4">
+                            <strong>Review/Submit</strong>
+                        </li>
+                    </ul>
+                    <div class="progress">
+                        <div class="progress-bar"></div>
+                    </div>
+                </div>
+                <div class="step-container">
+                    <fieldset>
+
+                        @if (Model.PrescriberFacilities.Count > 2 && !Model.IsEditMode)
+                        {
+                            <div class="row" style="margin-bottom:20px;">
+                                <div class="col-lg-10 col-md-9 col-sm-8">
+                                    <label class="form-label" for="doctorFacilityDdl"> Location: </label> @Model.DoctorDefaultFacilityName
+                                    @*  <select id="doctorFacilityDdl" class="form-select m-input m-input--square" name="doctorDefaultFacilityId" required asp-for="@Model.DoctorDefaultFacilityId" asp-items="@Model.PrescriberFacilities">
+                                </select> *@
+                                </div>
+                            </div>
+                        }
+                        <div class="row" style="margin-bottom:20px;">
+
+                            <div class="col-lg-10 col-md-9 col-sm-8">
+                                <input type="text" id="select2Patient" placeholder="Search by name or mobile number" class="form-control" autocomplete="off" />
+                            </div>
+                            <div class="col-lg-2 col-md-3 col-sm-4">
+                                <button class="btn btn-primary test-btn-select2-single" onclick="togglePatientDetails()" type="button"><i class="icon fa fa-plus"></i></button>
+                            </div>
+
+                            <input id="hdnPatientID" name="PatientID" type="hidden" value="@Model.PatientId" />
+                        </div>
+
+                        @*                         <div class="row">
+                        <div class="col-md-12">
+                        <select id="ddPatient" class="form-select select2" data-control="select2"></select>
+                        </div>
+                        </div> *@
+                        <div class="patient-details hide">
+                            <div class="patient-edit-form">
+                                @await Html.PartialAsync("~/Areas/Pharmacy/Views/Patients/_CreateOrEditPatient.cshtml", Model.Patient)
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-primary save-patient-button" id="save-patient-button"><i class="fa fa-save"></i> <span>Save</span></button>
+                            </div>
+                        </div>
+
+                    </fieldset>
+                    <fieldset>
+                        <h2>Select Prescriber</h2>
+                        <div class="row">
+
+                            <div class="mb-5 row">
+                                <div class="col-lg-10 col-md-9 col-sm-8">
+                                    @Html.DropDownList(
+                                             "DoctorId",
+                                             Model.Doctors,
+                                             new
+                                             {
+                                                 @class = "form-select select2",
+                                                 data_control = "select2",
+                                                 id = "DoctorId"
+                                             })
+                                    @*      <input id="select2Doctor" placeholder="Type to search..." class="form-control" type="text" />  *@
+                                </div>
+                            </div>
+
+                            <div class="prescriber-details hide">
+                                <div class="row">
+                                    <div class="my-3 col">
+                                        <label class="form-label" for="DoctorName">Name</label>
+                                        <input readonly type="text" id="DoctorName" class="form-control-plaintext" />
+                                    </div>
+
+                                    <div class="my-3 col">
+                                        <label class="form-label" for="DoctorNPI">NPI#</label>
+                                        <input readonly class="form-control-plaintext" id="DoctorNPI" type="text" />
+                                    </div>
+
+                                    <div class="my-3 col">
+                                        <label class="form-label" for="DoctorAddress">Address</label>
+                                        <input readonly class="form-control-plaintext" id="DoctorAddress" type="text" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="my-3 col">
+                                        <label class="form-label" for="PersonFaxing">Person Faxing</label>
+                                        <input readonly type="text" id="PersonFaxing" class="form-control-plaintext" />
+                                    </div>
+
+                                    <div class="my-3 col">
+                                        <label class="form-label" for="OfficePhone">Office Phone</label>
+                                        <input readonly class="form-control-plaintext" id="OfficePhone" type="text" />
+                                    </div>
+
+                                    <div class="my-3 col">
+                                        <label class="form-label" for="OfficeFax">Office Fax</label>
+                                        <input readonly class="form-control-plaintext" id="OfficeFax" type="text" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    @* <div class="my-3 col">
+                                    <label class="form-label" for="Billing">Billing</label>
+                                    <input readonly type="text" id="Billing" class="form-control-plaintext" />
+                                    </div>
+                                    <div class="my-3 col">
+                                    <label class="form-label" for="DeliveryType">Delivery Type</label>
+                                    <input readonly type="text" id="DeliveryType" class="form-control-plaintext" />
+                                    </div> *@
+                                    <div class="my-3 col">
+                                        <label class="form-label" for="Signature">Signature</label>
+                                        <div id="Signature" style="border-block:thin">
+                                            <img id="signature-img" style="height:60px;">
+                                            <input type="hidden" id="hdnSignatureId" name="hdnSignatureId" value="" />
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                            <input type="hidden" id="hdnDoctorId" name="DoctorID" value="@Model.DoctorId" />
+                        </div>
+
+
+                    </fieldset>
+                    <fieldset>
+                        <h2></h2>
+                        <div class="row">
+                            <div div="">
+                            </div>
+                        </div>
+
+                        <div class="row" style="margin-top:30px; margin-bottom:30px;">
+                            <div class="col-md-12">
+                                <spa style="width:100px; margin-right:100px; font-weight:bolder; font-size:x-large">Route</spa>
+                                @foreach (var dosageRoute in Model.DosageRoutes)
+                                {
+                                    <input type="radio" id="medicine_@dosageRoute.Id" @(dosageRoute.Id == Model.Prescription.DosageRouteId ? "Checked" : "") name="drugRouteIds" data-id="@dosageRoute.Id" class="radioRoute" />
+                                    <label for="permission_@dosageRoute.Id" style="margin-right:50px;">@dosageRoute.Description</label>
+                                }
+                            </div>
+                        </div>
+                        <div class="medicationItems">
+                            @await Html.PartialAsync("~/Areas/Pharmacy/Views/Prescriptions/_PrescriptionItems.cshtml", Model)
+                        </div>
+                        <div class="divNotes hide">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h3>Delivery Types</h3>
+                                    @foreach (var deliveryType in Model.DeliveryTypes)
+                                    {
+                                        <input type="radio" name="DeliveryTypeId" value="@deliveryType.Value" id="deliveryType_@deliveryType.Value" @(deliveryType.Selected ? "checked" : "") />
+                                        <label style="margin-right:40px;" for="deliveryType_@deliveryType.Value">@deliveryType.Text</label>
+                                    }
+                                </div>
+                            </div>
+                            <div class="row" style="margin-top:10px">
+                                <div class="col-md-12">
+                                    <h3>Billing</h3>
+                                    @foreach (var billingType in Model.BillingTypes)
+                                    {
+                                        <input type="radio" name="BillingTo" value="@billingType.Value" id="billingType_@billingType.Value" @(billingType.Selected ? "checked" : "") />
+                                        <label style="margin-right:40px;" for="billingType_@billingType.Value">@billingType.Text</label>
+                                    }
+                                </div>
+                            </div>
+                            <h2>Notes</h2>
+                            <textarea id="notes" style="width:100%" name="notes" rows="4" cols="50">@Model.Prescription.Notes</textarea>
+
+                        </div>
+
+                    </fieldset>
+                    <fieldset>
+                        <div id="submit-view">
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+@await Html.PartialAsync("~/Areas/Pharmacy/Views/Prescriptions/_PrescriptionModalFooter.cshtml")
+<script>
+    var model = @Html.Raw(JsonConvert.SerializeObject(Model))
+</script>

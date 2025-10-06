@@ -1,0 +1,112 @@
+﻿@using System.Globalization
+@using ATI.Pharmacy.Web.PageModel.Patients
+@using ATI.Pharmacy.Web.PageModel.Prescriptions
+@using Abp.AspNetCore.Mvc.RazorPages
+@using Abp.AspNetCore.Localization
+@using ATI.Authorization
+@model PatientsViewModel
+@{
+    //ViewBag.CurrentPageName = PharmacyConstants.Patients;
+}
+@section Scripts
+{
+    <script abp-src="/view-resources/Areas/Pharmacy/Views/Patients/Index.js" asp-append-version="true"></script>
+}
+
+<abp-page-subheader title='@L("Patient List")'>
+
+    @if (IsGranted(AppPermissions.Pages_Patients_Import))
+    {
+        <div class="btn-group">
+            <button type="button" class="btn btn-outline btn-outline-success btn-active-light-success dropdown-toggle me-1"
+                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="far fa-file-excel btn-md-icon"></i>
+                <span class="d-none d-md-inline-block mb-md-0">@L("Excel Operations")</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right">
+                <div id="ImportPatientsFromExcelButton">
+                    <a class="dropzone-select dropdown-item" href="#">
+                        <span class="fileinput-button align-items-start justify-content-start">
+                            <span style="color:black !important;">@L("Import From Excel")</span>
+                        </span>
+                    </a>
+                </div>
+                <div class="dropdown-divider"></div>
+                <span class="dropdown-item-text text-muted pl-3">
+                    <small class="pl-2">
+                        @Html.Raw(L("{0} to download sample import file",
+                                 "<a href='" + ApplicationPath + "assets/SampleFiles/ImportPatientsSampleFile.xlsx'>" +
+                                 L("Click Here") + "</a>"))
+                    </small>
+                </span>
+            </div>
+        </div>
+    }
+
+    @if (IsGranted(AppPermissions.Pages_Patients_Create))
+    {
+        <button id="CreateNewPatientButton" class="btn btn-primary">
+            <i class="fa fa-plus"></i> @L("Create New Patient")
+        </button>
+    }
+
+</abp-page-subheader>
+
+<div class="@(await GetContainerClass())">
+    <div class="card card-custom gutter-b">
+        <div class="card-body">
+            <div class="form">
+                <div class="row align-items-center mb-4">
+                    <div class="col-xl-12">
+                       @*  @if (Model.FacilityList.Count > 1)
+                        {
+                            <div class="col-md-3">
+                                <div class="my-3">
+                                    <label class="form-label" for="FacilityList">Location</label>
+                                    <select id="FacilityList" class="form-select m-input m-input--square" name="defaultFacilityId" required asp-for="@Model.DefaultFacilityId" asp-items="@Model.FacilityList">
+                                    </select>
+                                </div>
+                            </div>
+                        } *@
+                        <div class="my-3">
+
+                            <div class="input-group">
+                                <input type="text" id="PatientsTableFilter" class="form-control reload-on-change" placeholder='Search...' value="@Model.FilterText">
+                                <button id="GetPatientsButton" class="btn btn-primary" type="submit"><i class="flaticon-search-1"></i></button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div id="AdvacedAuditFiltersArea" style="display: none" class="row mb-4">
+                <div class="col-md-12">
+                </div>
+
+                <div class="col-md-12 mt-5">
+                    <button class="btn btn-secondary btn-sm" id="btn-reset-filters">Reset</button>
+                </div>
+            </div>
+
+            <div class="row align-items-center">
+                <table id="PatientsTable" class="table align-middle table-row-dashed fs-6 gy-5 dataTable no-footer" width="100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Date Of Birth</th>
+                            <th>Phone Number</th>
+                            <th>Gender</th>
+                            @if (IsGranted(AppPermissions.Pages_Patients_Edit))
+                            {
+                                <th>@L("Edit")</th>
+                            }
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,118 @@
+﻿@using Abp.AspNetCore.Mvc.RazorPages
+@using Abp.AspNetCore.Localization
+@using System.Globalization
+@using ATI.Pharmacy.Web
+@model CreateOrEditPatientModalViewModel
+@using ATI.Pharmacy.Application.Patients
+@using ATI.Pharmacy.Web.PageModel.Patients
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using Abp.Extensions
+
+
+@if (Model.IsEditMode)
+{
+    <input type="hidden" id="hdnPatientId" name="id" value="@Model.Patient.Id" />
+}
+<h2>Patient Details <span class="float-end" style="font-size:smaller; margin-right:100px;">(Input fields mark with <span class="required"></span> are mandatory.)</span> </h2>
+<div class="row">
+    <div class="my-3 col-md-4">
+        <label class="form-label" for="Patient_Name">First Name <span class="required"></span></label>
+        <input class="form-control" id="Patient_Name" value="@Model.Patient.Name" type="text" name="name" required maxlength="@ATI.Pharmacy.PatientConsts.MaxNameLength" minlength="@ATI.Pharmacy.PatientConsts.MinNameLength" />
+    </div>
+
+    <div class="my-3 col-md-4">
+        <label class="form-label" for="Patient_Surname">Last Name  <span class="required"></span></label>
+        <input class="form-control" id="Patient_Surname" value="@Model.Patient.Surname" required type="text" name="surname" maxlength="@ATI.Pharmacy.PatientConsts.MaxSurnameLength" minlength="@ATI.Pharmacy.PatientConsts.MinSurnameLength" />
+    </div>
+
+    <div class="my-3 col-md-4">
+        <label class="form-label" for="Patient_DateOfBirth">Date Of Birth  <span class="required"></span></label>
+        <input class="form-control m-input date-picker" id="Patient_DateOfBirth" type="text" required name="dateOfBirth" value='@Model.Patient.DateOfBirth?.ToString("MM-dd-yyyy")' />
+    </div>
+
+    @{
+        var selectListGender = new List<SelectListItem>();
+        selectListGender.Add(new SelectListItem() { Text = "Select Gender", Value = "" });
+        selectListGender.AddRange(Html.GetEnumSelectList(typeof(GenderEnum)));
+
+    }
+    <div class="my-3 col-md-4">
+        <label class="form-label" for="Patient_Gender">@L("Gender")  <span class="required"></span></label>
+        <select class="form-select m-input m-input--square" name="genderId" required id="Patient_Gender" asp-for="@Model.Patient.GenderId" asp-items="@selectListGender">
+        </select>
+    </div>
+    <div class="my-3 col-md-4">
+        <label class="form-label" for="Patient_EmailAddress">Email Address</label>
+        <input class="form-control" id="Patient_EmailAddress" value="@Model.Patient.EmailAddress" type="text" name="emailAddress" />
+    </div>
+    <div class="my-3 col">
+        <label class="form-label" for="Patient_PhoneNumber">Phone Number<span class="required"></span></label>
+        <input class="form-control" id="Patient_PhoneNumber" required value="@Model.Patient.PhoneNumber" type="text" name="phoneNumber" maxlength="@ATI.Pharmacy.PatientConsts.MaxPhoneNumberLength" minlength="@ATI.Pharmacy.PatientConsts.MinPhoneNumberLength" />
+    </div>
+</div>
+
+<div class="row">
+
+    @{
+        var alergies = @Model.Patient.Allergies;
+    }
+    <div class="my-3 col-md-4">
+        <label class="form-label" for="Patient_Gender">Drug Allergies</label>
+        @Html.ListBoxFor(
+                 model => model.Patient.AllergyId,
+                 alergies,
+                 new { @id = "AllergyId", @class = "form-control", multiple = "multiple" }
+                 )
+    </div>
+    <div class="my-3 col-md-4">
+        <label class="form-label" for="Patient_PhoneNumber">Other Allergy</label>
+        <input class="form-control" id="Patient_Allergy" value="@Model.Patient.Other" type="text" name="Other" />
+    </div>
+    @if (Model.MultipleDoctorAvailable && !Model.IsEditMode)
+    {
+        <div class="my-3 col-md-4">
+        <label class="form-label" for="Patient_Doctor">Patient Prescriber  <span class="required"></span></label>
+        <select class="form-select m-input m-input--square" name="doctorId" required id="Patient_Doctor" asp-for="@Model.Patient.DoctorId" asp-items="@Model.Doctors">
+        </select>
+        </div>
+    }
+</div>
+
+<h2 style="margin-top:10px;">Address Details</h2>
+
+@await Html.PartialAsync("~/Areas/Pharmacy/Views/Address/_CreateOrEditAddress.cshtml", Model.Address)
+
+<h2 style="margin-top:10px;">Pharmacy Insurance</h2>
+
+<div class="row">
+    <div class="my-3 col">
+        <label class="form-label" for="Patient_InsuranceProvider"> Payor Name</label>
+        <input class="form-control" id="Patient_InsuranceProvider" value="@Model.Patient.InsuranceProvider" type="text" name="insuranceProvider" />
+    </div>
+
+    <div class="my-3 col">
+        <label class="form-label" for="Patient_PolicyNumber">Cardholder ID</label>
+        <input class="form-control" id="Patient_PolicyNumber" value="@Model.Patient.PolicyNumber" type="text" name="policyNumber" />
+    </div>
+
+    @*  <div class="my-3 col">
+    <label class="form-label" for="Patient_CoverageDetails">Coverage Details</label>
+    <input class="form-control" id="Patient_CoverageDetails" value="@Model.Patient.CoverageDetails" type="text" name="coverageDetails" />
+    </div> *@
+</div>
+<div class="row">
+    <div class="my-3 col">
+        <label class="form-label" for="Patient_Bin">BIN</label>
+        <input class="form-control" id="Patient_Bin" value="@Model.Patient.Bin" type="text" name="Bin" />
+    </div>
+    <div class="my-3 col">
+        <label class="form-label" for="Patient_PCN">PCN</label>
+        <input class="form-control" id="Patient_PCN" value="@Model.Patient.PCN" type="text" name="PCN" />
+    </div>
+    <div class="my-3 col">
+        <label class="form-label" for="Patient_Group">Group</label>
+        <input class="form-control" id="Patient_Group" value="@Model.Patient.Group" type="text" name="Group" />
+    </div>
+</div>
+
+

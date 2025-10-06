@@ -1,0 +1,15 @@
+﻿@using ATI.Pharmacy.Web
+@model PharmacyModalHeaderViewModel
+<div class="modal-header">
+    <h5 class="modal-title">
+        <span style="margin-right:190px;">@Html.Raw(Model.Title)</span>
+   
+    @if (!string.IsNullOrEmpty(Model.Header))
+    {
+
+            <span> Current Location : </span>  <span>@Html.Raw(Model.Header)</span>
+       
+    }
+        </h5>
+    @* <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>  *@
+</div>

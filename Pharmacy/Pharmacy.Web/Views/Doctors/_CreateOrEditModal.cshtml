@@ -1,0 +1,75 @@
+﻿@using System.Globalization
+@using ATI.Pharmacy.Web.PageModel.Doctors
+@using Abp.AspNetCore.Mvc.RazorPages
+@using Abp.AspNetCore.Localization
+@model CreateOrEditDoctorModalViewModel
+@using ATI.Authorization
+@using Abp.Extensions
+@await Html.PartialAsync("~/Areas/Pharmacy/Views/Common/Modals/_PharmacyModalHeader.cshtml", new PharmacyModalHeaderViewModel(Model.IsEditMode ? "Edit Prescriber" : "Create New Prescriber"))
+
+<div class="modal-body">
+    <div id="DoctorInformationsTab">
+        <form name="DoctorInformationsForm" role="form" novalidate class="form-validation">
+
+            @if (Model.IsEditMode)
+            {
+                @* using this hidden field to decide that delet button will show or hide in modal *@
+                <input type="hidden" id="hdnDoctorId" name="id" value="@Model.Doctor.Id" />
+            }
+            <h2> Prescriber Details <span class="float-end" style="font-size:smaller; margin-right:100px;">(Input fields mark with <span class="required"></span> are mandatory.)</span></h2>
+            @*  <div class="my-3">
+            <label class="form-label" for="Doctor_DoctorID">@L("DoctorID")</label>
+            <input class="form-control m-input" id="Doctor_DoctorID" value="@Model.Doctor.DoctorID.ToString(CultureInfo.InvariantCulture)" type="number" name="doctorID" />
+            </div> *@
+
+            @await Html.PartialAsync("~/Areas/Pharmacy/Views/User/_CreateOrEditUser.cshtml", Model.User)
+            <div class="row">
+                <div class="col-md-4">
+                    <label class="form-label" for="Doctor_LicenseNumber"> NPI# <span class="required"></span> </label>
+                    <input class="form-control" id="Doctor_LicenseNumber" value="@Model.Doctor.LicenseNumber" type="text" name="licenseNumber" maxlength="@ATI.Pharmacy.DoctorConsts.MaxLicenseNumberLength" minlength="@ATI.Pharmacy.DoctorConsts.MinLicenseNumberLength" required />
+                </div>
+            </div>
+            
+            @if (IsGranted(AppPermissions.Pages_Doctors_Create))
+            {
+                var facilities = Model.Facilities.ToList();     
+                <br />
+                <h2> Location </h2>
+                <br />
+                <div class="row">
+                    <div class="col-md-4 company-new hide">
+                        <label class="form-label" for="Doctor_Company">
+                            Location Name<span class="required"></span> &nbsp; &nbsp;&nbsp;
+                            <button style="margin-top:-29px;" class="btn btn-default" id="select-company">Select Location</button>
+                        </label>
+                        <input class="form-control" id="Doctor_Company" value="" type="text" name="facilityName" required />
+
+                    </div>
+                    <div class="col-md-4 company-list">
+                        <label class="form-label" for="Doctor_Company"> Location <span class="required"></span> &nbsp; &nbsp;&nbsp; <button style="margin-top:-29px;" class="btn btn-default" id="create-company">Create New Clinic</button> </label>
+                        @* <select id="companyddl" class="form-select m-input m-input--square" name="facilityId" required id="Patient_Gender" asp-for="@Model.Facility.Id" asp-items="@facilities">
+                    </select> *@
+                        <select id="companyddl" class="form-select m-input m-input--square" name="facilityIds" required asp-for="@Model.FacilityIds" asp-items="@facilities" multiple>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="Doctor_UserName"> User Name <span class="required"></span> </label>
+                        <input class="form-control" id="Doctor_UserName" value="@Model.User.UserName" type="text" name="userName" required />
+                    </div>
+                </div>
+            }
+
+
+            @* <h2 style="margin-top:10px;">Address Details</h2>
+
+            @await Html.PartialAsync("~/Areas/Pharmacy/Views/Address/_CreateOrEditAddress.cshtml", Model.Address) *@
+
+            <div class="my-3">
+                @await Html.PartialAsync("_DigitalSignature", Model)
+            </div>
+
+        </form>
+    </div>
+</div>
+
+@await Html.PartialAsync("~/Areas/Pharmacy/Views/Common/Modals/_PharmacyModalFooterWithSaveDeleteAndCancel.cshtml")

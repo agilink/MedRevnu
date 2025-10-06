@@ -1,0 +1,88 @@
+﻿@using ATI.Pharmacy.Dtos
+@using Abp.AspNetCore.Mvc.RazorPages
+@using Abp.AspNetCore.Localization
+@using System.Globalization
+@model CreateOrEditUserInputDto
+@using Abp.Extensions
+
+@await Html.PartialAsync("~/Areas/Pharmacy/Views/Common/Modals/_PharmacyModalHeader.cshtml", new PharmacyModalHeaderViewModel(Model.IsEditMode ? "New Employee" : "Edit Employee"))
+
+<div class="modal-body">
+    <div id="UserInformationsTab">
+        <form name="UserInformationForm" role="form" novalidate class="form-validation">
+
+            @if (Model.IsEditMode)
+            {
+                <input type="hidden" id="hdnUserId" name="userId" value="@Model.UserId" />
+            }
+            <div class="row">
+                <div class="my-3 col-md-4">
+                    <label class="form-label" for="User_Name">User Name<span class="required"></span></label>
+                    <input class="form-control" id="User_Name" value="@Model.UserName"
+                           type="text" name="userName" />
+                </div>
+                <div class="my-3 col-md-4">
+                    <label class="form-label" for="User_FirstName">First Name<span class="required"></span></label>
+                    <input class="form-control" id="User_FirstName" value="@Model.Name"
+                           type="text" name="name" />
+                </div>
+                <div class="my-3 col-md-4">
+                    <label class="form-label" for="User_Surname">Last Name<span class="required"></span></label>
+                    <input class="form-control" id="User_Surname" value="@Model.Surname"
+                           type="text" name="surname" />
+                </div>
+                <div class="my-3 col-md-4">
+                    <div class="company-new hide">
+                        <label class="form-label" for="Employee_Company">
+                            Location Name<span class="required"></span> &nbsp; &nbsp;&nbsp;
+                            <button style="margin-top:-29px;" class="btn btn-default" id="select-company">Select Location</button>
+                        </label>
+                        <input class="form-control" id="Employee_Company" value="" type="text" name="facility" required />
+
+                    </div>
+                    <div class="company-list">
+                        <label class="form-label" for="Employee_Company"> Location <span class="required"></span> &nbsp; &nbsp;&nbsp; <button style="margin-top:-29px;" class="btn btn-default" id="create-company">Create New Clinic</button> </label>
+                        @* <select id="companyddl" class="form-select m-input m-input--square" name="facilityId" required id="Patient_Gender" asp-for="@Model.Facility.Id" asp-items="@facilities">
+                        </select> *@
+                        <select id="companyddl" class="form-select m-input m-input--square" name="facilityIds" required asp-for="@Model.FacilityIds" asp-items="@Model.FacilityList" multiple>
+                        </select>
+                    </div>
+                </div>
+                <div class="my-3 col-md-4">
+                    <label class="form-label" for="User_Role">Role<span class="required"></span></label>
+                    @{
+                        var roles = new List<SelectListItem>();
+                        roles.Add(new SelectListItem { Text = "Select Role", Value = "" });
+                        roles.AddRange(Model.RoleList.ToList());
+                    }
+                    <select id="roleId" class="form-select m-input m-input--square" name="userRole" required asp-for="@Model.UserRole" asp-items="@roles">
+                    </select>
+                </div>
+                <div class="my-3 col-md-4">
+                    <label class="form-label" for="User_EmailAddress">Email Address<span class="required"></span></label>
+                    <input class="form-control" id="User_EmailAddress" value="@Model.EmailAddress"
+                           type="email" name="emailAddress" />
+                </div>
+                <div class="col-md-4">
+                    @if (Model.IsEditMode)
+                    {
+                        <label class="form-label" for="UserActve">Active?</label>
+                        <label for="EditUser_IsActive" class="form-check form-check-custom form-check-solid mb-2">
+
+                            @if (Model.IsActive)
+                            {
+                                <input type="checkbox" class="form-check-input" value="true" checked="checked" id="userIsActive" />
+                            }
+                            else
+                            {
+                                <input type="checkbox" class="form-check-input" value="true" id="userIsActive" />
+                            }
+                        </label>
+                    }
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@await Html.PartialAsync("~/Areas/Core/Views/Common/Modals/_ModalFooterWithSaveAndCancel.cshtml")
