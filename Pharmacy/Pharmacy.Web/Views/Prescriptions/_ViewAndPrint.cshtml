@@ -1,0 +1,164 @@
+﻿@using System.Globalization
+@using ATI.Pharmacy.Application.Patients
+@using ATI.Pharmacy.Dtos
+@using ATI.Pharmacy.Web.PageModel.Prescriptions
+@using Abp.AspNetCore.Mvc.RazorPages
+@using Abp.AspNetCore.Localization
+@model GetPrescriptionForViewDto
+@using Abp.Extensions
+<head>
+    <link rel="stylesheet" abp-href="/fonts/fonts-poppins.css" asp-append-version="true" />
+    <link rel="stylesheet" abp-href="/fonts/fonts-inter.css" asp-append-version="true" />
+    <link rel="stylesheet" abp-href="/fonts/fonts-roboto.css" asp-append-version="true" />
+</head>
+<style>
+    .prescription-ro-table td {
+        padding: 5px;
+    }
+
+    .pdf-body {
+        font-family: Inter, Helvetica, "sans-serif" !important;
+        font-size: 14px !important;
+    }
+</style>
+<div class="pdf-body">
+    <div>
+        <p style="text-align:center">
+            <b>@Model.Header <br /> <br /></b>
+        </p>
+        @{
+            var Prescription = Model.Prescription;
+            var Patient = Model.Patient;
+            var Doctor = Model.Doctor;
+
+            var allergies = Patient?.PatientAllergies.Where(i => i.Allergy != null).Select(item => item.Allergy?.AllergyName);
+            var allergyString = string.Join(", ", allergies);
+            var allergiesOthers = Patient?.PatientAllergies.Where(i => i.Other != null).Select(item => item.Other).Distinct();
+            var addressConcat = $"{Doctor?.Address?.City}, {Doctor?.Address?.State?.Abbreviation}, {Doctor?.Address?.ZipCode}";
+            if (allergiesOthers != null && allergiesOthers.Count() > 0) allergyString = allergyString + ", " + string.Join(", ", allergiesOthers);
+        }
+
+        <table class="prescription-ro-table" style="width:100%; border:2px solid black; margin-bottom: 20px; ">
+            <tr><td style="width:55%"><b>Location Name:</b> @(Prescription?.ClinicName)  </td> <td style="width:5%"></td>  <td style="width:40%"><b>Person Faxing:</b> @(Prescription?.PersonFaxing)</td> </tr>
+            <tr> <td>  <b>Prescriber Name:</b> @(Prescription?.PrescriberName)  </td> <td></td> <td>  <b>NPI #:</b> @(Prescription?.PrescriberNPI) </td></tr>
+            <tr><td> <b>Office Phone #:</b> @(Prescription?.PrescriberOfficePhone)  </td> <td> </td> <td><b>Office Fax #:</b> @(Prescription?.PrescriberOfficeFax)  </td> </tr>
+            <tr> <td> <b>Address:</b> @(Prescription?.PrescriberAddress1) </td> <td></td> <td><b>City, State, Zip:</b> @(Prescription?.PrescriberAddress2)  </td> </tr>
+            <tr><td><b>Date:</b> @(Prescription?.PrescriptionDate?.ToString("MM/dd/yyyy") ?? DateTime.UtcNow.ToString("MM/dd/yyyy"))</td></tr>
+        </table>
+
+
+        <br />
+        <table style="width:100%">
+
+            <tr> <td style="width:55%"> <b>  Patient Name:</b> @(Prescription?.PatientName) </td> <td style=width:5%></td> <td style="width:40%"> <b>DOB:</b>  @(Prescription?.PatientDateOfBirth?.ToString("MM/dd/yyyy")) </td> </tr>
+            <tr> <td><b>Patient Address:</b>  @(Prescription?.PatientAddress)  </td></tr>
+            <tr> <td>  <b>Patient Phone #:</b> @(Prescription?.PatientPhone) </td> <td> </td>  <td> <b>Drug Allergies:</b> @(Prescription?.DrugAllergies) </td>  </tr>
+            <tr> <td>  </td> </tr>
+
+        </table>
+        <input type="hidden" id="hdnPrescriptionId" value="@Model.Prescription.Id" />
+        <input type="hidden" id="hdnStatusId" value="@Model.Prescription.PrescriptionStatusId" />
+        <p>
+            @if (Model.Prescription.DeliveryTypeId == (int)DeliveryTypeEnum.DeliveryToPrescriberOffice)
+            {
+                <text><b>Ship/Deliver to:</b> Prescriber&#8217;s Office Address</text>
+            }
+            else if (Model.Prescription.DeliveryTypeId == (int)DeliveryTypeEnum.DeliveryToPatientHome)
+            {
+                <text><b>Ship/Deliver to:</b> Patient&#8217;s Home Address</text>
+            }
+            else
+            {
+                <text><b>Ship/Deliver to:</b> Pick-Up</text>
+            }
+            <br />
+            @if (Model.Prescription.BillingTo == (int)BillToEnum.Doctor)
+            {
+                <text> <b>Bill to:</b> Prescriber&#8217;s Office </text>
+            }
+            else
+            {
+                <text> <b>Bill to:</b> Patient </text>
+            }
+            <br />
+
+        </p>
+        @if (Model.Prescription.DosageRouteId == 1)
+        {
+            <p> <b> Rx COMPOUNDED INJECTIONS</b>  </p>
+            <p>&#9744; Rx syringes and alcohol pads</p>
+        }
+        @{
+            var items = Prescription.PrescriptionItems.Where(a => a.Medication?.MedicationCategoryId == (int)MedicationCategoryEnum.Medication);
+            var nauseaItems = Prescription.PrescriptionItems.Where(a => a.Medication?.MedicationCategoryId == (int)MedicationCategoryEnum.Nausea);
+            var otherItems = Prescription.PrescriptionItems.Where(a => a.Medication?.MedicationCategoryId == (int)MedicationCategoryEnum.Other);
+        }
+
+        @foreach (var item in items)
+        {
+            <p>
+                <text>
+                    <p style="margin-bottom:0px;"> @(item.Description) &nbsp;  &nbsp; <b>Refills:</b> @(item.RefillsAllowed) @(item.Medication?.IsDeleted == true ? Html.Raw("&nbsp;  &nbsp; <b>(InActive)</b>") : "") </p>
+                    <p style="margin-left:20px;"> @(item.Instructions)   </p>
+                </text>
+            </p>
+        }
+
+
+        @if (nauseaItems.Count() > 0)
+        {
+
+            <p>
+                <b>Nausea Treatment Option: </b><br />
+                @foreach (var item in nauseaItems)
+                {
+                    <text>
+                        <p style="margin-bottom:0px;">   @(item.Description)  &nbsp; <b>Refills:</b> @(item.RefillsAllowed)</p>
+                        <p style="margin-left:20px;"> @(item.Instructions)   </p>
+                    </text>
+                }
+            </p>
+        }
+
+        @if (otherItems.Count() > 0)
+        {
+
+            <p>
+                <b>Others: </b><br />
+                @foreach (var item in otherItems)
+                {
+                    <text>
+                        <p style="margin-bottom:0px;">   @(item.Description)  &nbsp; <b>Refills:</b> @(item.RefillsAllowed)</p>
+                        <p style="margin-left:20px;"> @(item.Instructions)   </p>
+                    </text>
+                }
+            </p>
+        }
+
+        <p>
+            <b>Notes: </b>
+        </p>
+        <p>@Model.Prescription.Notes</p>
+        <p><br /> <br /></p>
+
+        <table>
+            <tr>
+                <td style="width:40%">
+                </td>
+                <td style="width:40%">
+                </td>
+                <td style="width:20%;">
+                    <img style="height:60px" src="@(Model.SignatureBytes)" id="signature" />
+                    <br />
+                    <b>Prescriber Signature</b>:
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+@* <div style="page-break-before:always; page-break-after:always">
+    <div>
+
+
+    </div>
+</div> *@

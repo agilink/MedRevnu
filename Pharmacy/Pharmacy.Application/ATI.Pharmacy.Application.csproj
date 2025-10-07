@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Patient\**" />
+    <EmbeddedResource Remove="Patient\**" />
+    <None Remove="Patient\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Patients\Dtos\GetAllForLookupTableInput.cs" />
+    <Compile Remove="Patients\Importing\ImportPatientsToExcelJob.cs" />
+    <Compile Remove="Reports\IReportingAppService.cs" />
+    <Compile Remove="Reports\ReportingAppService.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Abp.AutoMapper" Version="9.4.2" />
+    <PackageReference Include="Abp.Zero.Ldap" Version="9.4.2" />
+    <PackageReference Include="NReco.PdfGenerator.LT" Version="1.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Admin\ATI.Admin.Application\ATI.Admin.Application.csproj" />
+    <ProjectReference Include="..\..\src\ATI.Application\ATI.Application.csproj" />
+    <ProjectReference Include="..\Pharmacy.Domain\ATI.Pharmacy.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Reports\" />
+  </ItemGroup>
+
+</Project>

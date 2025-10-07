@@ -1,0 +1,22 @@
+﻿@using ATI.Pharmacy.Web.PageModel.Doctors
+@using ATI.Pharmacy
+@using ATI.Pharmacy.Dtos
+@model CreateOrEditUserDto
+
+<div class="row">
+    <div class="col-md-4">
+        <label class="form-label" for="User_Name">First Name  <span class="required"></span></label>
+        <input class="form-control" id="User_Name" value="@Model.Name" type="text" name="Name" maxlength="@ATI.Pharmacy.UserConsts.MaxNameLength" minlength="@ATI.Pharmacy.UserConsts.MinNameLength" required />
+    </div>
+    <div class="col-md-4">
+        <label class="form-label" for="User_Surname">Last Name  <span class="required"></span></label>
+        <input class="form-control" id="User_Surname" value="@Model.Surname" type="text" name="Surname" maxlength="@ATI.Pharmacy.UserConsts.MaxSurnameLength" minlength="@ATI.Pharmacy.UserConsts.MinSurnameLength" required />
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <label class="form-label" for="User_EmailAddress">Email<span class="required"></span></label>
+        <input class="form-control" id="User_EmailAddress" value="@Model.EmailAddress" type="email" name="EmailAddress" />
+    </div>
+</div>

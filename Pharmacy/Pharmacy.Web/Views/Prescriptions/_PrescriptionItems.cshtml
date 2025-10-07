@@ -1,0 +1,151 @@
+﻿@using Abp.AspNetCore.Mvc.RazorPages
+@using Abp.AspNetCore.Localization
+@using ATI.Pharmacy.Web.PageModel.Prescriptions
+@model CreateOrEditPrescriptionModalViewModel
+@using Abp.Extensions
+
+@if (@Model.AllMedicines.Count() > 0)
+{
+    <h2>  Medication: </h2>
+}
+@{
+    string cchecked = "";
+    var refills = 0;
+}
+@foreach (var medicine in Model.AllMedicines)
+{
+    if (Model.SelectedMedicineIds.ContainsKey(medicine.Id))
+    {
+        cchecked = "checked";
+        refills = Model.SelectedMedicineIds[medicine.Id] ?? 0;
+    }
+    else
+    {
+        cchecked = "";
+        refills = 0;
+    }
+    <div class="row prescriptionItems" style="margin-bottom:20px;">
+        <div class="col-md-9" style="padding-left:5px">
+            <input type="checkbox" @(cchecked) id="medicine_@medicine.Id" name="medicineIds" data-id="@medicine.MedicineId" class="chkMedicines" />
+            <span style="line-height:2.9px">
+                @medicine.Description
+            </span>
+        </div>
+
+        <div class="col-md-3" style="margin-top:-20px;">
+            <span for="refills" class="col-form-label" style="font-weight:bold">Refills</span>
+            <input type="text" value="@(refills)" class="form-control no-border medicationRefilledQuantity" id="refilledQuantity_@medicine.Id" style="width:80px; border-top:0px; border-left:0px; border-right:0px;border-bottom:1px solid black; display:inline-block;" required />
+        </div>
+        <div class="col-md-1"></div>
+        <div class="col-md-8" style="padding-left:5px;">
+            <label>
+                @medicine.Instructions
+            </label>
+        </div>
+    </div>
+}
+@if (@Model.NauseaMedications.Count() > 0)
+{
+    <h2>  Nausea Treatment Options: </h2>
+}
+<div class="row">
+
+    @foreach (var medicine in Model.NauseaMedications)
+    {
+        if (Model.SelectedMedicineIds.ContainsKey(medicine.Id))
+        {
+            cchecked = "checked";
+            refills = Model.SelectedMedicineIds[medicine.Id] ?? 0;
+        }
+        else
+        {
+            cchecked = "";
+            refills = 0;
+        }
+        <div class="row prescriptionItemsNausea" style="margin-bottom:20px;">
+            <div class="col-md-9" style="padding-left:5px; margin-bottom:20px;">
+                <input type="checkbox" @(cchecked) id="nauseamedicine_@medicine.Id" name="medicineIds" data-id="@medicine.MedicineId" class="chkMedicinesNausea" />
+                <label>
+                    @medicine.Description
+                </label>
+            </div>
+            <div class="col-md-3 align-items-center">
+                <label for="refills" class="col-form-label" style="font-weight:bold">Refills</label>
+                <input type="text" value="@(refills)" class="form-control no-border medicationRefilledQuantity" id="nauseaRefilledQuantity_@medicine.Id" style="width:80px; border-top:0px; border-left:0px; border-right:0px; border-bottom:1px solid black; display:inline-block;" />
+            </div>
+            <div class="col-md-1"></div>
+            <div class="col-md-8" style="padding-left:5px; margin-top:-20px;">
+                @* <label>
+            @medicine.Instructions
+            </label> *@
+            </div>
+        </div>
+    }
+
+</div>
+
+@if (@Model.OtherMedications.Count() > 0)
+{
+    <h2>  Others: </h2>
+}
+
+<div class="row">
+
+    @foreach (var medicine in Model.OtherMedications)
+    {
+        if (Model.SelectedMedicineIds.ContainsKey(medicine.Id))
+        {
+            cchecked = "checked";
+            refills = Model.SelectedMedicineIds[medicine.Id] ?? 0;
+        }
+        else
+        {
+            cchecked = "";
+            refills = 0;
+        }
+        <div class="row prescriptionItemsOther" style="margin-bottom:20px;">
+            <div class="col-md-9" style="padding-left:5px; margin-bottom:20px;">
+                <input type="checkbox" @(cchecked) id="othermedicine_@medicine.Id" name="medicineIds" data-id="@medicine.MedicineId" class="chkMedicinesOther" />
+                <label>
+                    @medicine.Description
+                </label>
+            </div>
+            <div class="col-md-3 align-items-center">
+                <label for="refills" class="col-form-label" style="font-weight:bold">Refills</label>
+                <input type="text" value="@(refills)" class="form-control no-border medicationRefilledQuantity" id="otherRefilledQuantity_@medicine.Id" style="width:80px; border-top:0px; border-left:0px; border-right:0px; border-bottom:1px solid black; display:inline-block;" />
+            </div>
+            <div class="col-md-1"></div>
+            <div class="col-md-8" style="padding-left:5px; margin-top:-20px;">
+                <label>
+                    @medicine.Instructions
+                </label>
+            </div>
+        </div>
+    }
+
+</div>
+<script type="text/javascript">
+    $(function () {
+        $(".chkMedicinesNausea").on("change", function () {
+            var $this = $(this);
+            var medId = $this.attr('data-id') * 1;
+            if (!$this.prop('checked'))
+                $("#nauseaRefilledQuantity_" + medId).val(0);
+
+        });
+        $(".chkMedicinesOther").on("change", function () {
+            var $this = $(this);
+            var medId = $this.attr('data-id') * 1;
+            if (!$this.prop('checked'))
+                $("#otherRefilledQuantity_" + medId).val(0);
+
+        });
+        $(".chkMedicines").on("change", function () {
+            var $this = $(this);
+            var medId = $this.attr('data-id') * 1;
+            if (!$this.prop('checked'))
+                $("#refilledQuantity_" + medId).val(0);
+
+        });
+    });
+</script>

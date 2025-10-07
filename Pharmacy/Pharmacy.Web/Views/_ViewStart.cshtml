@@ -1,0 +1,6 @@
+﻿
+@using ATI.UiCustomization.Dto
+@{
+   UiCustomizationSettingsDto theme = await GetTheme();
+   Layout = "~/Areas/Core/Views/Layout/" + theme.BaseSettings.Theme + "/_Layout.cshtml";
+}

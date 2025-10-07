@@ -1,0 +1,124 @@
+﻿@using System.Globalization
+@using ATI.Pharmacy.Web.PageModel.Doctors
+@using Abp.AspNetCore.Mvc.RazorPages
+@using Abp.AspNetCore.Localization
+@using ATI.Authorization
+@model DoctorsViewModel
+@{
+    ViewBag.CurrentPageName = PharmacyConstants.Doctors;
+}
+@section Scripts
+{
+    <script abp-src="/view-resources/Areas/Pharmacy/Views/Doctors/Index.js" asp-append-version="true"></script>
+}
+
+<abp-page-subheader title="Prescriber List">
+
+    @*         <button class="btn btn-primary" id="ExportToExcelButton">
+    <i class="far fa-file-excel btn-md-icon"></i>
+    Export To Excel
+    </button> *@
+
+    @if (IsGranted(AppPermissions.Pages_Doctors_Create))
+    {
+        <button id="CreateNewDoctorButton" class="btn btn-primary"><i class="fa fa-plus"></i> Create New Prescriber</button>
+    }
+</abp-page-subheader>
+
+<div class="@(await GetContainerClass())">
+    <div class="card card-custom gutter-b">
+        <div class="card-body">
+            <div class="form">
+                <div class="row align-items-center mb-4">
+                    @* <div class="col-xl-12"> *@
+                    @*  @if (Model.FacilityList.Count > 1)
+                    {
+                    <div class="col-md-3">
+                    <div class="my-3">
+                    <label class="form-label" for="FacilityList">Clinic</label>
+                    <select id="FacilityList" class="form-select m-input m-input--square" name="defaultFacilityId" required asp-for="@Model.DefaultFacilityId" asp-items="@Model.FacilityList">
+                    </select>
+                    </div>
+                    </div>
+                    } *@
+                 
+                    @if (Model.CompanyList.Count > 1 && IsGranted(AppPermissions.Pages_Doctors_Grid_View_Facility))
+                    {
+                        <div class="col-md-3">
+                            <div class="my-3">
+                                <label class="form-label" for="CompanyList">Clinic Name</label>
+                                <select id="CompanyList" class="form-select m-input m-input--square" name="companyId" required asp-for="@Model.CompanyId" asp-items="@Model.CompanyList">
+                                </select>
+                            </div>
+                        </div>
+                       
+                    }
+                 
+                    <div class="col-md-6">
+                        <div class="my-3" style="margin-top:35px !important">
+                            <div class="input-group">
+                                <input type="text" id="DoctorsTableFilter" class="form-control reload-on-change" placeholder='Search...' value="@Model.FilterText">
+                                <button id="GetDoctorsButton" class="btn btn-primary" type="submit"><i class="flaticon-search-1"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    @* </div> *@
+                </div>
+            </div>
+            @*         <div id="AdvacedAuditFiltersArea" style="display: none" class="row mb-4">
+            <div class="col-md-12">
+            </div>
+
+            <div class="col-md-3">
+            <div class="my-3">
+            <label class="form-label" for="MinDoctorIDFilterId">Min Max Doctor ID</label>
+            <div class="input-group">
+            <input type="number" class="form-control m-input reload-on-keyup" placeholder="Min Value" name="minDoctorIDFilter" id="MinDoctorIDFilterId" />
+            <input type="number" class="form-control m-input reload-on-keyup" placeholder="Max Value" name="maxDoctorIDFilter" id="MaxDoctorIDFilterId" />
+            </div>
+            </div>
+            </div>
+            <div class="col-md-3">
+            <div class="my-3">
+            <label class="form-label" for="SpecialtyFilterId">@L("Specialty")</label>
+            <input type="text" class="form-control reload-on-keyup" name="specialtyFilter" id="SpecialtyFilterId">
+            </div>
+            </div>
+            <div class="col-md-3">
+            <div class="my-3">
+            <label class="form-label" for="LicenseNumberFilterId">License Number</label>
+            <input type="text" class="form-control reload-on-keyup" name="licenseNumberFilter" id="LicenseNumberFilterId">
+            </div>
+            </div>
+
+            <div class="col-md-12 mt-5">
+            <button class="btn btn-secondary btn-sm" id="btn-reset-filters">Reset</button>
+            </div>
+            </div> *@
+            @*  <div class="row my-4">
+            <div class="col-xl-12">
+            <span id="ShowAdvancedFiltersSpan" class="text-muted clickable-item"><i class="fa fa-angle-down"></i>Show Advanced Filters</span>
+            <span id="HideAdvancedFiltersSpan" class="text-muted clickable-item" style="display: none"><i class="fa fa-angle-up"></i>Hide Advanced Filters</span>
+            </div>
+            </div> *@
+            <div class="row align-items-center">
+                <table id="DoctorsTable" class="table align-middle table-row-dashed fs-6 gy-5 dataTable no-footer" width="100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>NPI#</th>
+                            <th>Phone Number</th>
+                            @if (IsGranted(AppPermissions.Pages_Doctors_Grid_View_Facility))
+                            {
+                                <th>Location</th>
+                            }
+                            <th>@L("Edit")</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

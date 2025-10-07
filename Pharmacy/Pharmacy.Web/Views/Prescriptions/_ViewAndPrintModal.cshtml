@@ -1,0 +1,13 @@
+﻿@using System.Globalization
+@using ATI.Pharmacy.Application.Patients
+@using ATI.Pharmacy.Web.PageModel.Prescriptions
+@using Abp.AspNetCore.Mvc.RazorPages
+@using Abp.AspNetCore.Localization
+@model ViewAndPrintPrescriptionModalViewModel
+@using Abp.Extensions
+@await Html.PartialAsync("~/Areas/Pharmacy/Views/Common/Modals/_PharmacyModalHeader.cshtml", new PharmacyModalHeaderViewModel("View Prescription"))
+
+<div class="modal-body">
+    @await Html.PartialAsync("~/Areas/Pharmacy/Views/Prescriptions/_ViewAndPrint.cshtml", Model.PrescriptionForViewDto)
+</div>
+@await Html.PartialAsync("~/Areas/Pharmacy/Views/Prescriptions/_ViewAndPrintModalFooter.cshtml")

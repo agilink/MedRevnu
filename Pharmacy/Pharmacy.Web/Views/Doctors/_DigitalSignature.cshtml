@@ -1,0 +1,177 @@
+@using ATI.Pharmacy.Web.PageModel.Doctors
+@using ATI.Pharmacy.Dtos
+@using Abp.AspNetCore.Mvc.RazorPages
+@model CreateOrEditDoctorModalViewModel
+
+<div class="card-header">
+    <div class="card-title">
+        <label class="form-label">
+            Digital Signature
+        </label>
+    </div>
+</div>
+<div class="card-body">
+    <div style="border-block:thin">
+        <canvas id="signature-pad" width="400" height="200" style="border:1px solid var(--bs-gray-300); border-radius:0.475rem;"></canvas>
+    </div>
+    <input type="hidden" name="SignatureFileID" id="SignatureFileID" value="@Model.Doctor.SignatureFileID" />
+    @* <input type="hidden" name="DoctorID" id="DoctorID" value="@Model.Doctor.Id" /> *@
+    <button id="clear">Clear</button>
+    <button id="save">Save</button>
+</div>
+
+<script>
+    $(document).ready(function () {
+        const canvas = $('#signature-pad');
+        const signaturePad = new SignaturePad(canvas[0]); // Initialize signature pad using the canvas element
+
+        // Check if there's an existing signature
+        if ($("#SignatureFileID").val() != null && $("#SignatureFileID").val().length > 0) {
+
+            LoadSignature();
+        }
+
+    @if (Model.SignaturePermission.HasValue && Model.SignaturePermission.Value)
+    {      
+    }else{
+        <text>
+                DisableSignaturePad();
+        </text>
+    }
+
+            // Save the signature when clicking the save button
+            $("#save").on("click", function () {
+                if (signaturePad.isEmpty()) {
+                    abp.notify.error("Please provide a signature first.");
+                    return false;
+                }
+
+                SaveSignature();
+            });
+
+        // Clear the signature pad when clicking the clear button
+        $("#clear").on('click', function () {
+            signaturePad.clear();
+            $("#SignatureFileID").val('');
+        });
+
+        function SaveSignature() {
+            var signatureData = signaturePad.toDataURL();
+            $.ajax({
+                url: abp.appPath + 'api/services/app/Doctors/SaveSignature',
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify(signatureData),
+                success: function (response) {
+
+                    $("#SignatureFileID").val(response.result);
+                    abp.notify.success("Signature saved successfully!");
+                },
+                error: function () {
+                    abp.notify.error("Some error occurred during upload signature!");
+                }
+            });
+        }
+
+        function LoadSignature() {
+            signaturePad.clear(); // Clear the canvas before loading the signature
+            var binaryId = $("#SignatureFileID").val();
+
+            // Perform AJAX request to get the signature
+            $.ajax({
+                url: abp.appPath + 'api/services/app/Doctors/GetSignature',
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify(binaryId),
+                success: function (response) {
+                    if (response.result.length > 0) {
+                        // Load the signature into the pad
+                        signaturePad.fromDataURL(response.result);
+
+                    }
+                },
+                error: function () {
+                    abp.notify.error("Failed to load signature!");
+                }
+            });
+        }
+
+        function DisableSignaturePad() {
+            canvas.css('pointer-events', 'none'); // Disable drawing
+            $("#save").hide();
+            $("#clear").hide();
+
+            //$(canvas[0]).css('pointer-events', 'auto'); // Re-enable drawing
+        }
+    });
+</script>
+
+
+@* <script>
+    const canvas = $('#signature-pad');
+    const signaturePad = new SignaturePad(canvas);
+
+
+    $(function () {
+        debugger
+        if ($("#SignatureFileID").val() != null && $("#SignatureFileID").val().length > 0) {
+            LoadSignature();
+        }
+        $("#save").on("click", function () {
+            SaveSignature();
+        });
+
+        $("#clear").on('click', function () {
+            signaturePad.clear()
+        });
+    });
+
+    function SaveSignature() {
+
+        var formData = new FormData();
+        var blob = new Blob(signaturePad.toData());
+        formData.append("file", blob, "signature.png");
+        var doctorId = $("#DoctorID").val();
+        $.ajax({
+            type: "POST",
+            url: '/Pharmacy/Doctors/UploadSignature',
+            processData: false,
+            contentType: false,
+            data: formData,
+            success: function (response, status, xhr) {
+
+                $("#SignatureFileID").val(response.result.binaryObjectId);
+                abp.notify.success("Signature saved successfully!");
+            },
+            error: function (response) {
+                abp.notify.error("Some error occured during upload signature!");
+            },
+            complete: function () {
+            },
+        });  // Specify the format (image/png or image/jpeg)
+    }
+
+    function LoadSignature() {
+        signaturePad.clear();
+        var formData = new FormData();
+        formData.append("binaryObjectId", $("#SignatureFileID").val())
+        $.ajax({
+            type: "POST",
+            url: '/Pharmacy/Doctors/GetSignature',
+            processData: false,
+            contentType: false,
+            data: formData,
+            success: function (response, status, xhr) {
+
+                if (response.result.bytes.length > 0)
+                    signaturePad.fromDataURL(response.result.bytes);
+            },
+            error: function (response) {
+            },
+            complete: function () {
+            },
+        });  // Specify the format (image/png or image/jpeg)
+    }
+</script> *@

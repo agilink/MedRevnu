@@ -1,0 +1,167 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <OutputType>Library</OutputType>
+	  <PublishDir>$(OutputPath)Publish\Pharmacy\</PublishDir>
+	  <PackageOutputPath>$(OutputPath)Pharmacy</PackageOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Abp.AspNetCore" Version="9.4.2" />
+    <PackageReference Include="Abp.AspNetCore.SignalR" Version="9.4.2" />
+    <PackageReference Include="Abp.AspNetZeroCore.Web" Version="5.0.0" />
+    <PackageReference Include="Abp.Castle.Log4Net" Version="9.4.2" />
+    <PackageReference Include="NReco.PdfGenerator.LT" Version="1.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ATI.Web.Core\ATI.Web.Core.csproj" />
+    <ProjectReference Include="..\Pharmacy.Application\ATI.Pharmacy.Application.csproj" />
+    <ProjectReference Include="..\Pharmacy.Domain\ATI.Pharmacy.Domain.csproj" />
+    <ProjectReference Include="..\Pharmacy.EntityFrameworkCore\ATI.Pharmacy.EntityFrameworkCore.csproj" />
+  </ItemGroup>
+	<ItemGroup>
+		<Content Remove="Views/**" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Compile Remove="ATIPageSubheaderPharmacyTagHelper.cs" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Remove="ViewModels\Doctors\CreateOrEdit.js" />
+	  <None Remove="ViewModels\Doctors\Index.js" />
+	  <None Remove="ViewModels\Doctors\Index.min.js" />
+	  <None Remove="ViewModels\Doctors\_CreateOrEditModal - Copy.min.js" />
+	  <None Remove="ViewModels\Doctors\_CreateOrEditModal.js" />
+	  <None Remove="ViewModels\Doctors\_CreateOrEditModal.min.js" />
+	  <None Remove="ViewModels\Doctors\_ExcelColumnSelectionModal.js" />
+	  <None Remove="ViewModels\Patients\Index.js" />
+	  <None Remove="ViewModels\Patients\Index.min.js" />
+	  <None Remove="ViewModels\Patients\_CreateOrEditModal.js" />
+	  <None Remove="ViewModels\Patients\_CreateOrEditModal.min.js" />
+	  <None Remove="ViewModels\Patients\_ExcelColumnSelectionModal.js" />
+	  <None Remove="ViewModels\Employees\Index.js" />
+	  <None Remove="ViewModels\Employees\Index.min.js" />
+	  <None Remove="ViewModels\Prescriptions\Index.js" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Content Include="ViewModels\Doctors\Index.js">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	  <Content Include="ViewModels\Doctors\Index.min.js">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	  <Content Include="ViewModels\Doctors\_CreateOrEditModal.js">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	  <Content Include="ViewModels\Doctors\_CreateOrEditModal.min.js">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	  <Content Include="ViewModels\Doctors\_ExcelColumnSelectionModal.js">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	  <Content Include="ViewModels\Patients\Index.js">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	  <Content Include="ViewModels\Patients\Index.min.js">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	  <Content Include="ViewModels\Patients\_CreateOrEditModal.js">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	  <Content Include="ViewModels\Patients\_CreateOrEditModal.min.js">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	  <Content Include="ViewModels\Patients\_ExcelColumnSelectionModal.js">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	  <Content Include="ViewModels\Employees\Index.js">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	  <Content Include="ViewModels\Employees\Index.min.js">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	  <Content Include="ViewModels\Prescriptions\Index.js">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	  <Content Include="Views\Address\_CreateOrEditAddress.cshtml">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	  <Content Include="Views\Common\Modals\_PharmacyModalFooterWithSaveDeleteAndCancel.cshtml">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	  <Content Include="Views\Common\Modals\_PharmacyModalHeader.cshtml">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	  <Content Include="Views\Employees\Index_1.cshtml">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	  <Content Include="Views\Prescriptions\_PrescriptionItems.cshtml">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	  <Content Include="Views\Prescriptions\_ViewAndPrintModalFooter.cshtml">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	  <Content Include="Views\Prescriptions\_PrescriptionModalFooter.cshtml">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	  <Content Include="Views\User\_CreateOrEditUser.cshtml">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	  <Content Include="Views\Doctors\_DigitalSignature.cshtml">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	</ItemGroup>
+	<ItemGroup>
+	  <None Include="Views\Doctors\Index.cshtml" />
+	  <None Include="Views\Doctors\_CreateOrEditModal.cshtml" />
+	  <None Include="Views\Doctors\_ExcelColumnSelectionModal.cshtml" />
+	  <None Include="Views\Doctors\_ViewDoctorModal.cshtml" />
+	  <None Include="Views\Patients\Index.cshtml" />
+	  <None Include="Views\Patients\_CreateOrEditModal.cshtml" />
+	  <None Include="Views\Patients\_CreateOrEditPatient.cshtml" />
+	  <None Include="Views\Patients\_ExcelColumnSelectionModal.cshtml" />
+	  <None Include="Views\Patients\_ViewPatientModal.cshtml" />
+	  <None Include="Views\PharmacyHome\Index.cshtml" />
+	  <None Include="Views\Employees\Index.cshtml" />
+	  <None Include="Views\Employees\_PharmacyUserDetails.cshtml" />
+	  <None Include="Views\Prescriptions\Index.cshtml" />
+	  <None Include="Views\Prescriptions\_ViewAndPrint.cshtml" />
+	  <None Include="Views\Prescriptions\_ViewAndPrintModal.cshtml" />
+	  <None Include="Views\Prescriptions\_CreateOrEditModal.cshtml" />
+	  <None Include="Views\_ViewImports.cshtml" />
+	  <None Include="Views\_ViewStart.cshtml" />
+	</ItemGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    
+  </Target>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    </Target>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="(robocopy &quot;../Pharmacy.Web\Views&quot; &quot;../../src\ATI.Web.Mvc\Areas\Pharmacy\Views&quot; /MIR /R:0 /W:0 /XF *.pdb *.xml *.dll /NP /NJH /IS ) &#xD;&#xA;(robocopy &quot;../Pharmacy.Web\ViewModels&quot; &quot;../../src\ATI.Web.Mvc\wwwroot\view-resources\Areas\Pharmacy\Views&quot; /MIR /R:0 /W:0 /XF *.pdb *.xml *.dll /NP /NJH /IS ) ^&amp; IF %25ERRORLEVEL%25 LEQ 3 (exit 0) ELSE (exit %25ERRORLEVEL%25)" Condition=" '$(OS)' == 'Windows_NT' " />
+  </Target>
+</Project>
