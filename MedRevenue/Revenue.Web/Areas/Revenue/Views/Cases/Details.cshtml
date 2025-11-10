@@ -1,0 +1,83 @@
+@model ATI.Revenue.Application.Cases.Dtos.CaseDto
+@{
+    ViewData["Title"] = "Case Details";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">@ViewData["Title"]</h3>
+                <div class="card-tools">
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning btn-sm">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a asp-action="Index" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">Case Number</dt>
+                    <dd class="col-sm-9">@Model.CaseNumber</dd>
+
+                    <dt class="col-sm-3">Client Name</dt>
+                    <dd class="col-sm-9">@Model.ClientName</dd>
+
+                    <dt class="col-sm-3">Case Date</dt>
+                    <dd class="col-sm-9">@Model.CaseDate.ToString("MM/dd/yyyy")</dd>
+
+                    <dt class="col-sm-3">Status</dt>
+                    <dd class="col-sm-9">
+                        @{
+                            var badgeClass = "secondary";
+                            if (Model.Status == "Open") badgeClass = "success";
+                            else if (Model.Status == "In Progress") badgeClass = "warning";
+                            else if (Model.Status == "Closed") badgeClass = "danger";
+                        }
+                        <span class="badge bg-@badgeClass">@Model.Status</span>
+                    </dd>
+
+                    <dt class="col-sm-3">Total Amount</dt>
+                    <dd class="col-sm-9">$@Model.TotalAmount.ToString("N2")</dd>
+
+                    <dt class="col-sm-3">Description</dt>
+                    <dd class="col-sm-9">@(Model.Description ?? "N/A")</dd>
+
+                    <dt class="col-sm-3">Notes</dt>
+                    <dd class="col-sm-9">@(Model.Notes ?? "N/A")</dd>
+                </dl>
+
+                @if (Model.CaseProducts != null && Model.CaseProducts.Any())
+                {
+                    <hr />
+                    <h5>Products</h5>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Discount</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var product in Model.CaseProducts)
+                            {
+                                <tr>
+                                    <td>@product.ProductName</td>
+                                    <td>@product.Quantity</td>
+                                    <td>$@product.UnitPrice.ToString("N2")</td>
+                                    <td>$@product.Discount.ToString("N2")</td>
+                                    <td>$@product.TotalPrice.ToString("N2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+</div>

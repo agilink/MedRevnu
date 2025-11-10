@@ -1,0 +1,89 @@
+@model ATI.Revenue.Application.Cases.Dtos.CreateOrEditCaseDto
+@{
+    ViewData["Title"] = "Edit Case";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">@ViewData["Title"]</h3>
+            </div>
+            <form asp-action="Edit" method="post">
+                <input asp-for="Id" type="hidden" />
+                <div class="card-body">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="CaseNumber" class="control-label"></label>
+                                <input asp-for="CaseNumber" class="form-control" />
+                                <span asp-validation-for="CaseNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="ClientName" class="control-label"></label>
+                                <input asp-for="ClientName" class="form-control" />
+                                <span asp-validation-for="ClientName" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="CaseDate" class="control-label"></label>
+                                <input asp-for="CaseDate" type="date" class="form-control" />
+                                <span asp-validation-for="CaseDate" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Status" class="control-label"></label>
+                                <select asp-for="Status" class="form-control">
+                                    <option value="Open">Open</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Closed">Closed</option>
+                                </select>
+                                <span asp-validation-for="Status" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="TotalAmount" class="control-label"></label>
+                                <input asp-for="TotalAmount" type="number" step="0.01" class="form-control" />
+                                <span asp-validation-for="TotalAmount" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Description" class="control-label"></label>
+                                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Notes" class="control-label"></label>
+                        <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

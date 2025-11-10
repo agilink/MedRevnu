@@ -1,0 +1,112 @@
+@model ATI.Revenue.Application.Products.Dtos.CreateOrEditProductDto
+@{
+    ViewData["Title"] = "Edit Product";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">@ViewData["Title"]</h3>
+            </div>
+            <form asp-action="Edit" method="post">
+                <input asp-for="Id" type="hidden" />
+                <div class="card-body">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Name" class="control-label"></label>
+                                <input asp-for="Name" class="form-control" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Manufacturer" class="control-label"></label>
+                                <input asp-for="Manufacturer" class="form-control" />
+                                <span asp-validation-for="Manufacturer" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="ModelNo" class="control-label">Model Number</label>
+                                <input asp-for="ModelNo" class="form-control" />
+                                <span asp-validation-for="ModelNo" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="ProductCategoryId" class="control-label">Category</label>
+                                <select asp-for="ProductCategoryId" id="ProductCategoryId" class="form-control">
+                                    <option value="">-- Select Category --</option>
+                                </select>
+                                <span asp-validation-for="ProductCategoryId" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Cost" class="control-label"></label>
+                                <input asp-for="Cost" type="number" step="0.01" class="form-control" />
+                                <span asp-validation-for="Cost" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Price" class="control-label"></label>
+                                <input asp-for="Price" type="number" step="0.01" class="form-control" />
+                                <span asp-validation-for="Price" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Description" class="control-label"></label>
+                        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                            <label asp-for="IsActive" class="form-check-label"></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            var currentCategoryId = @(Model.ProductCategoryId ?? "null");
+            
+            // Load categories
+            $.ajax({
+                url: '/Revenue/ProductCategories/GetAll',
+                type: 'GET',
+                success: function(data) {
+                    var select = $('#ProductCategoryId');
+                    $.each(data.items, function(i, category) {
+                        var selected = (currentCategoryId == category.id) ? 'selected' : '';
+                        select.append('<option value="' + category.id + '" ' + selected + '>' + category.name + '</option>');
+                    });
+                }
+            });
+        });
+    </script>
+}

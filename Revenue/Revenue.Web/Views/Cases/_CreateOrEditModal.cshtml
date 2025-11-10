@@ -1,0 +1,68 @@
+@using ATI.Revenue.Web.PageModel.Cases
+@model CreateOrEditCaseModalViewModel
+
+<div class="modal-header">
+    <h4 class="modal-title">
+        @if (Model.IsEditMode)
+        {
+            @L("EditCase")
+        }
+        else
+        {
+            @L("CreateCase")
+        }
+    </h4>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<form name="CaseCreateOrEditForm" role="form" class="form-horizontal">
+    <div class="modal-body">
+        <input type="hidden" name="Id" value="@Model.Case.Id" />
+        
+        <div class="mb-3">
+            <label class="form-label" for="CaseNumber">@L("CaseNumber") *</label>
+            <input class="form-control" type="text" name="CaseNumber" value="@Model.Case.CaseNumber" required maxlength="50" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="ClientName">@L("ClientName") *</label>
+            <input class="form-control" type="text" name="ClientName" value="@Model.Case.ClientName" required maxlength="200" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="Description">@L("Description")</label>
+            <textarea class="form-control" name="Description" rows="3" maxlength="500">@Model.Case.Description</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="CaseDate">@L("CaseDate") *</label>
+            <input class="form-control" type="date" name="CaseDate" value="@Model.Case.CaseDate.ToString("yyyy-MM-dd")" required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="TotalAmount">@L("TotalAmount")</label>
+            <input class="form-control" type="number" name="TotalAmount" value="@Model.Case.TotalAmount" step="0.01" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="Status">@L("Status") *</label>
+            <select class="form-control" name="Status" required>
+                <option value="Open" selected=@(Model.Case.Status == "Open" ? "selected" : "")>@L("Open")</option>
+                <option value="In Progress" selected=@(Model.Case.Status == "In Progress" ? "selected" : "")>@L("InProgress")</option>
+                <option value="Closed" selected=@(Model.Case.Status == "Closed" ? "selected" : "")>@L("Closed")</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="Notes">@L("Notes")</label>
+            <textarea class="form-control" name="Notes" rows="3" maxlength="1000">@Model.Case.Notes</textarea>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L("Cancel")</button>
+        <button type="submit" class="btn btn-primary save-button">@L("Save")</button>
+    </div>
+</form>
+
+<script src="~/view-resources/Areas/Revenue/Views/Cases/_CreateOrEditModal.js" asp-append-version="true"></script>

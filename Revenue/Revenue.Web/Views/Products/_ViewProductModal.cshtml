@@ -1,0 +1,57 @@
+@using ATI.Revenue.Web.PageModel.Products
+@model ViewProductModalViewModel
+
+<div class="modal-header">
+    <h4 class="modal-title">@L("ProductDetails")</h4>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<div class="modal-body">
+    <div class="row mb-2">
+        <div class="col-4"><strong>@L("Name"):</strong></div>
+        <div class="col-8">@Model.Product.Name</div>
+    </div>
+    
+    <div class="row mb-2">
+        <div class="col-4"><strong>@L("Manufacturer"):</strong></div>
+        <div class="col-8">@Model.Product.Manufacturer</div>
+    </div>
+    
+    <div class="row mb-2">
+        <div class="col-4"><strong>@L("ModelNo"):</strong></div>
+        <div class="col-8">@Model.Product.ModelNo</div>
+    </div>
+    
+    <div class="row mb-2">
+        <div class="col-4"><strong>@L("Description"):</strong></div>
+        <div class="col-8">@Model.Product.Description</div>
+    </div>
+    
+    <div class="row mb-2">
+        <div class="col-4"><strong>@L("Category"):</strong></div>
+        <div class="col-8">@Model.Product.ProductCategoryName</div>
+    </div>
+    
+    <div class="row mb-2">
+        <div class="col-4"><strong>@L("Cost"):</strong></div>
+        <div class="col-8">$@Model.Product.Cost.ToString("N2")</div>
+    </div>
+    
+    <div class="row mb-2">
+        <div class="col-4"><strong>@L("Price"):</strong></div>
+        <div class="col-8">$@Model.Product.Price.ToString("N2")</div>
+    </div>
+    
+    <div class="row mb-2">
+        <div class="col-4"><strong>@L("Status"):</strong></div>
+        <div class="col-8">
+            <span class="badge bg-@(Model.Product.IsActive ? "success" : "secondary")">
+                @(Model.Product.IsActive ? L("Active") : L("Inactive"))
+            </span>
+        </div>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L("Close")</button>
+</div>

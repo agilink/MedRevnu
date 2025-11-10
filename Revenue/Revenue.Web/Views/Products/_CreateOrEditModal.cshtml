@@ -1,0 +1,68 @@
+@using ATI.Revenue.Web.PageModel.Products
+@model CreateOrEditProductModalViewModel
+
+<div class="modal-header">
+    <h4 class="modal-title">
+        @if (Model.IsEditMode)
+        {
+            @L("EditProduct")
+        }
+        else
+        {
+            @L("CreateProduct")
+        }
+    </h4>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<form name="ProductCreateOrEditForm" role="form" class="form-horizontal">
+    <div class="modal-body">
+        <input type="hidden" name="Id" value="@Model.Product.Id" />
+        
+        <div class="mb-3">
+            <label class="form-label" for="Name">@L("Name") *</label>
+            <input class="form-control" type="text" name="Name" value="@Model.Product.Name" required maxlength="200" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="Manufacturer">@L("Manufacturer")</label>
+            <input class="form-control" type="text" name="Manufacturer" value="@Model.Product.Manufacturer" maxlength="200" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="ModelNo">@L("ModelNo")</label>
+            <input class="form-control" type="text" name="ModelNo" value="@Model.Product.ModelNo" maxlength="100" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="Description">@L("Description")</label>
+            <textarea class="form-control" name="Description" rows="3" maxlength="500">@Model.Product.Description</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="Cost">@L("Cost") *</label>
+            <input class="form-control" type="number" name="Cost" value="@Model.Product.Cost" required step="0.01" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="Price">@L("Price") *</label>
+            <input class="form-control" type="number" name="Price" value="@Model.Product.Price" required step="0.01" />
+        </div>
+
+        <div class="mb-3">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="IsActive" id="IsActive" @(Model.Product.IsActive ? "checked" : "") />
+                <label class="form-check-label" for="IsActive">
+                    @L("IsActive")
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L("Cancel")</button>
+        <button type="submit" class="btn btn-primary save-button">@L("Save")</button>
+    </div>
+</form>
+
+<script src="~/view-resources/Areas/Revenue/Views/Products/_CreateOrEditModal.js" asp-append-version="true"></script>

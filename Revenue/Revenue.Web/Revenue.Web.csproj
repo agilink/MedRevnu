@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Abp.AspNetCore" Version="9.4.2" />
+    <PackageReference Include="Abp.AspNetCore.SignalR" Version="9.4.2" />
+    <PackageReference Include="Abp.AspNetZeroCore.Web" Version="5.0.0" />
+    <PackageReference Include="Abp.Castle.Log4Net" Version="9.4.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Admin\ATI.Admin.Application\ATI.Admin.Application.csproj" />
+    <ProjectReference Include="..\..\src\ATI.Core\ATI.Core.csproj" />
+    <ProjectReference Include="..\..\src\ATI.Web.Core\ATI.Web.Core.csproj" />
+    <ProjectReference Include="..\Revenue.Application\ATI.Revenue.Application.csproj" />
+  </ItemGroup>
+
+</Project>

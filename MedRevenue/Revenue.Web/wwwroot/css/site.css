@@ -1,0 +1,96 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  white-space: nowrap;
+  line-height: 60px;
+}
+
+/* Custom styles for Revenue module */
+.card {
+  margin-bottom: 20px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.table-actions {
+  white-space: nowrap;
+}
+
+.table-actions .btn {
+  margin: 0 2px;
+}
+
+.badge {
+  padding: 5px 10px;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+  color: rgba(255,255,255,.8);
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+  color: rgba(255,255,255,1);
+}
+
+/* DataTables custom styling */
+.dataTables_wrapper {
+  padding-top: 10px;
+}
+
+.dataTables_filter {
+  text-align: right;
+}
+
+.dataTables_paginate {
+  margin-top: 15px;
+}
+
+/* Form styling */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-control:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+/* Dashboard cards */
+.card-header {
+  font-weight: bold;
+}
+
+.bg-primary {
+  background-color: #007bff!important;
+}
+
+.bg-success {
+  background-color: #28a745!important;
+}
+
+.bg-info {
+  background-color: #17a2b8!important;
+}

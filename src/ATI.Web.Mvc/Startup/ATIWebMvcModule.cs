@@ -4,22 +4,23 @@ using Abp.Dependency;
 using Abp.Modules;
 using Abp.Reflection.Extensions;
 using Abp.Threading.BackgroundWorkers;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using ATI.Auditing;
 using ATI.Authorization.Users.Password;
 using ATI.Configuration;
 using ATI.EntityFrameworkCore;
 using ATI.MultiTenancy;
 using ATI.MultiTenancy.Subscription;
+using ATI.Revenue.Web;
 using ATI.Web.Areas.Core.Startup;
-using ATI.MedRevnu.Web;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+
 
 namespace ATI.Web.Startup
 {
     [DependsOn(
         typeof(ATIWebCoreModule),
-        typeof(MedRevnuWebModule)
+        typeof(RevenueWebModule)
     )]
     public class ATIWebMvcModule : AbpModule
     {

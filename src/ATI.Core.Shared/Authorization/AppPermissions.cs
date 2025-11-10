@@ -6,6 +6,18 @@
     /// </summary>
     public static class AppPermissions
     {
+        public const string Pages_Administration_LafayetteQuota_Cases = "Pages_Administration_LafayetteQuota_Cases";
+        public const string Pages_Administration_LafayetteQuota_Cases_Delete = "Pages_Administration_LafayetteQuota_Cases_Delete";
+        public const string Pages_Administration_LafayetteQuota_Cases_Create = "Pages_Administration_LafayetteQuota_Cases_Delete";
+        public const string Pages_Administration_LafayetteQuota_Cases_Edit = "Pages_Administration_LafayetteQuota_Cases_Delete";
+        public const string Pages_Administration_LafayetteQuota_Personnel = "Pages.Administration.LafayetteQuota.Personnel";
+        public const string Pages_Administration_LafayetteQuota_Personnel_Create = "Pages.Administration.LafayetteQuota.Personnel.Create";
+        public const string Pages_Administration_LafayetteQuota_Personnel_Edit = "Pages.Administration.LafayetteQuota.Personnel.Edit";
+        public const string Pages_Administration_LafayetteQuota_Personnel_Delete = "Pages.Administration.LafayetteQuota.Personnel.Delete";
+        public const string Pages_Administration_LafayetteQuota_Products = "Pages.Administration.LafayetteQuota.Products";
+        public const string Pages_Administration_LafayetteQuota_Products_Delete = "Pages.Administration.LafayetteQuota.Products.Delete";
+        public const string Pages_Administration_LafayetteQuota_Products_Create = "Pages.Administration.LafayetteQuota.Products.Create";
+        public const string Pages_Administration_LafayetteQuota_Products_Edit = "Pages.Administration.LafayetteQuota.Products.Edit";
         //COMMON PERMISSIONS (FOR BOTH OF TENANTS AND HOST)
 
         public const string Pages = "Pages";

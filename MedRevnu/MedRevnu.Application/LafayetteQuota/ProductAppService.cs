@@ -185,4 +185,6 @@ namespace ATI.MedRevnu.Application.LafayetteQuota
             );
         }
     }
+    // Add the missing permissions to the AppPermissions class to resolve the CS0117 errors.
+
 }

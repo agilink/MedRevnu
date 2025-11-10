@@ -44,7 +44,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\MedRevnu\MedRevnu.Web\ATI.MedRevnu.Web.csproj" />
+    <ProjectReference Include="..\..\MedRevenue\Revenue.Application\ATI.Revenue.Application.csproj" />
+    <ProjectReference Include="..\..\MedRevenue\Revenue.Domain\ATI.Revenue.Domain.csproj" />
+    <ProjectReference Include="..\..\MedRevenue\Revenue.Web\ATI.Revenue.Web.csproj" />
     <ProjectReference Include="..\ATI.Web.Core\ATI.Web.Core.csproj" />
   </ItemGroup>
   <ItemGroup>

@@ -1,0 +1,73 @@
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<h1>Revenue Dashboard</h1>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white mb-3">
+            <div class="card-header">Total Cases</div>
+            <div class="card-body">
+                <h2 class="card-title">@ViewBag.CasesCount</h2>
+                <p class="card-text">Active revenue cases</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white mb-3">
+            <div class="card-header">Total Products</div>
+            <div class="card-body">
+                <h2 class="card-title">@ViewBag.ProductsCount</h2>
+                <p class="card-text">Available products</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info text-white mb-3">
+            <div class="card-header">Total Revenue</div>
+            <div class="card-body">
+                <h2 class="card-title">$@ViewBag.Revenue</h2>
+                <p class="card-text">This month</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Recent Activity</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Activity</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>@DateTime.Now.AddDays(-1).ToShortDateString()</td>
+                            <td>New case created: CASE-001</td>
+                            <td><span class="badge bg-success">Completed</span></td>
+                        </tr>
+                        <tr>
+                            <td>@DateTime.Now.AddDays(-2).ToShortDateString()</td>
+                            <td>Product updated: Laptop Pro</td>
+                            <td><span class="badge bg-info">Updated</span></td>
+                        </tr>
+                        <tr>
+                            <td>@DateTime.Now.AddDays(-3).ToShortDateString()</td>
+                            <td>Category added: Electronics</td>
+                            <td><span class="badge bg-primary">New</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

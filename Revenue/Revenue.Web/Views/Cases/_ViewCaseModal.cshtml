@@ -1,0 +1,55 @@
+@using ATI.Revenue.Web.PageModel.Cases
+@model ViewCaseModalViewModel
+
+<div class="modal-header">
+    <h4 class="modal-title">@L("CaseDetails")</h4>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<div class="modal-body">
+    <div class="row mb-2">
+        <div class="col-4"><strong>@L("CaseNumber"):</strong></div>
+        <div class="col-8">@Model.Case.CaseNumber</div>
+    </div>
+    
+    <div class="row mb-2">
+        <div class="col-4"><strong>@L("ClientName"):</strong></div>
+        <div class="col-8">@Model.Case.ClientName</div>
+    </div>
+    
+    <div class="row mb-2">
+        <div class="col-4"><strong>@L("Description"):</strong></div>
+        <div class="col-8">@Model.Case.Description</div>
+    </div>
+    
+    <div class="row mb-2">
+        <div class="col-4"><strong>@L("CaseDate"):</strong></div>
+        <div class="col-8">@Model.Case.CaseDate.ToString("yyyy-MM-dd")</div>
+    </div>
+    
+    <div class="row mb-2">
+        <div class="col-4"><strong>@L("TotalAmount"):</strong></div>
+        <div class="col-8">$@Model.Case.TotalAmount.ToString("N2")</div>
+    </div>
+    
+    <div class="row mb-2">
+        <div class="col-4"><strong>@L("Status"):</strong></div>
+        <div class="col-8">
+            <span class="badge bg-@(Model.Case.Status == "Open" ? "success" : Model.Case.Status == "In Progress" ? "warning" : "secondary")">
+                @Model.Case.Status
+            </span>
+        </div>
+    </div>
+    
+    @if (!string.IsNullOrEmpty(Model.Case.Notes))
+    {
+        <div class="row mb-2">
+            <div class="col-4"><strong>@L("Notes"):</strong></div>
+            <div class="col-8">@Model.Case.Notes</div>
+        </div>
+    }
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L("Close")</button>
+</div>
