@@ -4,6 +4,7 @@ using ATI.Revenue.Domain;
 using ATI.Revenue.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 namespace ATI.Revenue.Web
 {
@@ -69,6 +70,13 @@ namespace ATI.Revenue.Web
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
+
+            var res = Assembly.GetExecutingAssembly().GetManifestResourceNames();
+            foreach (var r in res)
+            {
+                Console.WriteLine(r);
+            }
+
         }
     }
 }

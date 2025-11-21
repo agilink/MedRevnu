@@ -182,7 +182,7 @@ namespace ATI.Web.Areas.Core.Startup
                 ).AddItem(new MenuItemDefinition(
                         CorePageNames.MedRevnuPages.Revenue,
                         L("Revenue"),
-                        url: "MedRevnu/Med",
+                        url: "Revenue/Cases",
                         icon: "flaticon-line-graph",
                         permissionDependency: new SimplePermissionDependency(AppPermissions.Pages)
                     )

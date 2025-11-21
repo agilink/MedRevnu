@@ -4,6 +4,8 @@ using ATI.Revenue.Application.Cases.Dtos;
 using Abp.Application.Services.Dto;
 using System.Threading.Tasks;
 using ATI.Web.Controllers;
+using ATI.Revenue.Web.PageModel.Cases;
+using System;
 
 namespace ATI.Revenue.Web.Areas.Revenue.Controllers
 {
@@ -17,65 +19,64 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
             _casesAppService = casesAppService;
         }
 
+        // View for listing cases
         public IActionResult Index()
         {
-            _casesAppService.GetAllFiltered(new GetAllCasesInput());
             return View();
         }
 
-        public IActionResult Create()
+        // Modal view for creating/editing cases
+        public async Task<IActionResult> CreateOrEditModal(int? id)
         {
-            return View();
-        }
+            CreateOrEditCaseModalViewModel viewModel;
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateOrEditCaseDto input)
-        {
-            if (ModelState.IsValid)
+            if (id.HasValue)
             {
-                await _casesAppService.CreateAsync(input);
-                return RedirectToAction(nameof(Index));
+                var output = await _casesAppService.GetCaseForEdit(new EntityDto<int> { Id = id.Value });
+                viewModel = new CreateOrEditCaseModalViewModel
+                {
+                    Case = output.Case,
+                    IsEditMode = true
+                };
             }
-            return View(input);
-        }
-
-        public async Task<IActionResult> Edit(int id)
-        {
-            var output = await _casesAppService.GetCaseForEdit(new EntityDto<int> { Id = id });
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(CreateOrEditCaseDto input)
-        {
-            if (ModelState.IsValid)
+            else
             {
-                await _casesAppService.UpdateAsync(input);
-                return RedirectToAction(nameof(Index));
+                viewModel = new CreateOrEditCaseModalViewModel
+                {
+                    Case = new CreateOrEditCaseDto
+                    {
+                        CaseDate = DateTime.Now,
+                        Status = "Open",
+                        TotalAmount = 0
+                    },
+                    IsEditMode = false
+                };
             }
-            return View(input);
+
+            return PartialView("_CreateOrEditModal", viewModel);
         }
 
+        // View for case details
         public async Task<IActionResult> Details(int id)
         {
             var output = await _casesAppService.GetCaseForView(id);
-            return View();
+            return View(output.Case);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Delete(int id)
+        // Modal for adding/editing case products
+        public IActionResult AddOrEditProductModal(int caseId, int? productId = null)
         {
-            await _casesAppService.DeleteAsync(new EntityDto<int> { Id = id });
-            return RedirectToAction(nameof(Index));
-        }
+            var model = new CaseProductDto
+            {
+                CaseId = caseId,
+                Quantity = 1,
+                Discount = 0
+            };
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll(GetAllCasesInput input)
-        {
-            var result = await _casesAppService.GetAllFiltered(input);
-            return Json(1);
+            // If editing, you could load the existing product data here
+            // For now, we'll handle that on the client side
+
+            return PartialView("_AddOrEditProductModal", model);
         }
     }
 }

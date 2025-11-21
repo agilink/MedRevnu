@@ -159,5 +159,48 @@ namespace ATI.Revenue.Application.Cases
             await CurrentUnitOfWork.SaveChangesAsync();
             return MapToEntityDto(entity);
         }
+
+        public async Task RemoveCaseProduct(EntityDto<int> input)
+        {
+            await _caseProductRepository.DeleteAsync(input.Id);
+            await CurrentUnitOfWork.SaveChangesAsync();
+        }
+
+        public async Task<CaseProductDto> AddOrUpdateCaseProduct(CaseProductDto input)
+        {
+            CaseProduct caseProduct;
+
+            if (input.Id > 0)
+            {
+                // Update existing case product
+                caseProduct = await _caseProductRepository.GetAsync(input.Id);
+                caseProduct.ProductId = input.ProductId;
+                caseProduct.Quantity = input.Quantity;
+                caseProduct.UnitPrice = input.UnitPrice;
+                caseProduct.Discount = input.Discount;
+                caseProduct.TotalPrice = input.TotalPrice;
+
+                await _caseProductRepository.UpdateAsync(caseProduct);
+            }
+            else
+            {
+                // Add new case product
+                caseProduct = new CaseProduct
+                {
+                    CaseId = input.CaseId,
+                    ProductId = input.ProductId,
+                    Quantity = input.Quantity,
+                    UnitPrice = input.UnitPrice,
+                    Discount = input.Discount,
+                    TotalPrice = input.TotalPrice
+                };
+
+                caseProduct.Id = await _caseProductRepository.InsertAndGetIdAsync(caseProduct);
+            }
+
+            await CurrentUnitOfWork.SaveChangesAsync();
+
+            return ObjectMapper.Map<CaseProductDto>(caseProduct);
+        }
     }
 }

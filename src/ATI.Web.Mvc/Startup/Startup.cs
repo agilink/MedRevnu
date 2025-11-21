@@ -193,6 +193,7 @@ namespace ATI.Web.Startup
             app.UseHttpsRedirection();
 
             app.UseStaticFiles();
+            app.UseEmbeddedFiles(); // Serve embedded static files from modules
 
             #pragma warning disable CS0162
             if (ATIConsts.PreventNotExistingTenantSubdomains)

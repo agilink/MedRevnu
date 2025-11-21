@@ -1,0 +1,61 @@
+@using ATI.Revenue.Application.Cases.Dtos
+@model CaseProductDto
+
+<div class="modal-header">
+    <h4 class="modal-title">
+        @if (Model?.Id > 0)
+        {
+            @L("EditProduct")
+        }
+        else
+        {
+            @L("AddProduct")
+        }
+    </h4>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<form name="CaseProductForm" role="form" class="form-horizontal">
+    <div class="modal-body">
+        <input type="hidden" name="Id" value="@(Model?.Id ?? 0)" />
+        <input type="hidden" name="CaseId" id="CaseId" value="@(Model?.CaseId ?? 0)" />
+
+        <div class="mb-3">
+            <label class="form-label" for="ProductId">@L("Product") *</label>
+            <select class="form-control" name="ProductId" id="ProductId" required>
+                <option value="">-- Select Product --</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="Quantity">@L("Quantity") *</label>
+            <input class="form-control" type="number" name="Quantity" id="Quantity"
+                   value="@(Model?.Quantity ?? 1)" required min="1" step="1" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="UnitPrice">@L("UnitPrice") *</label>
+            <input class="form-control" type="number" name="UnitPrice" id="UnitPrice"
+                   value="@(Model?.UnitPrice ?? 0)" required min="0" step="0.01" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="Discount">@L("Discount")</label>
+            <input class="form-control" type="number" name="Discount" id="Discount"
+                   value="@(Model?.Discount ?? 0)" min="0" step="0.01" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="TotalPrice">@L("TotalPrice")</label>
+            <input class="form-control" type="number" name="TotalPrice" id="TotalPrice"
+                   value="@(Model?.TotalPrice ?? 0)" readonly />
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L("Cancel")</button>
+        <button type="submit" class="btn btn-primary save-button">@L("Save")</button>
+    </div>
+</form>
+
+<script src="~/view-resources/Areas/Revenue/Views/Cases/_AddOrEditProductModal.js" asp-append-version="true"></script>

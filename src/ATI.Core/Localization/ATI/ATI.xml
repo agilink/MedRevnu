@@ -1316,8 +1316,17 @@
     <text name="Error_Oops">Oops!</text>
     <text name="Error_Btn">Return Home</text>
     <text name="Error403_Title">403 - Forbidden</text>
-    <text name="Error403_Desc">Access to this resource on the server is denied!</text>    
+    <text name="Error403_Desc">Access to this resource on the server is denied!</text>
     <text name="Error404_Title">404 - Page not found</text>
     <text name="Error404_Desc">The page you are looking for cannot be found.</text>
+    <!-- Revenue Module -->
+    <text name="CreateNewCase">Create New Case</text>
+    <text name="CaseDeleteWarningMessage">Case {0} will be deleted.</text>
+    <text name="FailedToLoadCases">Failed to load cases</text>
+    <text name="FailedToLoadProducts">Failed to load products</text>
+    <text name="Cases">Cases</text>
+    <text name="CaseNumber">Case Number</text>
+    <text name="ClientName">Client Name</text>
+    <text name="CaseDate">Case Date</text>
   </texts>
 </localizationDictionary>

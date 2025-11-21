@@ -26,6 +26,23 @@
 
   <ItemGroup>
     <Folder Include="Areas\Revenue\Data\" />
+    <Folder Include="Areas\Revenue\ViewModels\" />
   </ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="wwwroot\**\*.*" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Include="wwwroot\view-resources\Areas\Revenue\Views\Cases\Index.js" />
+	</ItemGroup>
 
+	<!-- Post-build event to copy JavaScript files to Web.Mvc -->
+	<Target Name="CopyRevenueScriptsToWebMvc" AfterTargets="Build">
+		<ItemGroup>
+			<ScriptFiles Include="wwwroot\view-resources\**\*.js" />
+		</ItemGroup>
+		<Copy SourceFiles="@(ScriptFiles)"
+			  DestinationFiles="@(ScriptFiles->'..\..\src\ATI.Web.Mvc\wwwroot\view-resources\%(RecursiveDir)%(Filename)%(Extension)')"
+			  SkipUnchangedFiles="true" />
+		<Message Text="Copied Revenue JavaScript files to ATI.Web.Mvc\wwwroot\view-resources\" Importance="high" />
+	</Target>
 </Project>

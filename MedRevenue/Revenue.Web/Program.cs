@@ -1,3 +1,4 @@
+using Abp.AspNetCore;
 using ATI.Revenue.Application;
 using ATI.Revenue.Domain;
 using ATI.Revenue.EntityFrameworkCore;
@@ -55,6 +56,7 @@ else
 }
 
 app.UseHttpsRedirection();
+app.UseEmbeddedFiles();
 app.UseStaticFiles();
 
 app.UseRouting();

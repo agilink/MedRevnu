@@ -13,7 +13,7 @@ using System.Reflection;
 
 namespace ATI.Revenue.Web
 {
-    [DependsOn(typeof(RevenueApplicationModule), typeof(RevenueCoreModule), typeof(ATICoreModule),typeof(ATIWebCoreModule),typeof(AbpAspNetZeroCoreWebModule),typeof(RevenueEntityFrameworkCoreModule))]
+    [DependsOn(typeof(RevenueApplicationModule), typeof(RevenueCoreModule), typeof(ATICoreModule), typeof(ATIWebCoreModule), typeof(AbpAspNetZeroCoreWebModule), typeof(RevenueEntityFrameworkCoreModule))]
     public class RevenueWebModule : AbpModule
     {
         public override void PreInitialize()
@@ -39,10 +39,15 @@ namespace ATI.Revenue.Web
                 )
             );
 
+            // Fix for CS0246: Ensure the correct namespace is used for AbpVirtualFileSystemOptions
             Configuration.Modules.AbpAspNetCore() // This line requires the Abp.AspNetCore namespace
                 .CreateControllersForAppServices(
                     typeof(RevenueApplicationModule).GetAssembly()
                 );
+
+            Configuration.EmbeddedResources.Sources.Add(new EmbeddedResourceSet("/ViewModels",
+                Assembly.GetExecutingAssembly(),
+                "Revenue.Views"));           
         }
 
         public override void Initialize()

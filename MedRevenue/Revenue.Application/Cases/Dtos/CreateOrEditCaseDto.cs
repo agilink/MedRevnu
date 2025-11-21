@@ -8,6 +8,7 @@ using System.ComponentModel.DataAnnotations;
 namespace ATI.Revenue.Application.Cases.Dtos
 {
     [AutoMapTo(typeof(Case))]
+    [AutoMapFrom(typeof(Case))]
     public class CreateOrEditCaseDto : EntityDto<int>
     {
         [Required]
