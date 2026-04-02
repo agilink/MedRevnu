@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using ATI.Revenue.Application.Reports;
 using ATI.Revenue.Application.Reports.Dtos;
 using Abp.Domain.Repositories;
@@ -119,38 +120,40 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         // Helper methods for dropdowns
         private async Task<SelectList> GetHospitalSelectList()
         {
-            var hospitals = await _facilityRepository.GetAllListAsync();
-            return new SelectList(
-                hospitals.OrderBy(h => h.FacilityName),
-                "Id",
-                "FacilityName"
-            );
+            var hospitals = await _facilityRepository.GetAll()
+                .Select(h => new { h.Id, FacilityName = h.FacilityName ?? "" })
+                .OrderBy(h => h.FacilityName)
+                .ToListAsync();
+            return new SelectList(hospitals, "Id", "FacilityName");
         }
 
         private async Task<SelectList> GetPhysicianSelectList()
         {
-            var physicians = await _personnelRepository.GetAllListAsync();
-            var physicianList = physicians
-                .Where(p => !string.IsNullOrEmpty(p.FIRST_NAME) || !string.IsNullOrEmpty(p.LAST_NAME))
+            var physicianList = await _personnelRepository.GetAll()
+                .Where(p => p.FIRST_NAME != null || p.LAST_NAME != null)
                 .Select(p => new
                 {
-                    Id = p.Id,
-                    Name = $"{p.FIRST_NAME} {p.LAST_NAME}".Trim()
+                    p.Id,
+                    FirstName = p.FIRST_NAME ?? "",
+                    LastName = p.LAST_NAME ?? ""
                 })
+                .ToListAsync();
+
+            var namedList = physicianList
+                .Select(p => new { p.Id, Name = (p.FirstName + " " + p.LastName).Trim() })
                 .OrderBy(p => p.Name)
                 .ToList();
 
-            return new SelectList(physicianList, "Id", "Name");
+            return new SelectList(namedList, "Id", "Name");
         }
 
         private async Task<SelectList> GetProductCategorySelectList()
         {
-            var categories = await _productCategoryRepository.GetAllListAsync();
-            return new SelectList(
-                categories.OrderBy(c => c.Name),
-                "Id",
-                "Name"
-            );
+            var categories = await _productCategoryRepository.GetAll()
+                .Select(c => new { c.Id, Name = c.Name ?? "" })
+                .OrderBy(c => c.Name)
+                .ToListAsync();
+            return new SelectList(categories, "Id", "Name");
         }
     }
 }

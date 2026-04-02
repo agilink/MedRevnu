@@ -1319,6 +1319,10 @@
     <text name="Error403_Desc">Access to this resource on the server is denied!</text>
     <text name="Error404_Title">404 - Page not found</text>
     <text name="Error404_Desc">The page you are looking for cannot be found.</text>
+    <!-- Common keys -->
+    <text name="CreateNew">Create New</text>
+    <text name="Inactive">Inactive</text>
+    <text name="Revenue">Revenue</text>
     <!-- Revenue Module -->
     <text name="CreateNewCase">Create New Case</text>
     <text name="CaseDeleteWarningMessage">Case {0} will be deleted.</text>
@@ -1328,5 +1332,63 @@
     <text name="CaseNumber">Case Number</text>
     <text name="ClientName">Client Name</text>
     <text name="CaseDate">Case Date</text>
+    <!-- Hospital Product Prices -->
+    <text name="HospitalProductPrices">Hospital Product Prices</text>
+    <text name="HospitalProductPricesHeaderInfo">Manage Hospital Product Prices</text>
+    <text name="Hospital">Hospital</text>
+    <text name="Product">Product</text>
+    <text name="ProductCode">Product Code</text>
+    <text name="UnitPrice">Unit Price</text>
+    <text name="EffectiveDate">Effective Date</text>
+    <text name="AllHospitals">All Hospitals</text>
+    <text name="SelectHospital">Select Hospital</text>
+    <text name="SelectProduct">Select Product</text>
+    <text name="CreateNewHospitalProductPrice">Create New Hospital Product Price</text>
+    <text name="EditHospitalProductPrice">Edit Hospital Product Price</text>
+    <text name="HospitalProductPriceDeleteWarningMessage">This hospital product price will be deleted. Are you sure?</text>
+    <text name="CreatingHospitalProductPrice">Creating Hospital Product Price</text>
+    <text name="EditingHospitalProductPrice">Editing Hospital Product Price</text>
+    <text name="DeletingHospitalProductPrice">Deleting Hospital Product Price</text>
+    <!-- Product Quotas -->
+    <text name="ProductQuotas">Product Quotas</text>
+    <text name="ProductQuotasHeaderInfo">Manage Product Quotas</text>
+    <text name="Year">Year</text>
+    <text name="Month">Month</text>
+    <text name="AllMonths">All Months</text>
+    <text name="January">January</text>
+    <text name="February">February</text>
+    <text name="March">March</text>
+    <text name="April">April</text>
+    <text name="May">May</text>
+    <text name="June">June</text>
+    <text name="July">July</text>
+    <text name="August">August</text>
+    <text name="September">September</text>
+    <text name="October">October</text>
+    <text name="November">November</text>
+    <text name="December">December</text>
+    <text name="ProductCategory">Product Category</text>
+    <text name="AllCategories">All Categories</text>
+    <text name="SelectProductCategory">Select Product Category</text>
+    <text name="TargetAmount">Target Amount</text>
+    <text name="TargetUnits">Target Units</text>
+    <text name="CreateNewProductQuota">Create New Product Quota</text>
+    <text name="EditProductQuota">Edit Product Quota</text>
+    <text name="ProductQuotaDeleteWarningMessage">This product quota will be deleted. Are you sure?</text>
+    <!-- Revenue Transactions -->
+    <text name="RevenueTransactions">Revenue Transactions</text>
+    <text name="RevenueTransactionsHeaderInfo">Manage Revenue Transactions</text>
+    <text name="Physician">Physician</text>
+    <text name="AllPhysicians">All Physicians</text>
+    <text name="SelectPhysician">Select Physician</text>
+    <text name="ProcedureType">Procedure Type</text>
+    <text name="NumberOfCases">No. of Cases</text>
+    <text name="BasePrice">Base Price</text>
+    <text name="TransactionAmount">Transaction Amount</text>
+    <text name="CreateTransaction">Create Transaction</text>
+    <text name="EditTransaction">Edit Transaction</text>
+    <text name="ProcedureTransactionDeleteWarningMessage">This transaction will be deleted. Are you sure?</text>
+    <text name="HospitalAutoPopulated">Auto-populated from physician</text>
+    <text name="AutoPopulatedFromProduct">Auto-populated based on product and procedure type</text>
   </texts>
 </localizationDictionary>

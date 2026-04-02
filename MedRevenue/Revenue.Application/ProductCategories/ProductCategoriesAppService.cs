@@ -20,18 +20,16 @@ namespace ATI.Revenue.Application.ProductCategories
 
         public async Task<ListResultDto<ProductCategoryDto>> GetAll()
         {
-            var categories = await _productCategoryRepository
+            var dtos = await _productCategoryRepository
                 .GetAll()
-                .Include(pc => pc.Products)
+                .Select(c => new ProductCategoryDto
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Description = c.Description,
+                    ProductCount = c.Products.Count()
+                })
                 .ToListAsync();
-
-            var dtos = categories.Select(c => new ProductCategoryDto
-            {
-                Id = c.Id,
-                Name = c.Name,
-                Description = c.Description,
-                ProductCount = c.Products.Count
-            }).ToList();
 
             return new ListResultDto<ProductCategoryDto>(dtos);
         }

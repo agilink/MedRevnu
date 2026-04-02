@@ -31,38 +31,41 @@ namespace ATI.Revenue.Application.HospitalProductPrices
 
         public async Task<PagedResultDto<HospitalProductPriceDto>> GetAll(GetAllHospitalProductPricesInput input)
         {
-            var query = CreateFilteredQuery(input)
-                .Include(hpp => hpp.Hospital)
-                .Include(hpp => hpp.Product)
-                .AsQueryable();
+            var baseQuery = CreateFilteredQuery(input);
 
-            var totalCount = await query.CountAsync();
+            var totalCount = await baseQuery.CountAsync();
 
-            if (!string.IsNullOrWhiteSpace(input.Sorting))
-                query = query.OrderBy(input.Sorting);
-            else
-                query = query.OrderBy(hpp => hpp.Hospital.FacilityName).ThenBy(hpp => hpp.ProductCode);
+            var sortedQuery = string.IsNullOrWhiteSpace(input.Sorting)
+                ? baseQuery.OrderBy(hpp => hpp.Hospital.FacilityName).ThenBy(hpp => hpp.ProductCode)
+                : baseQuery.OrderBy(input.Sorting);
 
-            query = query.PageBy(input);
-
-            var entities = await query.ToListAsync();
-            var dtos = entities.Select(MapToDto).ToList();
+            var dtos = await sortedQuery
+                .PageBy(input)
+                .Select(hpp => new HospitalProductPriceDto
+                {
+                    Id = hpp.Id,
+                    HospitalId = hpp.HospitalId,
+                    HospitalName = hpp.Hospital.FacilityName ?? "",
+                    ProductId = hpp.ProductId,
+                    ProductName = hpp.Product.Name ?? "",
+                    ProductCode = hpp.ProductCode,
+                    UnitPrice = hpp.UnitPrice,
+                    EffectiveDate = hpp.EffectiveDate,
+                    IsActive = hpp.IsActive
+                })
+                .ToListAsync();
 
             return new PagedResultDto<HospitalProductPriceDto>(totalCount, dtos);
         }
 
         public async Task<GetHospitalProductPriceForViewDto> GetHospitalProductPriceForView(int id)
         {
-            var entity = await _hospitalProductPriceRepository
-                .GetAll()
-                .Include(hpp => hpp.Hospital)
-                .Include(hpp => hpp.Product)
-                .FirstOrDefaultAsync(e => e.Id == id);
+            var dto = await ProjectToDto(_hospitalProductPriceRepository.GetAll().Where(e => e.Id == id));
 
-            if (entity == null)
+            if (dto == null)
                 throw new UserFriendlyException("Hospital Product Price not found");
 
-            return new GetHospitalProductPriceForViewDto { HospitalProductPrice = MapToDto(entity) };
+            return new GetHospitalProductPriceForViewDto { HospitalProductPrice = dto };
         }
 
         public async Task<GetHospitalProductPriceForEditOutput> GetHospitalProductPriceForEdit(EntityDto<int> input)
@@ -112,13 +115,7 @@ namespace ATI.Revenue.Application.HospitalProductPrices
             var id = await _hospitalProductPriceRepository.InsertAndGetIdAsync(entity);
             await CurrentUnitOfWork.SaveChangesAsync();
 
-            entity = await _hospitalProductPriceRepository
-                .GetAll()
-                .Include(hpp => hpp.Hospital)
-                .Include(hpp => hpp.Product)
-                .FirstOrDefaultAsync(e => e.Id == id);
-
-            return MapToDto(entity);
+            return await ProjectToDto(_hospitalProductPriceRepository.GetAll().Where(e => e.Id == id));
         }
 
         private async Task<HospitalProductPriceDto> Update(CreateOrEditHospitalProductPriceDto input)
@@ -135,13 +132,23 @@ namespace ATI.Revenue.Application.HospitalProductPrices
             await _hospitalProductPriceRepository.UpdateAsync(entity);
             await CurrentUnitOfWork.SaveChangesAsync();
 
-            entity = await _hospitalProductPriceRepository
-                .GetAll()
-                .Include(hpp => hpp.Hospital)
-                .Include(hpp => hpp.Product)
-                .FirstOrDefaultAsync(e => e.Id == entity.Id);
+            return await ProjectToDto(_hospitalProductPriceRepository.GetAll().Where(e => e.Id == entity.Id));
+        }
 
-            return MapToDto(entity);
+        private static Task<HospitalProductPriceDto> ProjectToDto(IQueryable<HospitalProductPrice> query)
+        {
+            return query.Select(hpp => new HospitalProductPriceDto
+            {
+                Id = hpp.Id,
+                HospitalId = hpp.HospitalId,
+                HospitalName = hpp.Hospital.FacilityName ?? "",
+                ProductId = hpp.ProductId,
+                ProductName = hpp.Product.Name ?? "",
+                ProductCode = hpp.ProductCode,
+                UnitPrice = hpp.UnitPrice,
+                EffectiveDate = hpp.EffectiveDate,
+                IsActive = hpp.IsActive
+            }).FirstOrDefaultAsync();
         }
 
         public async Task Delete(EntityDto<int> input)
@@ -172,20 +179,5 @@ namespace ATI.Revenue.Application.HospitalProductPrices
             return query;
         }
 
-        private static HospitalProductPriceDto MapToDto(HospitalProductPrice entity)
-        {
-            return new HospitalProductPriceDto
-            {
-                Id = entity.Id,
-                HospitalId = entity.HospitalId,
-                HospitalName = entity.Hospital?.FacilityName ?? "",
-                ProductId = entity.ProductId,
-                ProductName = entity.Product?.Name ?? "",
-                ProductCode = entity.ProductCode,
-                UnitPrice = entity.UnitPrice,
-                EffectiveDate = entity.EffectiveDate,
-                IsActive = entity.IsActive
-            };
-        }
     }
 }

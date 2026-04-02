@@ -40,53 +40,6 @@
             columnDefs: [
                 {
                     targets: 0,
-                    data: 'periodYear',
-                    name: 'periodYear',
-                    className: 'text-center'
-                },
-                {
-                    targets: 1,
-                    data: 'periodMonth',
-                    name: 'periodMonth',
-                    className: 'text-center',
-                    render: function (periodMonth) {
-                        var monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                            'July', 'August', 'September', 'October', 'November', 'December'];
-                        return monthNames[periodMonth - 1] || periodMonth;
-                    }
-                },
-                {
-                    targets: 2,
-                    data: 'productCategoryName',
-                    name: 'productCategoryName'
-                },
-                {
-                    targets: 3,
-                    data: 'targetAmount',
-                    name: 'targetAmount',
-                    render: function (targetAmount) {
-                        if (targetAmount) {
-                            return '$' + targetAmount.toFixed(2);
-                        }
-                        return '$0.00';
-                    }
-                },
-                {
-                    targets: 4,
-                    data: 'hospitalName',
-                    name: 'hospitalName'
-                },
-                {
-                    targets: 5,
-                    data: 'targetUnits',
-                    name: 'targetUnits',
-                    className: 'text-center',
-                    render: function (targetUnits) {
-                        return targetUnits || '-';
-                    }
-                },
-                {
-                    targets: 6,
                     data: null,
                     orderable: false,
                     autoWidth: false,
@@ -114,6 +67,53 @@
                                 }
                             }
                         ]
+                    }
+                },
+                {
+                    targets: 1,
+                    data: 'periodYear',
+                    name: 'periodYear',
+                    className: 'text-center'
+                },
+                {
+                    targets: 2,
+                    data: 'periodMonth',
+                    name: 'periodMonth',
+                    className: 'text-center',
+                    render: function (periodMonth) {
+                        var monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                            'July', 'August', 'September', 'October', 'November', 'December'];
+                        return monthNames[periodMonth - 1] || periodMonth;
+                    }
+                },
+                {
+                    targets: 3,
+                    data: 'productCategoryName',
+                    name: 'productCategoryName'
+                },
+                {
+                    targets: 4,
+                    data: 'targetAmount',
+                    name: 'targetAmount',
+                    render: function (targetAmount) {
+                        if (targetAmount) {
+                            return '$' + targetAmount.toFixed(2);
+                        }
+                        return '$0.00';
+                    }
+                },
+                {
+                    targets: 5,
+                    data: 'hospitalName',
+                    name: 'hospitalName'
+                },
+                {
+                    targets: 6,
+                    data: 'targetUnits',
+                    name: 'targetUnits',
+                    className: 'text-center',
+                    render: function (targetUnits) {
+                        return targetUnits || '-';
                     }
                 }
             ]

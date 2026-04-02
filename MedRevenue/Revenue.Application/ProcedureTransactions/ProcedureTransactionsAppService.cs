@@ -36,78 +36,61 @@ namespace ATI.Revenue.Application.ProcedureTransactions
 
         public async Task<PagedResultDto<ProcedureTransactionDto>> GetAll(GetAllProcedureTransactionsInput input)
         {
-            var query = CreateFilteredQuery(input)
-                .Include(pt => pt.Hospital)
-                .Include(pt => pt.Physician)
-                .Include(pt => pt.Product)
-                .AsQueryable();
+            var query = CreateFilteredQuery(input);
 
             var totalCount = await query.CountAsync();
 
-            // Apply sorting
             if (!string.IsNullOrWhiteSpace(input.Sorting))
-            {
                 query = query.OrderBy(input.Sorting);
-            }
             else
-            {
                 query = query.OrderByDescending(pt => pt.ProcedureDate);
-            }
 
-            // Apply paging
             query = query.PageBy(input);
 
-            var entities = await query.ToListAsync();
-            var dtos = entities.Select(entity => new ProcedureTransactionDto
+            var dtos = await query.Select(pt => new ProcedureTransactionDto
             {
-                Id = entity.Id,
-                ProcedureDate = entity.ProcedureDate,
-                HospitalId = entity.HospitalId,
-                HospitalName = entity.Hospital?.FacilityName ?? "",
-                PhysicianId = entity.PhysicianId,
-                PhysicianName = GetPhysicianFullName(entity.Physician),
-                ProductId = entity.ProductId,
-                ProductName = entity.Product?.Name ?? "",
-                ProductCode = entity.Product?.ProductCode ?? "",
-                ProcedureType = entity.ProcedureType,
-                Quantity = entity.Quantity,
-                UnitPrice = entity.UnitPrice,
-                TotalAmount = entity.TotalAmount
-            }).ToList();
+                Id = pt.Id,
+                ProcedureDate = pt.ProcedureDate,
+                HospitalId = pt.HospitalId,
+                HospitalName = pt.Hospital != null ? (pt.Hospital.FacilityName ?? "") : "",
+                PhysicianId = pt.PhysicianId,
+                PhysicianName = pt.Physician != null ? ((pt.Physician.FIRST_NAME ?? "") + " " + (pt.Physician.LAST_NAME ?? "")).Trim() : "",
+                ProductId = pt.ProductId,
+                ProductName = pt.Product != null ? (pt.Product.Name ?? "") : "",
+                ProductCode = pt.Product != null ? (pt.Product.ProductCode ?? "") : "",
+                ProcedureType = pt.ProcedureType,
+                Quantity = pt.Quantity,
+                UnitPrice = pt.UnitPrice,
+                TotalAmount = pt.TotalAmount
+            }).ToListAsync();
 
             return new PagedResultDto<ProcedureTransactionDto>(totalCount, dtos);
         }
 
         public async Task<GetProcedureTransactionForViewDto> GetProcedureTransactionForView(int id)
         {
-            var entity = await _procedureTransactionRepository
-                .GetAll()
-                .Include(pt => pt.Hospital)
-                .Include(pt => pt.Physician)
-                .Include(pt => pt.Product)
-                .FirstOrDefaultAsync(e => e.Id == id);
+            var dto = await _procedureTransactionRepository.GetAll()
+                .Where(pt => pt.Id == id)
+                .Select(pt => new ProcedureTransactionDto
+                {
+                    Id = pt.Id,
+                    ProcedureDate = pt.ProcedureDate,
+                    HospitalId = pt.HospitalId,
+                    HospitalName = pt.Hospital != null ? (pt.Hospital.FacilityName ?? "") : "",
+                    PhysicianId = pt.PhysicianId,
+                    PhysicianName = pt.Physician != null ? ((pt.Physician.FIRST_NAME ?? "") + " " + (pt.Physician.LAST_NAME ?? "")).Trim() : "",
+                    ProductId = pt.ProductId,
+                    ProductName = pt.Product != null ? (pt.Product.Name ?? "") : "",
+                    ProductCode = pt.Product != null ? (pt.Product.ProductCode ?? "") : "",
+                    ProcedureType = pt.ProcedureType,
+                    Quantity = pt.Quantity,
+                    UnitPrice = pt.UnitPrice,
+                    TotalAmount = pt.TotalAmount
+                })
+                .FirstOrDefaultAsync();
 
-            if (entity == null)
-            {
+            if (dto == null)
                 throw new UserFriendlyException("Procedure Transaction not found");
-            }
-
-            var dto = new ProcedureTransactionDto
-            {
-                Id = entity.Id,
-                ProcedureDate = entity.ProcedureDate,
-                HospitalId = entity.HospitalId,
-                HospitalName = entity.Hospital?.FacilityName ?? "",
-                PhysicianId = entity.PhysicianId,
-                PhysicianName = GetPhysicianFullName(entity.Physician),
-                ProductId = entity.ProductId,
-                ProductName = entity.Product?.Name ?? "",
-                ProductCode = entity.Product?.ProductCode ?? "",
-                ProcedureType = entity.ProcedureType,
-                Quantity = entity.Quantity,
-                UnitPrice = entity.UnitPrice,
-                TotalAmount = entity.TotalAmount
-            };
 
             return new GetProcedureTransactionForViewDto { ProcedureTransaction = dto };
         }
@@ -187,30 +170,25 @@ namespace ATI.Revenue.Application.ProcedureTransactions
             var id = await _procedureTransactionRepository.InsertAndGetIdAsync(entity);
             await CurrentUnitOfWork.SaveChangesAsync();
 
-            // Load navigation properties for return DTO
-            entity = await _procedureTransactionRepository
-                .GetAll()
-                .Include(pt => pt.Hospital)
-                .Include(pt => pt.Physician)
-                .Include(pt => pt.Product)
-                .FirstOrDefaultAsync(e => e.Id == id);
-
-            return new ProcedureTransactionDto
-            {
-                Id = entity.Id,
-                ProcedureDate = entity.ProcedureDate,
-                HospitalId = entity.HospitalId,
-                HospitalName = entity.Hospital?.FacilityName ?? "",
-                PhysicianId = entity.PhysicianId,
-                PhysicianName = GetPhysicianFullName(entity.Physician),
-                ProductId = entity.ProductId,
-                ProductName = entity.Product?.Name ?? "",
-                ProductCode = entity.Product?.ProductCode ?? "",
-                ProcedureType = entity.ProcedureType,
-                Quantity = entity.Quantity,
-                UnitPrice = entity.UnitPrice,
-                TotalAmount = entity.TotalAmount
-            };
+            return await _procedureTransactionRepository.GetAll()
+                .Where(pt => pt.Id == id)
+                .Select(pt => new ProcedureTransactionDto
+                {
+                    Id = pt.Id,
+                    ProcedureDate = pt.ProcedureDate,
+                    HospitalId = pt.HospitalId,
+                    HospitalName = pt.Hospital != null ? (pt.Hospital.FacilityName ?? "") : "",
+                    PhysicianId = pt.PhysicianId,
+                    PhysicianName = pt.Physician != null ? ((pt.Physician.FIRST_NAME ?? "") + " " + (pt.Physician.LAST_NAME ?? "")).Trim() : "",
+                    ProductId = pt.ProductId,
+                    ProductName = pt.Product != null ? (pt.Product.Name ?? "") : "",
+                    ProductCode = pt.Product != null ? (pt.Product.ProductCode ?? "") : "",
+                    ProcedureType = pt.ProcedureType,
+                    Quantity = pt.Quantity,
+                    UnitPrice = pt.UnitPrice,
+                    TotalAmount = pt.TotalAmount
+                })
+                .FirstOrDefaultAsync();
         }
 
         private async Task<ProcedureTransactionDto> Update(CreateOrEditProcedureTransactionDto input)
@@ -236,30 +214,26 @@ namespace ATI.Revenue.Application.ProcedureTransactions
             await _procedureTransactionRepository.UpdateAsync(entity);
             await CurrentUnitOfWork.SaveChangesAsync();
 
-            // Load navigation properties for return DTO
-            entity = await _procedureTransactionRepository
-                .GetAll()
-                .Include(pt => pt.Hospital)
-                .Include(pt => pt.Physician)
-                .Include(pt => pt.Product)
-                .FirstOrDefaultAsync(e => e.Id == entity.Id);
-
-            return new ProcedureTransactionDto
-            {
-                Id = entity.Id,
-                ProcedureDate = entity.ProcedureDate,
-                HospitalId = entity.HospitalId,
-                HospitalName = entity.Hospital?.FacilityName ?? "",
-                PhysicianId = entity.PhysicianId,
-                PhysicianName = GetPhysicianFullName(entity.Physician),
-                ProductId = entity.ProductId,
-                ProductName = entity.Product?.Name ?? "",
-                ProductCode = entity.Product?.ProductCode ?? "",
-                ProcedureType = entity.ProcedureType,
-                Quantity = entity.Quantity,
-                UnitPrice = entity.UnitPrice,
-                TotalAmount = entity.TotalAmount
-            };
+            var savedId = entity.Id;
+            return await _procedureTransactionRepository.GetAll()
+                .Where(pt => pt.Id == savedId)
+                .Select(pt => new ProcedureTransactionDto
+                {
+                    Id = pt.Id,
+                    ProcedureDate = pt.ProcedureDate,
+                    HospitalId = pt.HospitalId,
+                    HospitalName = pt.Hospital != null ? (pt.Hospital.FacilityName ?? "") : "",
+                    PhysicianId = pt.PhysicianId,
+                    PhysicianName = pt.Physician != null ? ((pt.Physician.FIRST_NAME ?? "") + " " + (pt.Physician.LAST_NAME ?? "")).Trim() : "",
+                    ProductId = pt.ProductId,
+                    ProductName = pt.Product != null ? (pt.Product.Name ?? "") : "",
+                    ProductCode = pt.Product != null ? (pt.Product.ProductCode ?? "") : "",
+                    ProcedureType = pt.ProcedureType,
+                    Quantity = pt.Quantity,
+                    UnitPrice = pt.UnitPrice,
+                    TotalAmount = pt.TotalAmount
+                })
+                .FirstOrDefaultAsync();
         }
 
         public async Task Delete(EntityDto<int> input)
@@ -343,13 +317,5 @@ namespace ATI.Revenue.Application.ProcedureTransactions
             return query;
         }
 
-        private string GetPhysicianFullName(Personnel physician)
-        {
-            if (physician == null) return "";
-
-            var firstName = physician.FIRST_NAME ?? "";
-            var lastName = physician.LAST_NAME ?? "";
-            return $"{firstName} {lastName}".Trim();
-        }
     }
 }

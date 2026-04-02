@@ -11,22 +11,24 @@
     <script src="~/view-resources/Areas/Revenue/Views/ProcedureTransactions/Index.js" asp-append-version="true"></script>
 }
 
-<abp-page-subheader title="@L("RevenueTransactions")" description="@L("RevenueTransactionsHeaderInfo")">
-    <button id="RefreshTransactionsButton" class="btn btn-outline btn-outline-primary btn-active-light-primary me-1">
-        <i class="fa fa-sync btn-md-icon"></i>
-        <span class="d-none d-md-inline-block">
-            @L("Refresh")
-        </span>
-    </button>
-    <button id="CreateNewTransactionButton" class="btn btn-primary">
-        <i class="fa fa-plus btn-md-icon"></i>
-        <span class="d-none d-md-inline-block">
-            @L("CreateNew")
-        </span>
-    </button>
-</abp-page-subheader>
+<div class="app-toolbar py-3 py-lg-6" id="kt_app_toolbar">
+    <div id="kt_app_toolbar_container" class="app-container container-fluid d-flex flex-stack">
+        <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
+            <h1 class="page-heading d-flex text-dark fw-bold fs-3 flex-column justify-content-center my-0">
+                @L("RevenueTransactions")
+            </h1>
+            <span class="text-muted me-4">@L("RevenueTransactionsHeaderInfo")</span>
+        </div>
+        <div class="d-flex align-items-center">
+            <button id="CreateNewTransactionButton" class="btn btn-primary">
+                <i class="fa fa-plus btn-md-icon"></i>
+                <span class="d-none d-md-inline-block">@L("CreateNew")</span>
+            </button>
+        </div>
+    </div>
+</div>
 
-<div class="container-xxl">
+<div class="app-container container-fluid">
     <div class="card">
         <div class="card-body">
             <div class="form">
@@ -93,6 +95,14 @@
                             </select>
                         </div>
                     </div>
+                    <div class="col-xl-12 text-end">
+                        <button id="RefreshTransactionsButton" class="btn btn-primary float-end">
+                            <i class="fa fa-sync btn-md-icon"></i>
+                            <span class="d-none d-md-inline-block">
+                                @L("Refresh")
+                            </span>
+                        </button>
+                    </div>
                 </div>
                 <div class="row mb-4">
                     <div class="col-xl-12">
@@ -107,9 +117,10 @@
             </div>
 
             <div class="align-items-center">
-                <table id="ProcedureTransactionsTable" class="table align-middle table-row-dashed fs-6 gy-5 dataTable no-footer" width="100%">
+                <table id="ProcedureTransactionsTable" class="table align-middle table-row-dashed fs-6 gy-5 dataTable dtr-inline no-footer" width="100%">
                     <thead>
                         <tr>
+                            <th>@L("Actions")</th>
                             <th>@L("Hospital")</th>
                             <th>@L("Physician")</th>
                             <th>@L("Date")</th>
@@ -119,7 +130,6 @@
                             <th>@L("NumberOfCases")</th>
                             <th>@L("BasePrice")</th>
                             <th>@L("TransactionAmount")</th>
-                            <th>@L("Actions")</th>
                         </tr>
                     </thead>
                 </table>

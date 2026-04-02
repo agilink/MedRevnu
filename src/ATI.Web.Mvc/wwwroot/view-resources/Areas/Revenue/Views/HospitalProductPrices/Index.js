@@ -32,56 +32,6 @@
             columnDefs: [
                 {
                     targets: 0,
-                    data: 'hospitalName',
-                    name: 'hospitalName'
-                },
-                {
-                    targets: 1,
-                    data: 'productName',
-                    name: 'productName'
-                },
-                {
-                    targets: 2,
-                    data: 'productCode',
-                    name: 'productCode',
-                    render: function (productCode) {
-                        return productCode || '-';
-                    }
-                },
-                {
-                    targets: 3,
-                    data: 'unitPrice',
-                    name: 'unitPrice',
-                    className: 'text-end',
-                    render: function (unitPrice) {
-                        return '$' + parseFloat(unitPrice).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                    }
-                },
-                {
-                    targets: 4,
-                    data: 'effectiveDate',
-                    name: 'effectiveDate',
-                    render: function (effectiveDate) {
-                        if (effectiveDate) {
-                            return moment(effectiveDate).format('MM/DD/YYYY');
-                        }
-                        return '';
-                    }
-                },
-                {
-                    targets: 5,
-                    data: 'isActive',
-                    name: 'isActive',
-                    className: 'text-center',
-                    render: function (isActive) {
-                        if (isActive) {
-                            return '<span class="badge badge-light-success">' + app.localize('Active') + '</span>';
-                        }
-                        return '<span class="badge badge-light-danger">' + app.localize('Inactive') + '</span>';
-                    }
-                },
-                {
-                    targets: 6,
                     data: null,
                     orderable: false,
                     autoWidth: false,
@@ -92,23 +42,66 @@
                         items: [
                             {
                                 text: app.localize('Edit'),
-                                visible: function () {
-                                    return _permissions.edit;
-                                },
+                                visible: function () { return _permissions.edit; },
                                 action: function (data) {
                                     _createOrEditModal.open({ id: data.record.id });
                                 }
                             },
                             {
                                 text: app.localize('Delete'),
-                                visible: function () {
-                                    return _permissions.delete;
-                                },
+                                visible: function () { return _permissions.delete; },
                                 action: function (data) {
                                     deletePrice(data.record);
                                 }
                             }
                         ]
+                    }
+                },
+                {
+                    targets: 1,
+                    data: 'hospitalName',
+                    name: 'hospitalName'
+                },
+                {
+                    targets: 2,
+                    data: 'productName',
+                    name: 'productName'
+                },
+                {
+                    targets: 3,
+                    data: 'productCode',
+                    name: 'productCode',
+                    render: function (productCode) {
+                        return productCode || '-';
+                    }
+                },
+                {
+                    targets: 4,
+                    data: 'unitPrice',
+                    name: 'unitPrice',
+                    className: 'text-end',
+                    render: function (unitPrice) {
+                        return '$' + parseFloat(unitPrice).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    }
+                },
+                {
+                    targets: 5,
+                    data: 'effectiveDate',
+                    name: 'effectiveDate',
+                    render: function (effectiveDate) {
+                        return effectiveDate ? moment(effectiveDate).format('MM/DD/YYYY') : '';
+                    }
+                },
+                {
+                    targets: 6,
+                    data: 'isActive',
+                    name: 'isActive',
+                    className: 'text-center',
+                    render: function (isActive) {
+                        if (isActive) {
+                            return '<span class="badge badge-light-success">' + app.localize('Active') + '</span>';
+                        }
+                        return '<span class="badge badge-light-danger">' + app.localize('Inactive') + '</span>';
                     }
                 }
             ]
@@ -124,12 +117,10 @@
                 app.localize('AreYouSure'),
                 function (isConfirmed) {
                     if (isConfirmed) {
-                        _pricesService
-                            .delete({ id: price.id })
-                            .done(function () {
-                                getPrices();
-                                abp.notify.success(app.localize('SuccessfullyDeleted'));
-                            });
+                        _pricesService.delete({ id: price.id }).done(function () {
+                            getPrices();
+                            abp.notify.success(app.localize('SuccessfullyDeleted'));
+                        });
                     }
                 }
             );
@@ -163,15 +154,13 @@
             getPrices();
         });
 
-        $('#CreateNewHospitalProductPriceButton').click(function () {
-            if (_permissions.create) {
-                _createOrEditModal.open();
-            }
-        });
-
         $('#RefreshHospitalProductPricesButton').click(function (e) {
             e.preventDefault();
             getPrices();
+        });
+
+        $('#CreateNewHospitalProductPriceButton').click(function () {
+            _createOrEditModal.open();
         });
 
         abp.event.on('app.createOrEditHospitalProductPriceModalSaved', function () {

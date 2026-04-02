@@ -78,18 +78,17 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
 
         private async Task<SelectList> GetHospitalSelectList()
         {
-            var hospitals = await _facilityRepository.GetAllListAsync();
-            return new SelectList(
-                hospitals.OrderBy(h => h.FacilityName),
-                "Id",
-                "FacilityName"
-            );
+            var hospitals = await _facilityRepository.GetAll()
+                .Select(h => new { h.Id, FacilityName = h.FacilityName ?? "" })
+                .OrderBy(h => h.FacilityName)
+                .ToListAsync();
+            return new SelectList(hospitals, "Id", "FacilityName");
         }
 
         private async Task<SelectList> GetProductSelectList()
         {
             var products = await _productRepository.GetAll()
-                .Select(p => new { p.Id, p.Name, p.ProductCode })
+                .Select(p => new { p.Id, Name = p.Name ?? "", ProductCode = p.ProductCode ?? "" })
                 .OrderBy(p => p.Name)
                 .ToListAsync();
             return new SelectList(

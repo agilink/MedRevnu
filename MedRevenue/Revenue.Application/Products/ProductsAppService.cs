@@ -21,8 +21,7 @@ namespace ATI.Revenue.Application.Products
 
         protected override IQueryable<Product> CreateFilteredQuery(PagedAndSortedResultRequestDto input)
         {
-            return _productRepository.GetAll()
-                .Include(p => p.ProductCategory);
+            return _productRepository.GetAll();
         }
 
         public async Task<ListResultDto<ProductDto>> GetAllActive()
@@ -30,12 +29,22 @@ namespace ATI.Revenue.Application.Products
             var products = await _productRepository
                 .GetAll()
                 .Where(p => p.IsActive)
-                .Include(p => p.ProductCategory)
+                .Select(p => new ProductDto
+                {
+                    Id = p.Id,
+                    Name = p.Name ?? "",
+                    Manufacturer = p.Manufacturer ?? "",
+                    ModelNo = p.ModelNo ?? "",
+                    Description = p.Description ?? "",
+                    ProductCategoryId = p.ProductCategoryId,
+                    ProductCategoryName = p.ProductCategory != null ? (p.ProductCategory.Name ?? "") : "",
+                    Cost = p.Cost,
+                    Price = p.Price,
+                    IsActive = p.IsActive
+                })
                 .ToListAsync();
 
-            return new ListResultDto<ProductDto>(
-                ObjectMapper.Map<List<ProductDto>>(products)
-            );
+            return new ListResultDto<ProductDto>(products);
         }
     }
 }

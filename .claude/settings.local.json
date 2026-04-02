@@ -15,7 +15,11 @@
       "mcp__agilink__db_test_connection",
       "Bash(sqlcmd:*)",
       "Read(//c/Users/LENOVO/AppData/Roaming/Claude/local-agent-mode-sessions/skills-plugin/a191a5a0-6477-4f9c-9abf-0102887e4098/8603b00f-a131-45b3-8486-b79429e79497/skills/xlsx/**)",
-      "Bash(python -c \":*)"
+      "Bash(python -c \":*)",
+      "Bash(git -C D:/ATI_GIT/MedRevnu ls-files src/ATI.Web.Mvc/wwwroot/view-resources/Areas/Revenue/)",
+      "Bash(git -C D:/ATI_GIT/MedRevnu rm -r src/ATI.Web.Mvc/wwwroot/view-resources/Areas/Revenue/)",
+      "Bash(git -C D:/ATI_GIT/MedRevnu status --short src/ATI.Web.Mvc/wwwroot/view-resources/Areas/Revenue/)",
+      "Bash(xargs grep:*)"
     ],
     "deny": [],
     "ask": []

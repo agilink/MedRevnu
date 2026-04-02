@@ -35,75 +35,57 @@ namespace ATI.Revenue.Application.ProductQuotas
 
         public async Task<PagedResultDto<ProductQuotaDto>> GetAll(GetAllProductQuotasInput input)
         {
-            var query = CreateFilteredQuery(input)
-                .Include(pq => pq.Hospital)
-                .Include(pq => pq.ProductCategory)
-                .Include(pq => pq.Product)
-                .AsQueryable();
+            var query = CreateFilteredQuery(input);
 
             var totalCount = await query.CountAsync();
 
-            // Apply sorting
             if (!string.IsNullOrWhiteSpace(input.Sorting))
-            {
                 query = query.OrderBy(input.Sorting);
-            }
             else
-            {
-                query = query.OrderByDescending(pq => pq.PeriodYear)
-                             .ThenByDescending(pq => pq.PeriodMonth);
-            }
+                query = query.OrderByDescending(pq => pq.PeriodYear).ThenByDescending(pq => pq.PeriodMonth);
 
-            // Apply paging
             query = query.PageBy(input);
 
-            var entities = await query.ToListAsync();
-            var dtos = entities.Select(entity => new ProductQuotaDto
+            var dtos = await query.Select(pq => new ProductQuotaDto
             {
-                Id = entity.Id,
-                PeriodYear = entity.PeriodYear,
-                PeriodMonth = entity.PeriodMonth,
-                HospitalId = entity.HospitalId,
-                HospitalName = entity.Hospital?.FacilityName ?? "",
-                ProductCategoryId = entity.ProductCategoryId,
-                ProductCategoryName = entity.ProductCategory?.Name ?? "",
-                ProductId = entity.ProductId,
-                ProductName = entity.Product?.Name ?? "",
-                TargetAmount = entity.TargetAmount,
-                TargetUnits = entity.TargetUnits
-            }).ToList();
+                Id = pq.Id,
+                PeriodYear = pq.PeriodYear,
+                PeriodMonth = pq.PeriodMonth,
+                HospitalId = pq.HospitalId,
+                HospitalName = pq.Hospital != null ? (pq.Hospital.FacilityName ?? "") : "",
+                ProductCategoryId = pq.ProductCategoryId,
+                ProductCategoryName = pq.ProductCategory != null ? (pq.ProductCategory.Name ?? "") : "",
+                ProductId = pq.ProductId,
+                ProductName = pq.Product != null ? (pq.Product.Name ?? "") : "",
+                TargetAmount = pq.TargetAmount,
+                TargetUnits = pq.TargetUnits
+            }).ToListAsync();
 
             return new PagedResultDto<ProductQuotaDto>(totalCount, dtos);
         }
 
         public async Task<GetProductQuotaForViewDto> GetProductQuotaForView(int id)
         {
-            var entity = await _productQuotaRepository
-                .GetAll()
-                .Include(pq => pq.Hospital)
-                .Include(pq => pq.ProductCategory)
-                .Include(pq => pq.Product)
-                .FirstOrDefaultAsync(e => e.Id == id);
+            var dto = await _productQuotaRepository.GetAll()
+                .Where(pq => pq.Id == id)
+                .Select(pq => new ProductQuotaDto
+                {
+                    Id = pq.Id,
+                    PeriodYear = pq.PeriodYear,
+                    PeriodMonth = pq.PeriodMonth,
+                    HospitalId = pq.HospitalId,
+                    HospitalName = pq.Hospital != null ? (pq.Hospital.FacilityName ?? "") : "",
+                    ProductCategoryId = pq.ProductCategoryId,
+                    ProductCategoryName = pq.ProductCategory != null ? (pq.ProductCategory.Name ?? "") : "",
+                    ProductId = pq.ProductId,
+                    ProductName = pq.Product != null ? (pq.Product.Name ?? "") : "",
+                    TargetAmount = pq.TargetAmount,
+                    TargetUnits = pq.TargetUnits
+                })
+                .FirstOrDefaultAsync();
 
-            if (entity == null)
-            {
+            if (dto == null)
                 throw new UserFriendlyException("Product Quota not found");
-            }
-
-            var dto = new ProductQuotaDto
-            {
-                Id = entity.Id,
-                PeriodYear = entity.PeriodYear,
-                PeriodMonth = entity.PeriodMonth,
-                HospitalId = entity.HospitalId,
-                HospitalName = entity.Hospital?.FacilityName ?? "",
-                ProductCategoryId = entity.ProductCategoryId,
-                ProductCategoryName = entity.ProductCategory?.Name ?? "",
-                ProductId = entity.ProductId,
-                ProductName = entity.Product?.Name ?? "",
-                TargetAmount = entity.TargetAmount,
-                TargetUnits = entity.TargetUnits
-            };
 
             return new GetProductQuotaForViewDto { ProductQuota = dto };
         }
@@ -165,28 +147,23 @@ namespace ATI.Revenue.Application.ProductQuotas
             var id = await _productQuotaRepository.InsertAndGetIdAsync(entity);
             await CurrentUnitOfWork.SaveChangesAsync();
 
-            // Load navigation properties for return DTO
-            entity = await _productQuotaRepository
-                .GetAll()
-                .Include(pq => pq.Hospital)
-                .Include(pq => pq.ProductCategory)
-                .Include(pq => pq.Product)
-                .FirstOrDefaultAsync(e => e.Id == id);
-
-            return new ProductQuotaDto
-            {
-                Id = entity.Id,
-                PeriodYear = entity.PeriodYear,
-                PeriodMonth = entity.PeriodMonth,
-                HospitalId = entity.HospitalId,
-                HospitalName = entity.Hospital?.FacilityName ?? "",
-                ProductCategoryId = entity.ProductCategoryId,
-                ProductCategoryName = entity.ProductCategory?.Name ?? "",
-                ProductId = entity.ProductId,
-                ProductName = entity.Product?.Name ?? "",
-                TargetAmount = entity.TargetAmount,
-                TargetUnits = entity.TargetUnits
-            };
+            return await _productQuotaRepository.GetAll()
+                .Where(pq => pq.Id == id)
+                .Select(pq => new ProductQuotaDto
+                {
+                    Id = pq.Id,
+                    PeriodYear = pq.PeriodYear,
+                    PeriodMonth = pq.PeriodMonth,
+                    HospitalId = pq.HospitalId,
+                    HospitalName = pq.Hospital != null ? (pq.Hospital.FacilityName ?? "") : "",
+                    ProductCategoryId = pq.ProductCategoryId,
+                    ProductCategoryName = pq.ProductCategory != null ? (pq.ProductCategory.Name ?? "") : "",
+                    ProductId = pq.ProductId,
+                    ProductName = pq.Product != null ? (pq.Product.Name ?? "") : "",
+                    TargetAmount = pq.TargetAmount,
+                    TargetUnits = pq.TargetUnits
+                })
+                .FirstOrDefaultAsync();
         }
 
         private async Task<ProductQuotaDto> Update(CreateOrEditProductQuotaDto input)
@@ -201,31 +178,27 @@ namespace ATI.Revenue.Application.ProductQuotas
             entity.TargetAmount = input.TargetAmount;
             entity.TargetUnits = input.TargetUnits;
 
+            var savedId = entity.Id;
             await _productQuotaRepository.UpdateAsync(entity);
             await CurrentUnitOfWork.SaveChangesAsync();
 
-            // Load navigation properties for return DTO
-            entity = await _productQuotaRepository
-                .GetAll()
-                .Include(pq => pq.Hospital)
-                .Include(pq => pq.ProductCategory)
-                .Include(pq => pq.Product)
-                .FirstOrDefaultAsync(e => e.Id == entity.Id);
-
-            return new ProductQuotaDto
-            {
-                Id = entity.Id,
-                PeriodYear = entity.PeriodYear,
-                PeriodMonth = entity.PeriodMonth,
-                HospitalId = entity.HospitalId,
-                HospitalName = entity.Hospital?.FacilityName ?? "",
-                ProductCategoryId = entity.ProductCategoryId,
-                ProductCategoryName = entity.ProductCategory?.Name ?? "",
-                ProductId = entity.ProductId,
-                ProductName = entity.Product?.Name ?? "",
-                TargetAmount = entity.TargetAmount,
-                TargetUnits = entity.TargetUnits
-            };
+            return await _productQuotaRepository.GetAll()
+                .Where(pq => pq.Id == savedId)
+                .Select(pq => new ProductQuotaDto
+                {
+                    Id = pq.Id,
+                    PeriodYear = pq.PeriodYear,
+                    PeriodMonth = pq.PeriodMonth,
+                    HospitalId = pq.HospitalId,
+                    HospitalName = pq.Hospital != null ? (pq.Hospital.FacilityName ?? "") : "",
+                    ProductCategoryId = pq.ProductCategoryId,
+                    ProductCategoryName = pq.ProductCategory != null ? (pq.ProductCategory.Name ?? "") : "",
+                    ProductId = pq.ProductId,
+                    ProductName = pq.Product != null ? (pq.Product.Name ?? "") : "",
+                    TargetAmount = pq.TargetAmount,
+                    TargetUnits = pq.TargetUnits
+                })
+                .FirstOrDefaultAsync();
         }
 
         public async Task Delete(EntityDto<int> input)
