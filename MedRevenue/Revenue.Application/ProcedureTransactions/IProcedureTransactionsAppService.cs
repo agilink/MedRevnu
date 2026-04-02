@@ -13,5 +13,6 @@ namespace ATI.Revenue.Application.ProcedureTransactions
         Task<ProcedureTransactionDto> CreateOrEdit(CreateOrEditProcedureTransactionDto input);
         Task Delete(EntityDto<int> input);
         Task<decimal> GetProductBasePrice(int productId, string procedureType);
+        Task<decimal> GetProductPriceByHospital(int hospitalId, int productId);
     }
 }

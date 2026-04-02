@@ -78,6 +78,7 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
             }
 
             // Populate dropdowns
+            ViewBag.Hospitals = await GetHospitalSelectList();
             ViewBag.Physicians = await GetPhysicianSelectList();
             ViewBag.Products = await GetProductSelectList();
 
@@ -122,6 +123,21 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
                     facilityId = physician.FacilityId,
                     facilityName = facility?.FacilityName ?? ""
                 });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        // API endpoint to get product price based on hospital and product
+        [HttpPost]
+        public async Task<JsonResult> GetProductPriceByHospital(int hospitalId, int productId)
+        {
+            try
+            {
+                var price = await _procedureTransactionsAppService.GetProductPriceByHospital(hospitalId, productId);
+                return Json(new { success = true, unitPrice = price });
             }
             catch (Exception ex)
             {

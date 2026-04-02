@@ -21,17 +21,20 @@ namespace ATI.Revenue.Application.ProcedureTransactions
         private readonly IRepository<Personnel, int> _personnelRepository;
         private readonly IRepository<Product, int> _productRepository;
         private readonly IRepository<Facility, int> _facilityRepository;
+        private readonly IRepository<HospitalProductPrice, int> _hospitalProductPriceRepository;
 
         public ProcedureTransactionsAppService(
             IRepository<ProcedureTransaction, int> procedureTransactionRepository,
             IRepository<Personnel, int> personnelRepository,
             IRepository<Product, int> productRepository,
-            IRepository<Facility, int> facilityRepository)
+            IRepository<Facility, int> facilityRepository,
+            IRepository<HospitalProductPrice, int> hospitalProductPriceRepository)
         {
             _procedureTransactionRepository = procedureTransactionRepository;
             _personnelRepository = personnelRepository;
             _productRepository = productRepository;
             _facilityRepository = facilityRepository;
+            _hospitalProductPriceRepository = hospitalProductPriceRepository;
         }
 
         public async Task<PagedResultDto<ProcedureTransactionDto>> GetAll(GetAllProcedureTransactionsInput input)
@@ -250,6 +253,26 @@ namespace ATI.Revenue.Application.ProcedureTransactions
             // - For DE_NOVO (new implant with leads), use full BasePrice
             // - For GEN_CHANGE (battery replacement), use BasePrice (generator only)
             // The BasePrice in the database already accounts for this distinction
+            return product.BasePrice;
+        }
+
+        public async Task<decimal> GetProductPriceByHospital(int hospitalId, int productId)
+        {
+            // First, try to get the hospital-specific price
+            var hospitalPrice = await _hospitalProductPriceRepository.GetAll()
+                .Where(hpp => hpp.HospitalId == hospitalId
+                    && hpp.ProductId == productId
+                    && hpp.IsActive)
+                .OrderByDescending(hpp => hpp.EffectiveDate)
+                .FirstOrDefaultAsync();
+
+            if (hospitalPrice != null)
+            {
+                return hospitalPrice.UnitPrice;
+            }
+
+            // Fallback to product's base price if no hospital-specific price exists
+            var product = await _productRepository.GetAsync(productId);
             return product.BasePrice;
         }
 

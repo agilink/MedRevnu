@@ -11,9 +11,19 @@
 <div class="modal-body">
     <form name="ProcedureTransactionCreateOrEditForm" role="form" novalidate class="form-validation">
         <input type="hidden" name="Id" value="@(Model.ProcedureTransaction?.Id ?? 0)" />
-        <input type="hidden" id="HospitalId" name="HospitalId" value="@(Model.ProcedureTransaction?.HospitalId ?? 0)" />
 
         <div class="row">
+            <div class="col-md-6 mb-5">
+                <label class="form-label required" for="HospitalId">@L("Hospital")</label>
+                <select class="form-control" id="HospitalId" name="HospitalId" required>
+                    <option value="">@L("SelectHospital")</option>
+                    @foreach (var hospital in ViewBag.Hospitals)
+                    {
+                        var isSelected = Model.ProcedureTransaction != null && hospital.Value == Model.ProcedureTransaction.HospitalId.ToString();
+                        <option value="@hospital.Value" selected="@isSelected">@hospital.Text</option>
+                    }
+                </select>
+            </div>
             <div class="col-md-6 mb-5">
                 <label class="form-label required" for="PhysicianId">@L("Physician")</label>
                 <select class="form-control" id="PhysicianId" name="PhysicianId" required>
@@ -25,11 +35,6 @@
                     }
                 </select>
                 <small class="form-text text-muted">@L("HospitalAutoPopulated")</small>
-            </div>
-            <div class="col-md-6 mb-5">
-                <label class="form-label required" for="ProcedureDate">@L("Date")</label>
-                <input class="form-control" type="date" name="ProcedureDate" id="ProcedureDate"
-                       value="@(Model.ProcedureTransaction?.ProcedureDate.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString("yyyy-MM-dd"))" required />
             </div>
         </div>
 
@@ -45,6 +50,14 @@
                     }
                 </select>
             </div>
+            <div class="col-md-6 mb-5">
+                <label class="form-label required" for="ProcedureDate">@L("Date")</label>
+                <input class="form-control" type="date" name="ProcedureDate" id="ProcedureDate"
+                       value="@(Model.ProcedureTransaction?.ProcedureDate.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString("yyyy-MM-dd"))" required />
+            </div>
+        </div>
+
+        <div class="row">
             <div class="col-md-6 mb-5">
                 <label class="form-label required">@L("ProcedureType")</label>
                 <div class="pt-2">
@@ -63,14 +76,14 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="row">
             <div class="col-md-6 mb-5">
                 <label class="form-label required" for="Quantity">@L("NumberOfCases")</label>
                 <input class="form-control" type="number" name="Quantity" id="Quantity"
                        value="@(Model.ProcedureTransaction?.Quantity ?? 1)" required min="1" />
             </div>
+        </div>
+
+        <div class="row">
             <div class="col-md-6 mb-5">
                 <label class="form-label required" for="UnitPrice">@L("BasePrice")</label>
                 <div class="input-group">
@@ -78,11 +91,8 @@
                     <input class="form-control" type="number" name="UnitPrice" id="UnitPrice"
                            value="@(Model.ProcedureTransaction?.UnitPrice ?? 0)" step="0.01" readonly required />
                 </div>
-                <small class="form-text text-muted">@L("AutoPopulatedFromProduct")</small>
+                <small class="form-text text-muted">@L("AutoPopulatedByHospitalProduct")</small>
             </div>
-        </div>
-
-        <div class="row">
             <div class="col-md-6 mb-5">
                 <label class="form-label required" for="TotalAmount">@L("TransactionAmount")</label>
                 <div class="input-group">
@@ -90,10 +100,6 @@
                     <input class="form-control" type="number" name="TotalAmount" id="TotalAmount"
                            value="@(Model.ProcedureTransaction?.TotalAmount ?? 0)" step="0.01" required min="0.01" />
                 </div>
-            </div>
-            <div class="col-md-6 mb-5">
-                <label class="form-label" for="HospitalName">@L("Hospital")</label>
-                <input class="form-control" type="text" id="HospitalName" readonly placeholder="@L("HospitalAutoPopulated")" />
             </div>
         </div>
     </form>

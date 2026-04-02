@@ -12,28 +12,32 @@
             // Initialize form logic
             initializeFormLogic();
 
-            // If editing, load physician's facility on page load
-            var physicianId = $('#PhysicianId').val();
-            if (physicianId) {
-                loadPhysicianFacility(physicianId);
+            // If editing and hospital/product are selected, load price on page load
+            var hospitalId = $('#HospitalId').val();
+            var productId = $('#ProductId').val();
+            if (hospitalId && productId) {
+                updateBasePrice();
             }
         };
 
         function initializeFormLogic() {
+            // When hospital changes, update base price
+            $('#HospitalId').on('change', function () {
+                updateBasePrice();
+            });
+
             // When physician changes, load facility and update base price
             $('#PhysicianId').on('change', function () {
                 var physicianId = $(this).val();
                 if (physicianId) {
                     loadPhysicianFacility(physicianId);
-                    updateBasePrice();
                 } else {
                     $('#HospitalId').val('');
-                    $('#HospitalName').val('');
                 }
             });
 
-            // When product or procedure type changes, update base price
-            $('#ProductId, input[name="ProcedureType"]').on('change', function () {
+            // When product changes, update base price
+            $('#ProductId').on('change', function () {
                 updateBasePrice();
             });
 
@@ -57,7 +61,8 @@
                 success: function (result) {
                     if (result.success) {
                         $('#HospitalId').val(result.facilityId || '');
-                        $('#HospitalName').val(result.facilityName || '(No facility assigned)');
+                        // After setting hospital, update the price
+                        updateBasePrice();
                     } else {
                         abp.notify.error('Failed to load physician facility: ' + result.message);
                     }
@@ -70,32 +75,32 @@
         }
 
         function updateBasePrice() {
+            var hospitalId = $('#HospitalId').val();
             var productId = $('#ProductId').val();
-            var procedureType = $('input[name="ProcedureType"]:checked').val();
 
-            if (!productId || !procedureType) {
+            if (!hospitalId || !productId) {
                 return;
             }
 
             $.ajax({
-                url: abp.appPath + 'Revenue/ProcedureTransactions/GetProductBasePrice',
+                url: abp.appPath + 'Revenue/ProcedureTransactions/GetProductPriceByHospital',
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({
-                    productId: parseInt(productId),
-                    procedureType: procedureType
+                    hospitalId: parseInt(hospitalId),
+                    productId: parseInt(productId)
                 }),
                 success: function (result) {
                     if (result.success) {
-                        $('#UnitPrice').val(result.basePrice.toFixed(2));
+                        $('#UnitPrice').val(result.unitPrice.toFixed(2));
                         calculateTotalAmount();
                     } else {
-                        abp.notify.error('Failed to load base price: ' + result.message);
+                        abp.notify.error('Failed to load price: ' + result.message);
                     }
                 },
                 error: function (xhr) {
-                    console.error('Failed to load base price', xhr);
-                    abp.notify.error('Failed to load base price');
+                    console.error('Failed to load price', xhr);
+                    abp.notify.error('Failed to load price');
                 }
             });
         }
