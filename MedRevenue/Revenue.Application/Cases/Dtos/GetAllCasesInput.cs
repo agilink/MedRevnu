@@ -11,5 +11,10 @@ namespace ATI.Revenue.Application.Cases.Dtos
         public string? StatusFilter { get; set; }
         public DateTime? MinCaseDateFilter { get; set; }
         public DateTime? MaxCaseDateFilter { get; set; }
+        public int? ProcedureTypeIdFilter { get; set; }
+        public int? FacilityIdFilter { get; set; }
+        public string? SurgeonNameFilter { get; set; }
+        public DateTime? MinProcedureDateFilter { get; set; }
+        public DateTime? MaxProcedureDateFilter { get; set; }
     }
 }

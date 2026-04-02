@@ -12,7 +12,13 @@ namespace ATI.Revenue.Domain.Entities
             this.CaseProducts = new HashSet<CaseProduct>();
         }
 
+        public int? SubproductCategoryId { get; set; }
+        public string ProductCode { get; set; }
         public string Name { get; set; }
+        public bool IsSystem { get; set; }
+        public decimal BasePrice { get; set; }
+
+        // Legacy fields - keeping for backwards compatibility
         public string Manufacturer { get; set; }
         public string ModelNo { get; set; }
         public string Description { get; set; }
@@ -23,6 +29,10 @@ namespace ATI.Revenue.Domain.Entities
 
         [ForeignKey("ProductCategoryId")]
         public virtual ProductCategory ProductCategory { get; set; }
+
+        [ForeignKey("SubproductCategoryId")]
+        public virtual ProductSubcategory ProductSubcategory { get; set; }
+
         public virtual ICollection<CaseProduct> CaseProducts { get; set; }
     }
 }

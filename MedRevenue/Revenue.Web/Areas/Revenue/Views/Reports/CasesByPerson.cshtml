@@ -1,0 +1,66 @@
+@{
+    ViewData["Title"] = "Cases by Person Report";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Cases by Person - Cases per Physician</h3>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-2">
+                        <label for="YearFilter">Year *</label>
+                        <input type="number" id="YearFilter" class="form-control" value="@ViewBag.LastYear" />
+                    </div>
+                    <div class="col-md-3">
+                        <label for="HospitalFilter">Hospital (Optional)</label>
+                        <select id="HospitalFilter" class="form-control">
+                            <option value="">All Hospitals</option>
+                            @foreach (var hospital in ViewBag.Hospitals)
+                            {
+                                <option value="@hospital.Value">@hospital.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="PhysicianFilter">Physician (Optional)</label>
+                        <select id="PhysicianFilter" class="form-control">
+                            <option value="">All Physicians</option>
+                            @foreach (var physician in ViewBag.Physicians)
+                            {
+                                <option value="@physician.Value">@physician.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button id="GenerateReportButton" class="btn btn-primary">
+                            <i class="fas fa-chart-bar"></i> Generate Report
+                        </button>
+                    </div>
+                </div>
+
+                <div id="reportContainer" style="display:none;">
+                    <table id="CasesByPersonTable" class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Physician</th>
+                                <th>Hospital</th>
+                                <th>Total Cases</th>
+                                <th>DE NOVO Cases</th>
+                                <th>GEN CHANGE Cases</th>
+                                <th>Total Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/view-resources/Areas/Revenue/Views/Reports/CasesByPerson.js" asp-append-version="true"></script>
+}

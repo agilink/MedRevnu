@@ -35,6 +35,7 @@ namespace ATI.Revenue.Application.Cases
         public async Task<PagedResultDto<CaseDto>> GetAllFiltered(GetAllCasesInput input)
         {
             var query = CreateFilteredQuery(input)
+                .Include(c => c.ProcedureType)
                 .Include(c => c.CaseProducts)
                     .ThenInclude(cp => cp.Product)
                 .AsQueryable(); // Ensure the query remains IQueryable<Case>
@@ -54,6 +55,7 @@ namespace ATI.Revenue.Application.Cases
         {
             var entity = await _caseRepository
                 .GetAll()
+                .Include(c => c.ProcedureType)
                 .Include(c => c.CaseProducts)
                     .ThenInclude(cp => cp.Product)
                 .FirstOrDefaultAsync(e => e.Id == id);
@@ -71,12 +73,13 @@ namespace ATI.Revenue.Application.Cases
         {
             var entity = await _caseRepository
                 .GetAll()
+                .Include(c => c.ProcedureType)
                 .Include(c => c.CaseProducts)
                     .ThenInclude(cp => cp.Product)
                 .FirstOrDefaultAsync(e => e.Id == input.Id);
 
             var editDto = ObjectMapper.Map<CreateOrEditCaseDto>(entity);
-            
+
             return new GetCaseForEditOutput
             {
                 Case = editDto
@@ -99,7 +102,17 @@ namespace ATI.Revenue.Application.Cases
                 .WhereIf(input.MinCaseDateFilter != null,
                     e => e.CaseDate >= input.MinCaseDateFilter.Value)
                 .WhereIf(input.MaxCaseDateFilter != null,
-                    e => e.CaseDate <= input.MaxCaseDateFilter.Value);
+                    e => e.CaseDate <= input.MaxCaseDateFilter.Value)
+                .WhereIf(input.ProcedureTypeIdFilter.HasValue,
+                    e => e.ProcedureTypeId == input.ProcedureTypeIdFilter.Value)
+                .WhereIf(input.FacilityIdFilter.HasValue,
+                    e => e.FacilityId == input.FacilityIdFilter.Value)
+                .WhereIf(!string.IsNullOrWhiteSpace(input.SurgeonNameFilter),
+                    e => e.SurgeonName.Contains(input.SurgeonNameFilter))
+                .WhereIf(input.MinProcedureDateFilter.HasValue,
+                    e => e.ProcedureDate >= input.MinProcedureDateFilter.Value)
+                .WhereIf(input.MaxProcedureDateFilter.HasValue,
+                    e => e.ProcedureDate <= input.MaxProcedureDateFilter.Value);
         }
 
         public override async Task<CaseDto> CreateAsync(CreateOrEditCaseDto input)

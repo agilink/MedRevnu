@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ATI.Revenue.Application.Cases;
 using ATI.Revenue.Application.Cases.Dtos;
+using ATI.Revenue.Application.ProcedureTypes;
 using Abp.Application.Services.Dto;
 using System.Threading.Tasks;
 using ATI.Web.Controllers;
@@ -13,10 +14,14 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
     public class CasesController : ATIControllerBase
     {
         private readonly ICasesAppService _casesAppService;
+        private readonly IProcedureTypesAppService _procedureTypesAppService;
 
-        public CasesController(ICasesAppService casesAppService)
+        public CasesController(
+            ICasesAppService casesAppService,
+            IProcedureTypesAppService procedureTypesAppService)
         {
             _casesAppService = casesAppService;
+            _procedureTypesAppService = procedureTypesAppService;
         }
 
         // View for listing cases
@@ -77,6 +82,13 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
             // For now, we'll handle that on the client side
 
             return PartialView("_AddOrEditProductModal", model);
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> GetProcedureTypes()
+        {
+            var procedureTypes = await _procedureTypesAppService.GetAllActiveProcedureTypes();
+            return Json(procedureTypes);
         }
     }
 }

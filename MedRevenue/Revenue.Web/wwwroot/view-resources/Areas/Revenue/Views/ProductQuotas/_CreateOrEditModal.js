@@ -1,0 +1,41 @@
+(function ($) {
+    app.modals.CreateOrEditProductQuotaModal = function () {
+        var _quotasService = abp.services.app.productQuotas;
+        var _modalManager;
+        var _$form = null;
+
+        this.init = function (modalManager) {
+            _modalManager = modalManager;
+            _$form = _modalManager.getModal().find('form[name=ProductQuotaCreateOrEditForm]');
+            _$form.validate();
+
+            // Bind save button click event
+            _modalManager.getModal().find('.save-button').click(function (e) {
+                e.preventDefault();
+                save();
+            });
+        };
+
+        function save() {
+            if (!_$form.valid()) {
+                return;
+            }
+
+            var productQuota = _$form.serializeFormToObject();
+
+            _modalManager.setBusy(true);
+            _quotasService
+                .createOrEdit(productQuota)
+                .done(function () {
+                    abp.notify.info(app.localize('SavedSuccessfully'));
+                    _modalManager.close();
+                    abp.event.trigger('app.createOrEditProductQuotaModalSaved');
+                })
+                .always(function () {
+                    _modalManager.setBusy(false);
+                });
+        }
+
+        this.save = save;
+    };
+})(jQuery);

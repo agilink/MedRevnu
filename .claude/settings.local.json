@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet ef migrations add:*)",
+      "mcp__agilink__db_discover",
+      "mcp__agilink__db_connect",
+      "mcp__agilink__db_query",
+      "Bash(dotnet ef database update:*)",
+      "mcp__agilink__db_schema",
+      "Bash(mkdir:*)",
+      "Bash(Select-Object -Last 50)",
+      "mcp__agilink__db_test_connection",
+      "Bash(sqlcmd:*)",
+      "Read(//c/Users/LENOVO/AppData/Roaming/Claude/local-agent-mode-sessions/skills-plugin/a191a5a0-6477-4f9c-9abf-0102887e4098/8603b00f-a131-45b3-8486-b79429e79497/skills/xlsx/**)",
+      "Bash(python -c \":*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -16,6 +16,15 @@ namespace ATI.Revenue.Application.Cases.Dtos
         public decimal TotalAmount { get; set; }
         public string? Status { get; set; }
         public string Notes { get; set; }
+
+        // New fields for procedure tracking
+        public int? ProcedureTypeId { get; set; }
+        public string ProcedureTypeName { get; set; }
+        public int? FacilityId { get; set; }
+        public string FacilityName { get; set; }
+        public string SurgeonName { get; set; }
+        public DateTime? ProcedureDate { get; set; }
+
         public List<CaseProductDto> CaseProducts { get; set; }
     }
 }

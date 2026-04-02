@@ -34,6 +34,15 @@ namespace ATI.Revenue.Application.Cases.Dtos
         [StringLength(1000)]
         public string Notes { get; set; }
 
+        // New fields for procedure tracking
+        public int? ProcedureTypeId { get; set; }
+        public int? FacilityId { get; set; }
+
+        [StringLength(200)]
+        public string SurgeonName { get; set; }
+
+        public DateTime? ProcedureDate { get; set; }
+
         public List<CaseProductDto> CaseProducts { get; set; }
     }
 }

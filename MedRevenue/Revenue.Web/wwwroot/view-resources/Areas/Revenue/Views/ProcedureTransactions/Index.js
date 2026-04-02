@@ -1,0 +1,205 @@
+(function () {
+    $(function () {
+        var _$transactionsTable = $('#ProcedureTransactionsTable');
+        var _transactionsService = abp.services.app.procedureTransactions;
+
+        var _permissions = {
+            create: true, // abp.auth.hasPermission('Pages.Revenue.ProcedureTransactions.Create'),
+            edit: true, // abp.auth.hasPermission('Pages.Revenue.ProcedureTransactions.Edit'),
+            delete: true // abp.auth.hasPermission('Pages.Revenue.ProcedureTransactions.Delete')
+        };
+
+        var _createOrEditModal = new app.ModalManager({
+            viewUrl: abp.appPath + 'Revenue/ProcedureTransactions/CreateOrEditModal',
+            scriptUrl: abp.appPath + 'view-resources/Areas/Revenue/Views/ProcedureTransactions/_CreateOrEditModal.js',
+            modalClass: 'CreateOrEditProcedureTransactionModal'
+        });
+
+        var dataTable = _$transactionsTable.DataTable({
+            paging: true,
+            serverSide: true,
+            processing: true,
+            listAction: {
+                ajaxFunction: _transactionsService.getAll,
+                inputFilter: function () {
+                    var year = $('#YearFilter').val();
+                    var month = $('#MonthFilter').val();
+                    var hospitalId = $('#HospitalFilter').val();
+                    var physicianId = $('#PhysicianFilter').val();
+
+                    return {
+                        filter: null,
+                        yearFilter: year ? parseInt(year) : null,
+                        monthFilter: month ? parseInt(month) : null,
+                        hospitalIdFilter: hospitalId ? parseInt(hospitalId) : null,
+                        physicianIdFilter: physicianId ? parseInt(physicianId) : null,
+                        procedureTypeFilter: null
+                    };
+                }
+            },
+            columnDefs: [
+                {
+                    targets: 0,
+                    data: 'hospitalName',
+                    name: 'hospitalName',
+                    render: function (hospitalName) {
+                        return hospitalName || '-';
+                    }
+                },
+                {
+                    targets: 1,
+                    data: 'physicianName',
+                    name: 'physicianName'
+                },
+                {
+                    targets: 2,
+                    data: 'procedureDate',
+                    name: 'procedureDate',
+                    render: function (procedureDate) {
+                        if (procedureDate) {
+                            return moment(procedureDate).format('L');
+                        }
+                        return '';
+                    }
+                },
+                {
+                    targets: 3,
+                    data: 'productName',
+                    name: 'productName'
+                },
+                {
+                    targets: 4,
+                    data: 'productCode',
+                    name: 'productCode',
+                    render: function (productCode) {
+                        return productCode || '-';
+                    }
+                },
+                {
+                    targets: 5,
+                    data: 'procedureType',
+                    name: 'procedureType',
+                    render: function (procedureType) {
+                        if (procedureType === 'DE_NOVO') {
+                            return '<span class="badge bg-success">NEW (De Novo)</span>';
+                        } else if (procedureType === 'GEN_CHANGE') {
+                            return '<span class="badge bg-info">GEN CHANGE</span>';
+                        }
+                        return procedureType;
+                    }
+                },
+                {
+                    targets: 6,
+                    data: 'quantity',
+                    name: 'quantity',
+                    className: 'text-center'
+                },
+                {
+                    targets: 7,
+                    data: 'unitPrice',
+                    name: 'unitPrice',
+                    render: function (unitPrice) {
+                        if (unitPrice) {
+                            return '$' + unitPrice.toFixed(2);
+                        }
+                        return '$0.00';
+                    }
+                },
+                {
+                    targets: 8,
+                    data: 'totalAmount',
+                    name: 'totalAmount',
+                    render: function (totalAmount) {
+                        if (totalAmount) {
+                            return '$' + totalAmount.toFixed(2);
+                        }
+                        return '$0.00';
+                    }
+                },
+                {
+                    targets: 9,
+                    data: null,
+                    orderable: false,
+                    autoWidth: false,
+                    defaultContent: '',
+                    rowAction: {
+                        cssClass: 'btn btn-brand dropdown-toggle',
+                        text: '<i class="fa fa-cog"></i> ' + app.localize('Actions') + ' <span class="caret"></span>',
+                        items: [
+                            {
+                                text: app.localize('Edit'),
+                                visible: function () {
+                                    return _permissions.edit;
+                                },
+                                action: function (data) {
+                                    _createOrEditModal.open({ id: data.record.id });
+                                }
+                            },
+                            {
+                                text: app.localize('Delete'),
+                                visible: function () {
+                                    return _permissions.delete;
+                                },
+                                action: function (data) {
+                                    deleteTransaction(data.record);
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        });
+
+        function getTransactions() {
+            dataTable.ajax.reload();
+        }
+
+        function deleteTransaction(transaction) {
+            abp.message.confirm(
+                'Are you sure you want to delete this transaction?',
+                app.localize('AreYouSure'),
+                function (isConfirmed) {
+                    if (isConfirmed) {
+                        _transactionsService
+                            .delete({
+                                id: transaction.id
+                            })
+                            .done(function () {
+                                getTransactions();
+                                abp.notify.success(app.localize('SuccessfullyDeleted'));
+                            });
+                    }
+                }
+            );
+        }
+
+        $('#FilterButton').click(function (e) {
+            e.preventDefault();
+            getTransactions();
+        });
+
+        $('#ClearFilterButton').click(function (e) {
+            e.preventDefault();
+            var currentYear = new Date().getFullYear();
+            var currentMonth = new Date().getMonth() + 1;
+            $('#YearFilter').val(currentYear);
+            $('#MonthFilter').val(currentMonth);
+            $('#HospitalFilter').val('');
+            $('#PhysicianFilter').val('');
+            getTransactions();
+        });
+
+        $('#CreateNewTransactionButton').click(function () {
+            _createOrEditModal.open();
+        });
+
+        $('#RefreshTransactionsButton').click(function (e) {
+            e.preventDefault();
+            getTransactions();
+        });
+
+        abp.event.on('app.createOrEditProcedureTransactionModalSaved', function () {
+            getTransactions();
+        });
+    });
+})();

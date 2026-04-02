@@ -2,6 +2,9 @@
 [Bb]in/
 [Oo]bj/
 
+# Windows reserved device names (invalid paths)
+nul
+
 # Logs
 Logs/
 
@@ -140,3 +143,5 @@ src/ATI.Web.Host/node_modules
 src/ATI.Web.Host/wwwroot/view-resources/Views/_Bundles
 src/ATI.Web.Host/package-lock.json
 src/ATI.Web.Host/wwwroot/view-resources/**/*.min.*
+# Agilink MCP
+.agilink/

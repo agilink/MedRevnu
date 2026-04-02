@@ -1,0 +1,96 @@
+@{
+    ViewData["Title"] = "Revenue Dashboard";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">@ViewData["Title"]</h3>
+                <div class="card-tools">
+                    <input type="date" id="DashboardDate" class="form-control form-control-sm" value="@DateTime.Now.ToString("yyyy-MM-dd")" style="width: 200px;" />
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Daily Summary Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="info-box">
+                            <span class="info-box-icon bg-primary"><i class="fas fa-dollar-sign"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Total Revenue (Today)</span>
+                                <span class="info-box-number" id="TotalRevenue">$0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="info-box">
+                            <span class="info-box-icon bg-success"><i class="fas fa-procedures"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Total Cases (Today)</span>
+                                <span class="info-box-number" id="TotalCases">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="info-box">
+                            <span class="info-box-icon bg-warning"><i class="fas fa-heartbeat"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Pacemaker</span>
+                                <span class="info-box-number" id="PacemakerRevenue">$0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="info-box">
+                            <span class="info-box-icon bg-danger"><i class="fas fa-heart"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Defibrillator</span>
+                                <span class="info-box-number" id="DefibrillatorRevenue">$0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Revenue by Category -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h5>Revenue by Category</h5>
+                        <div id="CategoryBreakdown"></div>
+                    </div>
+                </div>
+
+                <!-- Monthly Revenue vs Quota -->
+                <div class="row">
+                    <div class="col-12">
+                        <h5>Monthly Revenue vs Quota (@DateTime.Now.ToString("MMMM yyyy"))</h5>
+                        <div class="table-responsive">
+                            <table id="QuotaTable" class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Procedure Type</th>
+                                        <th>Category</th>
+                                        <th>Quota</th>
+                                        <th>Actual</th>
+                                        <th>Variance</th>
+                                        <th>% Achieved</th>
+                                        <th>Cases</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="QuotaTableBody">
+                                    <tr>
+                                        <td colspan="7" class="text-center">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/view-resources/Areas/Revenue/Views/Dashboard/Index.js" asp-append-version="true"></script>
+}

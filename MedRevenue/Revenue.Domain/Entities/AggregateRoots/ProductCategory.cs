@@ -10,11 +10,14 @@ namespace ATI.Revenue.Domain.Entities
         public ProductCategory()
         {
             this.Products = new HashSet<Product>();
+            this.ProductSubcategories = new HashSet<ProductSubcategory>();
         }
 
         public string Name { get; set; }
+        public string ShortDescription { get; set; }
         public string Description { get; set; }
 
         public virtual ICollection<Product> Products { get; set; }
+        public virtual ICollection<ProductSubcategory> ProductSubcategories { get; set; }
     }
 }

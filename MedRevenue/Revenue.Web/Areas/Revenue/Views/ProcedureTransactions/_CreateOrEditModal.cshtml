@@ -1,0 +1,127 @@
+@using ATI.Revenue.Web.PageModel.ProcedureTransactions
+@model CreateOrEditProcedureTransactionModalViewModel
+
+<div class="modal-header">
+    <h4 class="modal-title">
+        @if (Model.IsEditMode)
+        {
+            @L("EditTransaction")
+        }
+        else
+        {
+            @L("CreateTransaction")
+        }
+    </h4>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<form name="ProcedureTransactionCreateOrEditForm" role="form" class="form-horizontal">
+    <div class="modal-body">
+        <input type="hidden" name="Id" value="@(Model.ProcedureTransaction?.Id ?? 0)" />
+        <input type="hidden" id="HospitalId" name="HospitalId" value="@(Model.ProcedureTransaction?.HospitalId ?? 0)" />
+
+        <div class="mb-3">
+            <label class="form-label" for="PhysicianId">Physician *</label>
+            <select class="form-control" id="PhysicianId" name="PhysicianId" required>
+                <option value="">-- Select Physician --</option>
+                @foreach (var physician in ViewBag.Physicians)
+                {
+                    if (Model.ProcedureTransaction != null && physician.Value == Model.ProcedureTransaction.PhysicianId.ToString())
+                    {
+                        <option value="@physician.Value" selected>@physician.Text</option>
+                    }
+                    else
+                    {
+                        <option value="@physician.Value">@physician.Text</option>
+                    }
+                }
+            </select>
+            <small class="form-text text-muted">Hospital will be auto-populated from physician's facility</small>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="HospitalName">Hospital</label>
+            <input class="form-control" type="text" id="HospitalName" readonly placeholder="Auto-populated from physician" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="ProcedureDate">Date *</label>
+            <input class="form-control" type="date" name="ProcedureDate" id="ProcedureDate"
+                   value="@(Model.ProcedureTransaction?.ProcedureDate.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd"))" required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="ProductId">Product *</label>
+            <select class="form-control" id="ProductId" name="ProductId" required>
+                <option value="">-- Select Product --</option>
+                @foreach (var product in ViewBag.Products)
+                {
+                    if (Model.ProcedureTransaction != null && product.Value == Model.ProcedureTransaction.ProductId.ToString())
+                    {
+                        <option value="@product.Value" selected>@product.Text</option>
+                    }
+                    else
+                    {
+                        <option value="@product.Value">@product.Text</option>
+                    }
+                }
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Procedure Type *</label>
+            <div>
+                @{
+                    var isDeNovo = Model.ProcedureTransaction?.ProcedureType == "DE_NOVO" || Model.ProcedureTransaction?.ProcedureType == null;
+                }
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="ProcedureType" id="ProcedureTypeNew" value="DE_NOVO"
+                           @(isDeNovo ? "checked" : "") required />
+                    <label class="form-check-label" for="ProcedureTypeNew">
+                        NEW (De Novo)
+                    </label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="ProcedureType" id="ProcedureTypeChange" value="GEN_CHANGE"
+                           @(!isDeNovo ? "checked" : "") />
+                    <label class="form-check-label" for="ProcedureTypeChange">
+                        GEN CHANGE (Battery Replacement)
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="Quantity">No. of Cases *</label>
+            <input class="form-control" type="number" name="Quantity" id="Quantity"
+                   value="@(Model.ProcedureTransaction?.Quantity ?? 1)" required min="1" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="UnitPrice">Base Price *</label>
+            <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input class="form-control" type="number" name="UnitPrice" id="UnitPrice"
+                       value="@(Model.ProcedureTransaction?.UnitPrice ?? 0)" step="0.01" readonly required />
+            </div>
+            <small class="form-text text-muted">Auto-populated based on product and procedure type</small>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="TotalAmount">Transaction Amount *</label>
+            <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input class="form-control" type="number" name="TotalAmount" id="TotalAmount"
+                       value="@(Model.ProcedureTransaction?.TotalAmount ?? 0)" step="0.01" required min="0.01" />
+            </div>
+            <small class="form-text text-muted">Auto-calculated as Base Price × No. of Cases (can be modified)</small>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L("Cancel")</button>
+        <button type="submit" class="btn btn-primary save-button">@L("Save")</button>
+    </div>
+</form>
+
+<script src="~/view-resources/Areas/Revenue/Views/ProcedureTransactions/_CreateOrEditModal.js" asp-append-version="true"></script>
