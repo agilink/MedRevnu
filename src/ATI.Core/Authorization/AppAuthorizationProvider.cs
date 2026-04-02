@@ -31,6 +31,11 @@ namespace ATI.Authorization
             var pages = context.GetPermissionOrNull(AppPermissions.Pages) ?? context.CreatePermission(AppPermissions.Pages, L("Pages"));
             pages.CreateChildPermission(AppPermissions.Pages_DemoUiComponents, L("DemoUiComponents"));
             pages.CreateChildPermission(AppPermissions.Pages_Medrev, L("Revenue"));
+
+            var hospitalProductPrices = pages.CreateChildPermission(AppPermissions.Pages_Revenue_HospitalProductPrices, L("HospitalProductPrices"));
+            hospitalProductPrices.CreateChildPermission(AppPermissions.Pages_Revenue_HospitalProductPrices_Create, L("CreatingHospitalProductPrice"));
+            hospitalProductPrices.CreateChildPermission(AppPermissions.Pages_Revenue_HospitalProductPrices_Edit, L("EditingHospitalProductPrice"));
+            hospitalProductPrices.CreateChildPermission(AppPermissions.Pages_Revenue_HospitalProductPrices_Delete, L("DeletingHospitalProductPrice"));
             var administration = pages.CreateChildPermission(AppPermissions.Pages_Administration, L("Administration"));
 
             var roles = administration.CreateChildPermission(AppPermissions.Pages_Administration_Roles, L("Roles"));

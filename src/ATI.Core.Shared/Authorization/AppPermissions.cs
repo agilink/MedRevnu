@@ -18,6 +18,11 @@
         public const string Pages_Administration_LafayetteQuota_Products_Delete = "Pages.Administration.LafayetteQuota.Products.Delete";
         public const string Pages_Administration_LafayetteQuota_Products_Create = "Pages.Administration.LafayetteQuota.Products.Create";
         public const string Pages_Administration_LafayetteQuota_Products_Edit = "Pages.Administration.LafayetteQuota.Products.Edit";
+
+        public const string Pages_Revenue_HospitalProductPrices = "Pages.Revenue.HospitalProductPrices";
+        public const string Pages_Revenue_HospitalProductPrices_Create = "Pages.Revenue.HospitalProductPrices.Create";
+        public const string Pages_Revenue_HospitalProductPrices_Edit = "Pages.Revenue.HospitalProductPrices.Edit";
+        public const string Pages_Revenue_HospitalProductPrices_Delete = "Pages.Revenue.HospitalProductPrices.Delete";
         //COMMON PERMISSIONS (FOR BOTH OF TENANTS AND HOST)
 
         public const string Pages = "Pages";

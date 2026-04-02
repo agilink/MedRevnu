@@ -1,0 +1,78 @@
+@using ATI.Revenue.Web.PageModel.HospitalProductPrices
+@model CreateOrEditHospitalProductPriceModalViewModel
+
+<div class="modal-header">
+    <h5 class="modal-title">
+        <span>@(Model.IsEditMode ? L("EditHospitalProductPrice") : L("CreateNewHospitalProductPrice"))</span>
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+</div>
+
+<div class="modal-body">
+    <form name="HospitalProductPriceCreateOrEditForm" role="form" novalidate class="form-validation">
+        <input type="hidden" name="Id" value="@(Model.HospitalProductPrice?.Id ?? 0)" />
+
+        <div class="mb-5">
+            <label class="form-label required" for="HospitalId">@L("Hospital")</label>
+            <select class="form-select" id="HospitalId" name="HospitalId" required>
+                <option value="">@L("SelectHospital")</option>
+                @foreach (var hospital in ViewBag.Hospitals)
+                {
+                    var isSelected = Model.HospitalProductPrice != null && hospital.Value == Model.HospitalProductPrice.HospitalId.ToString();
+                    <option value="@hospital.Value" selected="@isSelected">@hospital.Text</option>
+                }
+            </select>
+        </div>
+
+        <div class="mb-5">
+            <label class="form-label required" for="ProductId">@L("Product")</label>
+            <select class="form-select" id="ProductId" name="ProductId" required>
+                <option value="">@L("SelectProduct")</option>
+                @foreach (var product in ViewBag.Products)
+                {
+                    var isSelected = Model.HospitalProductPrice != null && product.Value == Model.HospitalProductPrice.ProductId.ToString();
+                    <option value="@product.Value" selected="@isSelected">@product.Text</option>
+                }
+            </select>
+        </div>
+
+        <div class="mb-5">
+            <label class="form-label" for="ProductCode">@L("ProductCode")</label>
+            <input class="form-control" type="text" name="ProductCode" id="ProductCode"
+                   value="@(Model.HospitalProductPrice?.ProductCode ?? "")" maxlength="100" />
+        </div>
+
+        <div class="mb-5">
+            <label class="form-label required" for="UnitPrice">@L("UnitPrice")</label>
+            <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input class="form-control" type="number" name="UnitPrice" id="UnitPrice"
+                       value="@(Model.HospitalProductPrice?.UnitPrice ?? 0)" step="0.01" required min="0.01" />
+            </div>
+        </div>
+
+        <div class="mb-5">
+            <label class="form-label required" for="EffectiveDate">@L("EffectiveDate")</label>
+            <input class="form-control" type="date" name="EffectiveDate" id="EffectiveDate"
+                   value="@(Model.HospitalProductPrice?.EffectiveDate.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString("yyyy-MM-dd"))" required />
+        </div>
+
+        <div class="mb-5">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" name="IsActive" id="IsActive"
+                       value="true" @(Model.HospitalProductPrice?.IsActive == true ? "checked" : "") />
+                <input type="hidden" name="IsActive" value="false" />
+                <label class="form-check-label" for="IsActive">@L("IsActive")</label>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L("Cancel")</button>
+    <button type="button" class="btn btn-primary save-button">
+        <i class="fa fa-save"></i> <span>@L("Save")</span>
+    </button>
+</div>
+
+<script src="~/view-resources/Areas/Revenue/Views/HospitalProductPrices/_CreateOrEditModal.js" asp-append-version="true"></script>
