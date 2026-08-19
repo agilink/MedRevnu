@@ -991,11 +991,41 @@ implant-type pricing is Phase 2.
 `Pages.Revenue.*` permission tree exists, and the menu exposes the pages that
 were previously built but unreachable.
 
-**Still open.** Case/CaseProduct remains in the codebase as the legacy model
-(retirement not yet done); the duplicated Revenue web layer under
-`MedRevenue/Revenue.Web` and `src/ATI.Web.Mvc/Areas/Revenue` is still two copies
-kept in sync by hand; De Novo vs Gen Change pricing, case status workflow, Excel
-export, hospital/physician management pages and spreadsheet import are Phase 2+.
+## ATI-78 Phase 2 Changes
+
+**Implant type follows the product.** Phase 2 was scoped as "per-implant-type
+pricing", but the taxonomy already separates De Novo from Gen Change at the
+subcategory level ("Single Chamber" vs "Single Chamber Gen Change"), so a Gen
+Change is a distinct product with its own price and no new pricing dimension was
+needed. The actual defect was that nothing tied the entry form's implant-type
+radio to the product chosen, so a mismatch could land in the De Novo / Gen Change
+report columns. The app service now rejects a contradiction on save, and the form
+sets the radio from the product.
+
+**Case, CaseProduct and ProcedureQuota retired.** Entities, app services, DTOs,
+controllers, page models, views, view-resources, the Cases menu entry and the
+Pages.Revenue.Cases.* permissions are removed. `RevenueAuthorizationProvider` is
+also gone - it was a second registered provider declaring a parallel
+Pages.Cases / Pages.Products / Pages.ProductCategories tree that nothing checked.
+
+No tables were dropped. REV.Case and REV.CaseProduct keep their rows and are
+simply no longer mapped; see `DbScripts/ATI-78_REV.Case_ReportRetainedData.sql`.
+Dropping them is a separate decision once the client confirms the contents are
+not needed.
+
+**Still open.** The duplicated Revenue web layer under `MedRevenue/Revenue.Web`
+and `src/ATI.Web.Mvc/Areas/Revenue` is two copies kept in sync by hand, by
+decision - change both. Sales rep / territory / commission is deferred pending
+client confirmation. Case status workflow and calculated case totals are moot,
+having gone with the retired model. Report sample designs, quarterly rollup,
+Excel export, hospital and physician management pages and spreadsheet import
+remain for Phase 3.
+
+**Noted, not addressed.** `MedRevenue/Revnue_All/` is a 51-file duplicate copy of
+the module referenced by no solution or project file. Migration
+`20260402134200_MakeProductCreationTimeNotNull` has no Designer file, so EF does
+not recognise it and it has never been applied. `Revenue/Home` renders a
+hardcoded `ViewBag.CasesCount = 150`.
 
 ---
 
