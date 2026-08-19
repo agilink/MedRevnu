@@ -7,6 +7,8 @@ using ATI.Revenue.Application.Products;
 using Abp.Application.Services.Dto;
 using Abp.Domain.Repositories;
 using System;
+using System.Collections.Generic;
+using ATI.Revenue.Application.Products.Dtos;
 using System.Linq;
 using System.Threading.Tasks;
 using ATI.Web.Controllers;
@@ -164,14 +166,15 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
             return new SelectList(namedList, "Id", "Name");
         }
 
-        private async Task<SelectList> GetProductSelectList()
+        /// <summary>
+        /// Active products ordered by name. Returns the DTOs rather than a SelectList so
+        /// the view can emit each product's implant type as a data attribute, letting the
+        /// form set the De Novo / Gen Change radio from the product chosen.
+        /// </summary>
+        private async Task<List<ProductDto>> GetProductSelectList()
         {
             var productsResult = await _productsAppService.GetAllActive();
-            return new SelectList(
-                productsResult.Items.OrderBy(p => p.Name),
-                "Id",
-                "Name"
-            );
+            return productsResult.Items.OrderBy(p => p.Name).ToList();
         }
     }
 }

@@ -143,6 +143,8 @@ namespace ATI.Revenue.Application.ProcedureTransactions
 
         private async Task<ProcedureTransactionDto> Create(CreateOrEditProcedureTransactionDto input)
         {
+            await EnsureImplantTypeMatchesProduct(input.ProductId, input.ImplantType);
+
             // Auto-populate HospitalId from Physician's FacilityId
             var physician = await _personnelRepository.GetAsync(input.PhysicianId);
             input.HospitalId = physician.FacilityId;
@@ -198,6 +200,8 @@ namespace ATI.Revenue.Application.ProcedureTransactions
 
         private async Task<ProcedureTransactionDto> Update(CreateOrEditProcedureTransactionDto input)
         {
+            await EnsureImplantTypeMatchesProduct(input.ProductId, input.ImplantType);
+
             var entity = await _procedureTransactionRepository.GetAsync(input.Id);
 
             // Auto-populate HospitalId from Physician's FacilityId if Physician changed
@@ -245,6 +249,51 @@ namespace ATI.Revenue.Application.ProcedureTransactions
         {
             await _procedureTransactionRepository.DeleteAsync(input.Id);
             await CurrentUnitOfWork.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Rejects a transaction whose implant type contradicts the product it records.
+        /// </summary>
+        /// <remarks>
+        /// De Novo and Gen Change are modelled as separate product subcategories
+        /// ("Single Chamber" vs "Single Chamber Gen Change"), so the product already
+        /// determines which one a transaction is. Nothing previously tied the radio
+        /// button to the product chosen, so a battery replacement could be recorded
+        /// against a de novo device - and that mismatch would land straight in the
+        /// De Novo / Gen Change columns the business reports on.
+        ///
+        /// Products with no subcategory cannot be checked and are left to the user.
+        /// </remarks>
+        private async Task EnsureImplantTypeMatchesProduct(int productId, ImplantType implantType)
+        {
+            var expected = await _productRepository.GetAll()
+                .Where(p => p.Id == productId && p.ProductSubcategory != null)
+                .Select(p => new
+                {
+                    ProductName = p.Name,
+                    SubcategoryName = p.ProductSubcategory.SubcategoryName,
+                    p.ProductSubcategory.ImplantType
+                })
+                .FirstOrDefaultAsync();
+
+            if (expected == null || expected.ImplantType == implantType)
+            {
+                return;
+            }
+
+            throw new UserFriendlyException(
+                "Implant type does not match the selected product",
+                string.Format(
+                    "{0} belongs to the \"{1}\" subcategory, which is {2}. Either choose a {3} product or change the implant type to {2}.",
+                    expected.ProductName,
+                    expected.SubcategoryName,
+                    Describe(expected.ImplantType),
+                    Describe(implantType)));
+        }
+
+        private static string Describe(ImplantType implantType)
+        {
+            return implantType == ImplantType.GenChange ? "Gen Change" : "De Novo";
         }
 
         /// <summary>

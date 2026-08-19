@@ -1,4 +1,6 @@
 ﻿@using ATI.Revenue.Domain.Enums
+@using ATI.Revenue.Application.Products.Dtos
+@using System.Collections.Generic
 @using ATI.Revenue.Web.PageModel.ProcedureTransactions
 @model CreateOrEditProcedureTransactionModalViewModel
 
@@ -42,12 +44,15 @@
         <div class="row">
             <div class="col-md-6 mb-5">
                 <label class="form-label required" for="ProductId">@L("Product")</label>
+                @* data-implant-type lets the form set the De Novo / Gen Change radio from
+                   the product, since the two are separate product subcategories. *@
                 <select class="form-control" id="ProductId" name="ProductId" required>
                     <option value="">@L("SelectProduct")</option>
-                    @foreach (var product in ViewBag.Products)
+                    @foreach (var product in (List<ProductDto>)ViewBag.Products)
                     {
-                        var isSelected = Model.ProcedureTransaction != null && product.Value == Model.ProcedureTransaction.ProductId.ToString();
-                        <option value="@product.Value" selected="@isSelected">@product.Text</option>
+                        var isSelected = Model.ProcedureTransaction != null && product.Id == Model.ProcedureTransaction.ProductId;
+                        <option value="@product.Id" selected="@isSelected"
+                                data-implant-type="@(product.ImplantType.HasValue ? ((int)product.ImplantType.Value).ToString() : "")">@product.Name</option>
                     }
                 </select>
             </div>

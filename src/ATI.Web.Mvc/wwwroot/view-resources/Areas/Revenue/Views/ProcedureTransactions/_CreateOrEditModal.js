@@ -1,4 +1,4 @@
-(function ($) {
+﻿(function ($) {
     app.modals.CreateOrEditProcedureTransactionModal = function () {
         var _transactionsService = abp.services.app.procedureTransactions;
         var _modalManager;
@@ -36,8 +36,9 @@
                 }
             });
 
-            // When product changes, update base price
+            // When product changes, update base price and follow the product's implant type
             $('#ProductId').on('change', function () {
+                syncImplantTypeToProduct();
                 updateBasePrice();
             });
 
@@ -72,6 +73,25 @@
                     abp.notify.error('Failed to load physician facility');
                 }
             });
+        }
+
+        // De Novo and Gen Change are separate product subcategories, so the product
+        // determines which one this is. The server rejects a mismatch; this keeps the
+        // radio in step so the user does not run into that.
+        function syncImplantTypeToProduct() {
+            var implantType = $('#ProductId').find('option:selected').data('implant-type');
+
+            if (implantType === undefined || implantType === '') {
+                return; // product has no subcategory, so leave the user's choice alone
+            }
+
+            $('#ImplantTypeDeNovo, #ImplantTypeGenChange').prop('checked', false);
+
+            if (parseInt(implantType, 10) === 2) {
+                $('#ImplantTypeGenChange').prop('checked', true);
+            } else {
+                $('#ImplantTypeDeNovo').prop('checked', true);
+            }
         }
 
         function updateBasePrice() {

@@ -1,9 +1,10 @@
-using Abp.Application.Services;
+﻿using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
 using ATI.Revenue.Application.Products.Dtos;
 using ATI.Revenue.Domain.Entities;
+using ATI.Revenue.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
@@ -92,6 +93,7 @@ namespace ATI.Revenue.Application.Products
                     ProductCategoryName = p.ProductCategory != null ? (p.ProductCategory.Name ?? "") : "",
                     SubproductCategoryId = p.SubproductCategoryId,
                     SubproductCategoryName = p.ProductSubcategory != null ? (p.ProductSubcategory.SubcategoryName ?? "") : "",
+                    ImplantType = p.ProductSubcategory != null ? p.ProductSubcategory.ImplantType : (ImplantType?)null,
                     BasePrice = p.BasePrice,
                     Cost = p.Cost,
                     Price = p.Price,
