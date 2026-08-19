@@ -31,11 +31,7 @@ INSERT INTO @RevenuePermissions (Name) VALUES
     ('Pages.Revenue.Products'),
     ('Pages.Revenue.Products.Create'),
     ('Pages.Revenue.Products.Edit'),
-    ('Pages.Revenue.Products.Delete'),
-    ('Pages.Revenue.Cases'),
-    ('Pages.Revenue.Cases.Create'),
-    ('Pages.Revenue.Cases.Edit'),
-    ('Pages.Revenue.Cases.Delete');
+    ('Pages.Revenue.Products.Delete');
 
 -- Insert a granted RolePermissionSetting for every Admin role that is missing it.
 INSERT INTO [dbo].[AbpPermissions]
@@ -66,3 +62,17 @@ WHERE ap.[Discriminator] = N'RolePermissionSetting'
   AND ap.[IsGranted] = 0;
 
 PRINT 'Revenue permissions granted to Admin roles.';
+
+-- Remove grants for permissions that no longer exist. Pages.Revenue.Cases.* was
+-- defined while the Case model was still in use, and Pages.Cases / Pages.Products /
+-- Pages.ProductCategories came from a second authorization provider in the Revenue
+-- module that nothing ever checked. Left in place they appear in the role editor as
+-- grantable permissions that do nothing.
+DELETE FROM [dbo].[AbpPermissions]
+WHERE [Name] LIKE 'Pages.Revenue.Cases%'
+   OR [Name] IN ('Pages.Cases', 'Pages.Cases.Create', 'Pages.Cases.Edit', 'Pages.Cases.Delete',
+                 'Pages.Products', 'Pages.Products.Create', 'Pages.Products.Edit', 'Pages.Products.Delete',
+                 'Pages.ProductCategories', 'Pages.ProductCategories.Create',
+                 'Pages.ProductCategories.Edit', 'Pages.ProductCategories.Delete');
+
+PRINT 'Removed grants for retired permissions.';

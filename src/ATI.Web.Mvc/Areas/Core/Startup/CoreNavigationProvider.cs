@@ -1,4 +1,4 @@
-using Abp.Application.Navigation;
+﻿using Abp.Application.Navigation;
 using Abp.Authorization;
 using Abp.Localization;
 using ATI.Authorization;
@@ -192,14 +192,6 @@ namespace ATI.Web.Areas.Core.Startup
                             url: "Revenue/ProcedureTransactions",
                             icon: "flaticon-line-graph",
                             permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_ProcedureTransactions)
-                        )
-                    )
-                    .AddItem(new MenuItemDefinition(
-                            "Revenue.Cases",
-                            L("Cases"),
-                            url: "Revenue/Cases",
-                            icon: "flaticon-folder",
-                            permissionDependency: new SimplePermissionDependency(AppPermissions.Pages)
                         )
                     )
                     .AddItem(new MenuItemDefinition(

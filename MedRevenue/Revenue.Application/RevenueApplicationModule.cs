@@ -1,4 +1,4 @@
-using Abp.AutoMapper;
+﻿using Abp.AutoMapper;
 using Abp.Modules;
 using Abp.Reflection.Extensions;
 using ATI.Revenue.Domain;
@@ -13,7 +13,6 @@ namespace ATI.Revenue.Application
     {
         public override void PreInitialize()
         {
-            Configuration.Authorization.Providers.Add<RevenueAuthorizationProvider>();
             
             Configuration.Modules.AbpAutoMapper().Configurators.Add(RevenueDtoMapper.CreateMappings);
         }

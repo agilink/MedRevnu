@@ -1,8 +1,6 @@
-using AutoMapper;
-using ATI.Revenue.Application.Cases.Dtos;
+﻿using AutoMapper;
 using ATI.Revenue.Application.Products.Dtos;
 using ATI.Revenue.Application.ProcedureTypes.Dtos;
-using ATI.Revenue.Application.ProcedureQuotas.Dtos;
 using ATI.Revenue.Application.ProcedureTransactions.Dtos;
 using ATI.Revenue.Application.HospitalProductPrices.Dtos;
 using ATI.Revenue.Application.ProductQuotas.Dtos;
@@ -14,20 +12,6 @@ namespace ATI.Revenue.Application
     {
         public static void CreateMappings(IMapperConfigurationExpression configuration)
         {
-            // Case mappings
-            configuration.CreateMap<Case, CaseDto>()
-                .ForMember(dto => dto.CaseProducts, opt => opt.MapFrom(src => src.CaseProducts))
-                .ForMember(dto => dto.ProcedureTypeName,
-                    opt => opt.MapFrom(src => src.ProcedureType != null ? src.ProcedureType.Name : string.Empty));
-
-            configuration.CreateMap<CreateOrEditCaseDto, Case>()
-                .ForMember(ent => ent.CaseProducts, opt => opt.Ignore())
-                .ForMember(ent => ent.ProcedureType, opt => opt.Ignore());
-
-            // CaseProduct mappings
-            configuration.CreateMap<CaseProduct, CaseProductDto>()
-                .ForMember(dto => dto.ProductName, opt => opt.MapFrom(src => src.Product.Name));
-
             // Product mappings
             configuration.CreateMap<Product, ProductDto>()
                 .ForMember(dto => dto.ProductCategoryName,
@@ -38,12 +22,6 @@ namespace ATI.Revenue.Application
             // ProcedureType mappings
             configuration.CreateMap<ProcedureType, ProcedureTypeDto>();
             configuration.CreateMap<CreateOrEditProcedureTypeDto, ProcedureType>();
-
-            // ProcedureQuota mappings
-            configuration.CreateMap<ProcedureQuota, ProcedureQuotaDto>()
-                .ForMember(dto => dto.ProcedureTypeName,
-                    opt => opt.MapFrom(src => src.ProcedureType != null ? src.ProcedureType.Name : string.Empty));
-            configuration.CreateMap<CreateOrEditProcedureQuotaDto, ProcedureQuota>();
 
             // ProcedureTransaction mappings
             configuration.CreateMap<ProcedureTransaction, ProcedureTransactionDto>()

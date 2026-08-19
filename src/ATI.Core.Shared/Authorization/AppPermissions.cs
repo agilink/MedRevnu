@@ -41,11 +41,6 @@
         public const string Pages_Revenue_Products_Edit = "Pages.Revenue.Products.Edit";
         public const string Pages_Revenue_Products_Delete = "Pages.Revenue.Products.Delete";
 
-        public const string Pages_Revenue_Cases = "Pages.Revenue.Cases";
-        public const string Pages_Revenue_Cases_Create = "Pages.Revenue.Cases.Create";
-        public const string Pages_Revenue_Cases_Edit = "Pages.Revenue.Cases.Edit";
-        public const string Pages_Revenue_Cases_Delete = "Pages.Revenue.Cases.Delete";
-
         public const string Pages_Revenue_Reports = "Pages.Revenue.Reports";
         public const string Pages_Revenue_Dashboard = "Pages.Revenue.Dashboard";
         //COMMON PERMISSIONS (FOR BOTH OF TENANTS AND HOST)

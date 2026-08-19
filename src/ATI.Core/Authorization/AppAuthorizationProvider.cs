@@ -54,11 +54,6 @@ namespace ATI.Authorization
             revenueProducts.CreateChildPermission(AppPermissions.Pages_Revenue_Products_Edit, L("EditingProduct"));
             revenueProducts.CreateChildPermission(AppPermissions.Pages_Revenue_Products_Delete, L("DeletingProduct"));
 
-            var revenueCases = revenue.CreateChildPermission(AppPermissions.Pages_Revenue_Cases, L("Cases"));
-            revenueCases.CreateChildPermission(AppPermissions.Pages_Revenue_Cases_Create, L("CreatingCase"));
-            revenueCases.CreateChildPermission(AppPermissions.Pages_Revenue_Cases_Edit, L("EditingCase"));
-            revenueCases.CreateChildPermission(AppPermissions.Pages_Revenue_Cases_Delete, L("DeletingCase"));
-
             revenue.CreateChildPermission(AppPermissions.Pages_Revenue_Reports, L("Reports"));
             revenue.CreateChildPermission(AppPermissions.Pages_Revenue_Dashboard, L("RevenueDashboard"));
 

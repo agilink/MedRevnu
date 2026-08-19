@@ -1,4 +1,4 @@
-using Abp.Domain.Entities.Auditing;
+﻿using Abp.Domain.Entities.Auditing;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -7,11 +7,6 @@ namespace ATI.Revenue.Domain.Entities
     [Table("Product", Schema = "REV")]
     public class Product : AuditedAggregateRoot<int>
     {
-        public Product()
-        {
-            this.CaseProducts = new HashSet<CaseProduct>();
-        }
-
         public int? SubproductCategoryId { get; set; }
         public string? ProductCode { get; set; }
         public string Name { get; set; }
@@ -33,6 +28,5 @@ namespace ATI.Revenue.Domain.Entities
         [ForeignKey("SubproductCategoryId")]
         public virtual ProductSubcategory ProductSubcategory { get; set; }
 
-        public virtual ICollection<CaseProduct> CaseProducts { get; set; }
     }
 }
