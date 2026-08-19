@@ -25,6 +25,6 @@ namespace ATI.Revenue.Application.ProcedureQuotas.Dtos
         public DateTime EndDate { get; set; }
 
         [MaxLength(500)]
-        public string Notes { get; set; }
+        public string? Notes { get; set; }
     }
 }

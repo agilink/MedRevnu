@@ -23,7 +23,7 @@ namespace ATI.Revenue.Domain.Entities
         public DateTime EndDate { get; set; }
 
         [MaxLength(500)]
-        public string Notes { get; set; }
+        public string? Notes { get; set; }
 
         [ForeignKey("ProcedureTypeId")]
         public virtual ProcedureType ProcedureType { get; set; }

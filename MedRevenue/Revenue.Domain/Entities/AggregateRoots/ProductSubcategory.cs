@@ -15,7 +15,7 @@ namespace ATI.Revenue.Domain.Entities
         public int ProductCategoryId { get; set; }
         public string SubcategoryName { get; set; }
         public string ProcedureType { get; set; } // DE_NOVO or GEN_CHANGE
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         [ForeignKey("ProductCategoryId")]
         public virtual ProductCategory ProductCategory { get; set; }

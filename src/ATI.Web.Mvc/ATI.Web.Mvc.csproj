@@ -25,7 +25,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Remove="wwwroot\swagger\ui\index.html" />
-    <Content Remove="wwwroot\view-resources\Areas\Revenue\**\*" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="wwwroot\swagger\ui\index.html" />

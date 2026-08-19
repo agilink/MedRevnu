@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using ATI.Revenue.Application.ProductCategories;
+using ATI.Web.Controllers;
 using System.Threading.Tasks;
 
 namespace ATI.Revenue.Web.Areas.Revenue.Controllers
 {
     [Area("Revenue")]
-    public class ProductCategoriesController : Controller
+    public class ProductCategoriesController : ATIControllerBase
     {
         private readonly ProductCategoriesAppService _productCategoriesAppService;
 

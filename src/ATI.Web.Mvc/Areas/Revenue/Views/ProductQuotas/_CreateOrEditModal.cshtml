@@ -1,0 +1,88 @@
+@using ATI.Revenue.Web.PageModel.ProductQuotas
+@model CreateOrEditProductQuotaModalViewModel
+
+<div class="modal-header">
+    <h5 class="modal-title">
+        <span>@(Model.IsEditMode ? L("EditProductQuota") : L("CreateNewProductQuota"))</span>
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+</div>
+
+<div class="modal-body">
+    <form name="ProductQuotaCreateOrEditForm" role="form" novalidate class="form-validation">
+        <input type="hidden" name="Id" value="@(Model.ProductQuota?.Id ?? 0)" />
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-5">
+                    <label class="form-label required" for="PeriodYear">@L("Year")</label>
+                    <input class="form-control" type="number" name="PeriodYear" id="PeriodYear"
+                           value="@(Model.ProductQuota?.PeriodYear ?? DateTime.Now.Year)" required min="2000" max="2100" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-5">
+                    <label class="form-label required" for="PeriodMonth">@L("Month")</label>
+                    <select class="form-control" name="PeriodMonth" id="PeriodMonth" required>
+                        @for (int i = 1; i <= 12; i++)
+                        {
+                            var isSelected = (Model.ProductQuota != null && Model.ProductQuota.PeriodMonth == i) ||
+                                           (Model.ProductQuota == null && i == DateTime.Now.Month);
+                            <option value="@i" selected="@isSelected">@(new DateTime(2000, i, 1).ToString("MMMM"))</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-5">
+                <label class="form-label required" for="HospitalId">@L("Hospital")</label>
+                <select class="form-control" id="HospitalId" name="HospitalId" required>
+                    <option value="">@L("SelectHospital")</option>
+                    @foreach (var hospital in ViewBag.Hospitals)
+                    {
+                        var isSelected = Model.ProductQuota != null && hospital.Value == Model.ProductQuota.HospitalId.ToString();
+                        <option value="@hospital.Value" selected="@isSelected">@hospital.Text</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-6 mb-5">
+                <label class="form-label required" for="ProductCategoryId">@L("ProductCategory")</label>
+                <select class="form-control" id="ProductCategoryId" name="ProductCategoryId" required>
+                    <option value="">@L("SelectProductCategory")</option>
+                    @foreach (var category in ViewBag.ProductCategories)
+                    {
+                        var isSelected = Model.ProductQuota != null && category.Value == Model.ProductQuota.ProductCategoryId.ToString();
+                        <option value="@category.Value" selected="@isSelected">@category.Text</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-5">
+                <label class="form-label required" for="TargetAmount">@L("TargetAmount")</label>
+                <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input class="form-control" type="number" name="TargetAmount" id="TargetAmount"
+                           value="@(Model.ProductQuota?.TargetAmount ?? 0)" step="0.01" required min="0.01" />
+                </div>
+            </div>
+            <div class="col-md-6 mb-5">
+                <label class="form-label" for="TargetUnits">@L("TargetUnits")</label>
+                <input class="form-control" type="number" name="TargetUnits" id="TargetUnits"
+                       value="@(Model.ProductQuota?.TargetUnits ?? 0)" min="0" />
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L("Cancel")</button>
+    <button type="button" class="btn btn-primary save-button">
+        <i class="fa fa-save"></i> <span>@L("Save")</span>
+    </button>
+</div>
+
+<script src="~/view-resources/Areas/Revenue/Views/ProductQuotas/_CreateOrEditModal.js" asp-append-version="true"></script>

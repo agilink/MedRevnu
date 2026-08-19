@@ -50,7 +50,7 @@ namespace ATI.Revenue.Application.HospitalProductPrices
                     ProductName = hpp.Product.Name ?? "",
                     ProductCode = hpp.ProductCode,
                     UnitPrice = hpp.UnitPrice,
-                    EffectiveDate = hpp.EffectiveDate,
+                    EffectiveDate = hpp.EffectiveDate.Value,
                     IsActive = hpp.IsActive
                 })
                 .ToListAsync();

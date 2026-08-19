@@ -1,0 +1,51 @@
+@{
+    ViewData["Title"] = "Rate Chart Report";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Rate Chart - Products by Category with Prices</h3>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="HospitalFilter">Hospital *</label>
+                        <select id="HospitalFilter" class="form-control">
+                            <option value="">-- Select Hospital --</option>
+                            @foreach (var hospital in ViewBag.Hospitals)
+                            {
+                                <option value="@hospital.Value">@hospital.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button id="GenerateReportButton" class="btn btn-primary">
+                            <i class="fas fa-chart-bar"></i> Generate Report
+                        </button>
+                    </div>
+                </div>
+
+                <div id="reportContainer" style="display:none;">
+                    <table id="RateChartTable" class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Product Category</th>
+                                <th>Product Code</th>
+                                <th>Product Name</th>
+                                <th>Type</th>
+                                <th>Base Price</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/view-resources/Areas/Revenue/Views/Reports/RateChart.js" asp-append-version="true"></script>
+}

@@ -20,7 +20,7 @@ namespace ATI.Revenue.Application.Cases.Dtos
         public string ClientName { get; set; }
 
         [StringLength(500)]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         [Required]
         public DateTime CaseDate { get; set; }
@@ -32,17 +32,17 @@ namespace ATI.Revenue.Application.Cases.Dtos
         public string Status { get; set; }
 
         [StringLength(1000)]
-        public string Notes { get; set; }
+        public string? Notes { get; set; }
 
         // New fields for procedure tracking
         public int? ProcedureTypeId { get; set; }
         public int? FacilityId { get; set; }
 
         [StringLength(200)]
-        public string SurgeonName { get; set; }
+        public string? SurgeonName { get; set; }
 
         public DateTime? ProcedureDate { get; set; }
 
-        public List<CaseProductDto> CaseProducts { get; set; }
+        public List<CaseProductDto>? CaseProducts { get; set; }
     }
 }

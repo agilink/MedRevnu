@@ -15,57 +15,34 @@
             modalClass: 'CreateOrEditCaseModal'
         });
 
-        // Load procedure types for filter
         function loadProcedureTypes() {
-            $.ajax({
-                url: '/Revenue/Cases/GetProcedureTypes',
-                type: 'POST',
-                contentType: 'application/json',
-                success: function (result) {
-                    var $procedureTypeFilter = $('#ProcedureTypeFilter');
-                    $procedureTypeFilter.empty();
-                    $procedureTypeFilter.append('<option value="">All Procedure Types</option>');
-
-                    if (result && result.length > 0) {
-                        result.forEach(function (pt) {
-                            $procedureTypeFilter.append(
-                                $('<option></option>')
-                                    .attr('value', pt.id)
-                                    .text(pt.name)
-                            );
-                        });
-                    }
-                },
-                error: function () {
-                    console.log('Failed to load procedure types');
+            abp.ajax({
+                url: abp.appPath + 'Revenue/Cases/GetProcedureTypes',
+                type: 'GET',
+                abpHandleError: false
+            }).done(function (result) {
+                var $filter = $('#ProcedureTypeFilter');
+                $filter.empty().append('<option value="">All Procedure Types</option>');
+                if (result && result.length > 0) {
+                    $.each(result, function (i, pt) {
+                        $filter.append($('<option>').val(pt.id).text(pt.name));
+                    });
                 }
             });
         }
 
-        // Load facilities for filter
         function loadFacilities() {
-            $.ajax({
-                url: '/Admin/Facilities/GetAll',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({ maxResultCount: 1000, skipCount: 0 }),
-                success: function (result) {
-                    var $facilityFilter = $('#FacilityFilter');
-                    $facilityFilter.empty();
-                    $facilityFilter.append('<option value="">All Facilities</option>');
-
-                    if (result && result.items && result.items.length > 0) {
-                        result.items.forEach(function (facility) {
-                            $facilityFilter.append(
-                                $('<option></option>')
-                                    .attr('value', facility.id)
-                                    .text(facility.name)
-                            );
-                        });
-                    }
-                },
-                error: function () {
-                    console.log('Facilities endpoint not available yet');
+            abp.ajax({
+                url: abp.appPath + 'Revenue/Cases/GetFacilities',
+                type: 'GET',
+                abpHandleError: false
+            }).done(function (result) {
+                var $filter = $('#FacilityFilter');
+                $filter.empty().append('<option value="">All Hospitals</option>');
+                if (result && result.length > 0) {
+                    $.each(result, function (i, f) {
+                        $filter.append($('<option>').val(f.id).text(f.name));
+                    });
                 }
             });
         }

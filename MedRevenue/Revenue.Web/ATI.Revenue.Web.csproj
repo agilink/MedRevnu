@@ -6,6 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>ATI.Revenue.Web</RootNamespace>
     <AssemblyName>ATI.Revenue.Web</AssemblyName>
+    <IsPublishable>false</IsPublishable>
+    <OutputType>Library</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,12 +31,30 @@
     <Folder Include="Areas\Revenue\ViewModels\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </Content>
+    <Content Update="appsettings.Development.json">
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
   <Target Name="CopyRevenueScriptsToWebMvc" AfterTargets="Build">
     <ItemGroup>
       <ScriptFiles Include="wwwroot\view-resources\**\*" />
     </ItemGroup>
     <Copy SourceFiles="@(ScriptFiles)"
           DestinationFiles="@(ScriptFiles->'..\..\src\ATI.Web.Mvc\wwwroot\view-resources\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="CopyRevenueViewsToWebMvc" AfterTargets="Build">
+    <ItemGroup>
+      <ViewFiles Include="Areas\Revenue\Views\**\*.cshtml" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ViewFiles)"
+          DestinationFiles="@(ViewFiles->'..\..\src\ATI.Web.Mvc\Areas\Revenue\Views\%(RecursiveDir)%(Filename)%(Extension)')"
           SkipUnchangedFiles="true" />
   </Target>
 

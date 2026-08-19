@@ -1,0 +1,11 @@
+@using Abp.Configuration
+@using Abp.Dependency
+@using ATI.Configuration
+
+@{
+    var settingManager = IocManager.Instance.Resolve<ISettingManager>();
+    var currentThemeName = settingManager.GetSettingValue(AppSettings.UiManagement.Theme);
+
+    // Use current theme's layout
+    Layout = "~/Areas/Core/Views/Layout/" + currentThemeName + "/_Layout.cshtml";
+}

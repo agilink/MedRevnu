@@ -16,14 +16,13 @@ namespace ATI.Revenue.Domain.Entities
         public int ProductId { get; set; }
 
         [MaxLength(100)]
-        public string ProductCode { get; set; }
+        public string? ProductCode { get; set; }
 
         [Required]
         [Column(TypeName = "decimal(10,2)")]
         public decimal UnitPrice { get; set; }
 
-        [Required]
-        public DateTime EffectiveDate { get; set; }
+        public DateTime? EffectiveDate { get; set; }
 
         public bool IsActive { get; set; }
 

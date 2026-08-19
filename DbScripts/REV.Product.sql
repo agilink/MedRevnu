@@ -1,0 +1,1 @@
+ALTER TABLE REV.Product ALTER COLUMN CreationTime datetime2 NOT NULL

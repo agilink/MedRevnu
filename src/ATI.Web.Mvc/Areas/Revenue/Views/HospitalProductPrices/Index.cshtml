@@ -1,0 +1,108 @@
+@using ATI.Authorization
+@{
+    ViewData["Title"] = "Hospital Product Prices";
+}
+
+@section Scripts
+{
+    <script src="~/view-resources/Areas/Revenue/Views/HospitalProductPrices/Index.js" asp-append-version="true"></script>
+}
+
+<div class="app-toolbar py-3 py-lg-6" id="kt_app_toolbar">
+    <div id="kt_app_toolbar_container" class="app-container container-fluid d-flex flex-stack">
+        <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
+            <h1 class="page-heading d-flex text-dark fw-bold fs-3 flex-column justify-content-center my-0">
+                @L("HospitalProductPrices")
+            </h1>
+            <span class="text-muted me-4">@L("HospitalProductPricesHeaderInfo")</span>
+        </div>
+        <div class="d-flex align-items-center">
+            @if (IsGranted(AppPermissions.Pages_Revenue_HospitalProductPrices_Create))
+            {
+                <button id="CreateNewHospitalProductPriceButton" class="btn btn-primary">
+                    <i class="fa fa-plus btn-md-icon"></i>
+                    <span class="d-none d-md-inline-block">@L("CreateNew")</span>
+                </button>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="app-container container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <div class="form">
+                <div class="row align-items-center mb-4">
+                    <div class="col-xl-12">
+                        <div class="mb-5 align-items-center">
+                            <div class="input-group">
+                                <input type="text" id="HospitalProductPricesTableFilter" class="form-control" placeholder="@L("SearchWithThreeDot")">
+                                <button id="GetHospitalProductPricesButton" class="btn btn-primary" type="submit">
+                                    <i class="flaticon-search-1" aria-label="@L("Search")"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="AdvancedFiltersArea" style="display: none" class="row mb-4">
+                    <div class="col-xl-4">
+                        <div class="mb-5">
+                            <label for="HospitalFilter" class="form-label">@L("Hospital")</label>
+                            <select id="HospitalFilter" class="form-select">
+                                <option value="">@L("AllHospitals")</option>
+                                @foreach (var hospital in ViewBag.Hospitals)
+                                {
+                                    <option value="@hospital.Value">@hospital.Text</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-xl-4">
+                        <div class="mb-5">
+                            <label for="IsActiveFilter" class="form-label">@L("Status")</label>
+                            <select id="IsActiveFilter" class="form-select">
+                                <option value="">@L("All")</option>
+                                <option value="true">@L("Active")</option>
+                                <option value="false">@L("Inactive")</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-xl-12 text-end">
+                        <button id="RefreshHospitalProductPricesButton" class="btn btn-primary float-end">
+                            <i class="fa fa-sync btn-md-icon"></i>
+                            <span class="d-none d-md-inline-block">
+                                @L("Refresh")
+                            </span>
+                        </button>
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-xl-12">
+                        <span id="ShowAdvancedFiltersSpan" class="text-muted clickable-item">
+                            <i class="fa fa-angle-down"></i> @L("ShowAdvancedFilters")
+                        </span>
+                        <span id="HideAdvancedFiltersSpan" class="text-muted clickable-item" style="display: none">
+                            <i class="fa fa-angle-up"></i> @L("HideAdvancedFilters")
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="align-items-center">
+                <table id="HospitalProductPricesTable" class="table align-middle table-row-dashed fs-6 gy-5 dataTable dtr-inline no-footer" width="100%">
+                    <thead>
+                        <tr>
+                            <th>@L("Actions")</th>
+                            <th>@L("Hospital")</th>
+                            <th>@L("Product")</th>
+                            <th>@L("ProductCode")</th>
+                            <th>@L("UnitPrice")</th>
+                            <th>@L("EffectiveDate")</th>
+                            <th>@L("IsActive")</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

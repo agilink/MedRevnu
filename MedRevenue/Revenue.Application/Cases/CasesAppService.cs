@@ -118,10 +118,9 @@ namespace ATI.Revenue.Application.Cases
         public override async Task<CaseDto> CreateAsync(CreateOrEditCaseDto input)
         {
             var entity = ObjectMapper.Map<Case>(input);
-            
+
             entity.Id = await _caseRepository.InsertAndGetIdAsync(entity);
 
-            // Handle case products
             if (input.CaseProducts != null && input.CaseProducts.Any())
             {
                 foreach (var productDto in input.CaseProducts)
@@ -140,20 +139,26 @@ namespace ATI.Revenue.Application.Cases
             }
 
             await CurrentUnitOfWork.SaveChangesAsync();
-            return MapToEntityDto(entity);
+
+            var saved = await _caseRepository.GetAll()
+                .Include(c => c.ProcedureType)
+                .Include(c => c.CaseProducts).ThenInclude(cp => cp.Product)
+                .FirstOrDefaultAsync(c => c.Id == entity.Id);
+            return ObjectMapper.Map<CaseDto>(saved);
         }
 
         public override async Task<CaseDto> UpdateAsync(CreateOrEditCaseDto input)
         {
             var entity = await _caseRepository.GetAsync(input.Id);
-            
+
             ObjectMapper.Map(input, entity);
 
-            // Update case products
-            await _caseProductRepository.DeleteAsync(cp => cp.CaseId == entity.Id);
-            
-            if (input.CaseProducts != null && input.CaseProducts.Any())
+            // Only replace products when the caller explicitly sends a products list.
+            // Null means "leave products unchanged" (e.g. the create/edit modal).
+            if (input.CaseProducts != null)
             {
+                await _caseProductRepository.DeleteAsync(cp => cp.CaseId == entity.Id);
+
                 foreach (var productDto in input.CaseProducts)
                 {
                     var caseProduct = new CaseProduct
@@ -170,7 +175,21 @@ namespace ATI.Revenue.Application.Cases
             }
 
             await CurrentUnitOfWork.SaveChangesAsync();
-            return MapToEntityDto(entity);
+
+            var saved = await _caseRepository.GetAll()
+                .Include(c => c.ProcedureType)
+                .Include(c => c.CaseProducts).ThenInclude(cp => cp.Product)
+                .FirstOrDefaultAsync(c => c.Id == entity.Id);
+            return ObjectMapper.Map<CaseDto>(saved);
+        }
+
+        public async Task<CaseProductDto> GetCaseProductForEdit(int id)
+        {
+            var caseProduct = await _caseProductRepository.GetAll()
+                .Include(cp => cp.Product)
+                .FirstOrDefaultAsync(cp => cp.Id == id);
+
+            return ObjectMapper.Map<CaseProductDto>(caseProduct);
         }
 
         public async Task RemoveCaseProduct(EntityDto<int> input)
@@ -185,7 +204,6 @@ namespace ATI.Revenue.Application.Cases
 
             if (input.Id > 0)
             {
-                // Update existing case product
                 caseProduct = await _caseProductRepository.GetAsync(input.Id);
                 caseProduct.ProductId = input.ProductId;
                 caseProduct.Quantity = input.Quantity;
@@ -197,7 +215,6 @@ namespace ATI.Revenue.Application.Cases
             }
             else
             {
-                // Add new case product
                 caseProduct = new CaseProduct
                 {
                     CaseId = input.CaseId,
@@ -213,7 +230,11 @@ namespace ATI.Revenue.Application.Cases
 
             await CurrentUnitOfWork.SaveChangesAsync();
 
-            return ObjectMapper.Map<CaseProductDto>(caseProduct);
+            // Reload with Product to avoid NullReferenceException mapping ProductName
+            var saved = await _caseProductRepository.GetAll()
+                .Include(cp => cp.Product)
+                .FirstOrDefaultAsync(cp => cp.Id == caseProduct.Id);
+            return ObjectMapper.Map<CaseProductDto>(saved);
         }
     }
 }

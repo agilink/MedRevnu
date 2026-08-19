@@ -13,13 +13,13 @@ namespace ATI.Revenue.Application.Products.Dtos
         public string Name { get; set; }
 
         [StringLength(200)]
-        public string Manufacturer { get; set; }
+        public string? Manufacturer { get; set; }
 
         [StringLength(100)]
-        public string ModelNo { get; set; }
+        public string? ModelNo { get; set; }
 
         [StringLength(500)]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         public int? ProductCategoryId { get; set; }
 

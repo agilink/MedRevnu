@@ -13,5 +13,6 @@ namespace ATI.Revenue.Application.Cases
         Task<PagedResultDto<CaseDto>> GetAllFiltered(GetAllCasesInput input);
         Task RemoveCaseProduct(EntityDto<int> input);
         Task<CaseProductDto> AddOrUpdateCaseProduct(CaseProductDto input);
+        Task<CaseProductDto> GetCaseProductForEdit(int id);
     }
 }

@@ -145,3 +145,6 @@ src/ATI.Web.Host/package-lock.json
 src/ATI.Web.Host/wwwroot/view-resources/**/*.min.*
 # Agilink MCP
 .agilink/
+
+# Claude Code (internal, never commit)
+.claude/

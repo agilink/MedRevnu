@@ -9,18 +9,14 @@
             _$form = _modalManager.getModal().find('form[name=CaseProductForm]');
             _$form.validate();
 
-            // Load products dropdown
             loadProducts();
 
-            // Calculate total when quantity, unit price, or discount changes
             $('#Quantity, #UnitPrice, #Discount').on('input change', function () {
                 calculateTotal();
             });
 
-            // Set unit price when product is selected
             $('#ProductId').on('change', function () {
-                var selectedOption = $(this).find('option:selected');
-                var price = selectedOption.data('price');
+                var price = $(this).find('option:selected').data('price');
                 if (price) {
                     $('#UnitPrice').val(price);
                     calculateTotal();
@@ -29,45 +25,37 @@
         };
 
         function loadProducts() {
-            $.ajax({
-                url: abp.appPath + 'api/services/app/Products/GetAll',
-                type: 'GET',
-                success: function (result) {
+            abp.services.app.products.getAllActive()
+                .done(function (result) {
                     var $select = $('#ProductId');
-                    $select.empty();
-                    $select.append('<option value="">-- Select Product --</option>');
+                    $select.empty().append('<option value="">-- Select Product --</option>');
 
-                    if (result.items && result.items.length > 0) {
-                        $.each(result.items, function (index, product) {
+                    if (result && result.items && result.items.length > 0) {
+                        $.each(result.items, function (i, product) {
                             $select.append(
-                                $('<option></option>')
-                                    .attr('value', product.id)
+                                $('<option>').val(product.id)
                                     .attr('data-price', product.price || 0)
                                     .text(product.name)
                             );
                         });
 
-                        // If editing, select the current product
-                        var currentProductId = _modalManager.getArgs().productId;
+                        var currentProductId = $select.data('current-product-id');
                         if (currentProductId) {
                             $select.val(currentProductId);
-                            $select.trigger('change');
+                            calculateTotal();
                         }
                     }
-                },
-                error: function () {
-                    abp.notify.error('Failed to load products');
-                }
-            });
+                })
+                .fail(function () {
+                    abp.message.error('Failed to load products');
+                });
         }
 
         function calculateTotal() {
             var quantity = parseFloat($('#Quantity').val()) || 0;
             var unitPrice = parseFloat($('#UnitPrice').val()) || 0;
             var discount = parseFloat($('#Discount').val()) || 0;
-
-            var total = (quantity * unitPrice) - discount;
-            $('#TotalPrice').val(total.toFixed(2));
+            $('#TotalPrice').val(((quantity * unitPrice) - discount).toFixed(2));
         }
 
         this.save = function () {
@@ -97,19 +85,20 @@
 
             _modalManager.setBusy(true);
 
-            _casesService
-                .addOrUpdateCaseProduct(caseProductData)
-                .done(function () {
-                    abp.notify.info(app.localize('SavedSuccessfully'));
-                    _modalManager.close();
-                    abp.event.trigger('app.addOrEditProductModalSaved');
-                })
-                .fail(function (error) {
-                    console.error('Save failed:', error);
-                })
-                .always(function () {
-                    _modalManager.setBusy(false);
-                });
+            abp.ajax({
+                url: abp.appPath + 'api/services/app/Cases/AddOrUpdateCaseProduct',
+                type: 'POST',
+                data: JSON.stringify(caseProductData),
+                contentType: 'application/json'
+            })
+            .done(function () {
+                abp.notify.info(app.localize('SavedSuccessfully'));
+                _modalManager.close();
+                abp.event.trigger('app.addOrEditProductModalSaved');
+            })
+            .always(function () {
+                _modalManager.setBusy(false);
+            });
         };
     };
 })();

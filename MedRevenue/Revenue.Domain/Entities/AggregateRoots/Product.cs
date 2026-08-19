@@ -13,15 +13,15 @@ namespace ATI.Revenue.Domain.Entities
         }
 
         public int? SubproductCategoryId { get; set; }
-        public string ProductCode { get; set; }
+        public string? ProductCode { get; set; }
         public string Name { get; set; }
         public bool IsSystem { get; set; }
         public decimal BasePrice { get; set; }
 
         // Legacy fields - keeping for backwards compatibility
-        public string Manufacturer { get; set; }
-        public string ModelNo { get; set; }
-        public string Description { get; set; }
+        public string? Manufacturer { get; set; }
+        public string? ModelNo { get; set; }
+        public string? Description { get; set; }
         public int? ProductCategoryId { get; set; }
         public decimal Cost { get; set; }
         public decimal Price { get; set; }

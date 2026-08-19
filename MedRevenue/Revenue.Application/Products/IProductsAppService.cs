@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace ATI.Revenue.Application.Products
 {
-    public interface IProductsAppService : IAsyncCrudAppService<ProductDto, int, PagedAndSortedResultRequestDto, CreateOrEditProductDto>
+    public interface IProductsAppService : IAsyncCrudAppService<ProductDto, int, GetAllProductsInput, CreateOrEditProductDto>
     {
         Task<ListResultDto<ProductDto>> GetAllActive();
     }

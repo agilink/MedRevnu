@@ -1,0 +1,115 @@
+@using ATI.Revenue.Web.PageModel.ProcedureTransactions
+@model CreateOrEditProcedureTransactionModalViewModel
+
+<div class="modal-header">
+    <h5 class="modal-title">
+        <span>@(Model.IsEditMode ? L("EditTransaction") : L("CreateTransaction"))</span>
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+</div>
+
+<div class="modal-body">
+    <form name="ProcedureTransactionCreateOrEditForm" role="form" novalidate class="form-validation">
+        <input type="hidden" name="Id" value="@(Model.ProcedureTransaction?.Id ?? 0)" />
+
+        <div class="row">
+            <div class="col-md-6 mb-5">
+                <label class="form-label required" for="HospitalId">@L("Hospital")</label>
+                <select class="form-control" id="HospitalId" name="HospitalId" required>
+                    <option value="">@L("SelectHospital")</option>
+                    @foreach (var hospital in ViewBag.Hospitals)
+                    {
+                        var isSelected = Model.ProcedureTransaction != null && hospital.Value == Model.ProcedureTransaction.HospitalId.ToString();
+                        <option value="@hospital.Value" selected="@isSelected">@hospital.Text</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-6 mb-5">
+                <label class="form-label required" for="PhysicianId">@L("Physician")</label>
+                <select class="form-control" id="PhysicianId" name="PhysicianId" required>
+                    <option value="">@L("SelectPhysician")</option>
+                    @foreach (var physician in ViewBag.Physicians)
+                    {
+                        var isSelected = Model.ProcedureTransaction != null && physician.Value == Model.ProcedureTransaction.PhysicianId.ToString();
+                        <option value="@physician.Value" selected="@isSelected">@physician.Text</option>
+                    }
+                </select>
+                <small class="form-text text-muted">@L("HospitalAutoPopulated")</small>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-5">
+                <label class="form-label required" for="ProductId">@L("Product")</label>
+                <select class="form-control" id="ProductId" name="ProductId" required>
+                    <option value="">@L("SelectProduct")</option>
+                    @foreach (var product in ViewBag.Products)
+                    {
+                        var isSelected = Model.ProcedureTransaction != null && product.Value == Model.ProcedureTransaction.ProductId.ToString();
+                        <option value="@product.Value" selected="@isSelected">@product.Text</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-6 mb-5">
+                <label class="form-label required" for="ProcedureDate">@L("Date")</label>
+                <input class="form-control" type="date" name="ProcedureDate" id="ProcedureDate"
+                       value="@(Model.ProcedureTransaction?.ProcedureDate.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString("yyyy-MM-dd"))" required />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-5">
+                <label class="form-label required">@L("ProcedureType")</label>
+                <div class="pt-2">
+                    @{
+                        var isDeNovo = Model.ProcedureTransaction?.ProcedureType == "DE_NOVO" || Model.ProcedureTransaction?.ProcedureType == null;
+                    }
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="ProcedureType" id="ProcedureTypeNew" value="DE_NOVO"
+                               @(isDeNovo ? "checked" : "") required />
+                        <label class="form-check-label" for="ProcedureTypeNew">NEW (De Novo)</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="ProcedureType" id="ProcedureTypeChange" value="GEN_CHANGE"
+                               @(!isDeNovo ? "checked" : "") />
+                        <label class="form-check-label" for="ProcedureTypeChange">GEN CHANGE</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-5">
+                <label class="form-label required" for="Quantity">@L("NumberOfCases")</label>
+                <input class="form-control" type="number" name="Quantity" id="Quantity"
+                       value="@(Model.ProcedureTransaction?.Quantity ?? 1)" required min="1" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-5">
+                <label class="form-label required" for="UnitPrice">@L("BasePrice")</label>
+                <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input class="form-control" type="number" name="UnitPrice" id="UnitPrice"
+                           value="@(Model.ProcedureTransaction?.UnitPrice ?? 0)" step="0.01" readonly required />
+                </div>
+                <small class="form-text text-muted">@L("AutoPopulatedByHospitalProduct")</small>
+            </div>
+            <div class="col-md-6 mb-5">
+                <label class="form-label required" for="TotalAmount">@L("TransactionAmount")</label>
+                <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input class="form-control" type="number" name="TotalAmount" id="TotalAmount"
+                           value="@(Model.ProcedureTransaction?.TotalAmount ?? 0)" step="0.01" required min="0.01" />
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L("Cancel")</button>
+    <button type="button" class="btn btn-primary save-button">
+        <i class="fa fa-save"></i> <span>@L("Save")</span>
+    </button>
+</div>
+
+<script src="~/view-resources/Areas/Revenue/Views/ProcedureTransactions/_CreateOrEditModal.js" asp-append-version="true"></script>

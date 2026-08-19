@@ -1,0 +1,70 @@
+@model ATI.Revenue.Application.Products.Dtos.ProductDto
+
+<div class="modal-header">
+    <h5 class="modal-title">
+        <span>@L("ProductDetails")</span>
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+</div>
+
+<div class="modal-body">
+    <div class="row mb-3">
+        <div class="col-sm-4 fw-bold">@L("ProductCode")</div>
+        <div class="col-sm-8">@(Model.ProductCode ?? "-")</div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-sm-4 fw-bold">@L("Name")</div>
+        <div class="col-sm-8">@Model.Name</div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-sm-4 fw-bold">@L("Category")</div>
+        <div class="col-sm-8">@(Model.ProductCategoryName ?? "-")</div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-sm-4 fw-bold">@L("Subcategory")</div>
+        <div class="col-sm-8">@(Model.SubproductCategoryName ?? "-")</div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-sm-4 fw-bold">@L("Manufacturer")</div>
+        <div class="col-sm-8">@(Model.Manufacturer ?? "-")</div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-sm-4 fw-bold">@L("ModelNo")</div>
+        <div class="col-sm-8">@(Model.ModelNo ?? "-")</div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-sm-4 fw-bold">@L("BasePrice")</div>
+        <div class="col-sm-8">$@Model.BasePrice.ToString("N2")</div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-sm-4 fw-bold">@L("Cost")</div>
+        <div class="col-sm-8">$@Model.Cost.ToString("N2")</div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-sm-4 fw-bold">@L("Price")</div>
+        <div class="col-sm-8">$@Model.Price.ToString("N2")</div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-sm-4 fw-bold">@L("Status")</div>
+        <div class="col-sm-8">
+            @if (Model.IsActive)
+            {
+                <span class="badge badge-light-success">@L("Active")</span>
+            }
+            else
+            {
+                <span class="badge badge-light-danger">@L("Inactive")</span>
+            }
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-sm-4 fw-bold">@L("Description")</div>
+        <div class="col-sm-8">@(Model.Description ?? "-")</div>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L("Close")</button>
+</div>
+
+<script src="~/view-resources/Areas/Revenue/Views/Products/_ViewModal.js" asp-append-version="true"></script>

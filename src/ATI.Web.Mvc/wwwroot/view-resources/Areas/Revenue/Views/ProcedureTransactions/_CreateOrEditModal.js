@@ -82,26 +82,14 @@
                 return;
             }
 
-            $.ajax({
-                url: abp.appPath + 'Revenue/ProcedureTransactions/GetProductPriceByHospital',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    hospitalId: parseInt(hospitalId),
-                    productId: parseInt(productId)
-                }),
-                success: function (result) {
-                    if (result.success) {
-                        $('#UnitPrice').val(result.unitPrice.toFixed(2));
-                        calculateTotalAmount();
-                    } else {
-                        abp.notify.error('Failed to load price: ' + result.message);
-                    }
-                },
-                error: function (xhr) {
-                    console.error('Failed to load price', xhr);
-                    abp.notify.error('Failed to load price');
-                }
+            _transactionsService.getProductPriceByHospital(
+                parseInt(hospitalId),
+                parseInt(productId)
+            ).done(function (result) {
+                $('#UnitPrice').val(result.toFixed(2));
+                calculateTotalAmount();
+            }).fail(function (error) {
+                abp.notify.error('Failed to load price');
             });
         }
 

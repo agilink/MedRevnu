@@ -14,8 +14,8 @@ namespace ATI.Revenue.Domain.Entities
         }
 
         public string Name { get; set; }
-        public string ShortDescription { get; set; }
-        public string Description { get; set; }
+        public string? ShortDescription { get; set; }
+        public string? Description { get; set; }
 
         public virtual ICollection<Product> Products { get; set; }
         public virtual ICollection<ProductSubcategory> ProductSubcategories { get; set; }

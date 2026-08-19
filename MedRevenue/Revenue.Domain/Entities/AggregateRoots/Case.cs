@@ -15,16 +15,16 @@ namespace ATI.Revenue.Domain.Entities
 
         public string CaseNumber { get; set; }
         public string ClientName { get; set; }
-        public string Description { get; set; }
+        public string? Description { get; set; }
         public DateTime CaseDate { get; set; }
         public decimal TotalAmount { get; set; }
         public string Status { get; set; }
-        public string Notes { get; set; }
+        public string? Notes { get; set; }
 
         // New fields for procedure tracking
         public int? ProcedureTypeId { get; set; }
         public int? FacilityId { get; set; }
-        public string SurgeonName { get; set; }
+        public string? SurgeonName { get; set; }
         public DateTime? ProcedureDate { get; set; }
 
         [ForeignKey("ProcedureTypeId")]

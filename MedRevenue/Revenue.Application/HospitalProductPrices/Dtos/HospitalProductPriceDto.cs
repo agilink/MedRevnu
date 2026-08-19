@@ -11,7 +11,7 @@ namespace ATI.Revenue.Application.HospitalProductPrices.Dtos
         public string ProductName { get; set; }
         public string ProductCode { get; set; }
         public decimal UnitPrice { get; set; }
-        public DateTime EffectiveDate { get; set; }
+        public DateTime? EffectiveDate { get; set; }
         public bool IsActive { get; set; }
     }
 }

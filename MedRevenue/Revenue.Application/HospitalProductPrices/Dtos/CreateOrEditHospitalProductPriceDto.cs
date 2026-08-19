@@ -13,14 +13,14 @@ namespace ATI.Revenue.Application.HospitalProductPrices.Dtos
         public int ProductId { get; set; }
 
         [MaxLength(100)]
-        public string ProductCode { get; set; }
+        public string? ProductCode { get; set; }
 
         [Required]
         [Range(0.01, double.MaxValue, ErrorMessage = "Unit Price must be greater than 0")]
         public decimal UnitPrice { get; set; }
 
         [Required]
-        public DateTime EffectiveDate { get; set; }
+        public DateTime? EffectiveDate { get; set; }
 
         public bool IsActive { get; set; }
     }
