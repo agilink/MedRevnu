@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using ATI.Revenue.Application.Cases;
 using ATI.Revenue.Application.Cases.Dtos;
 using ATI.Revenue.Application.ProcedureTypes;
@@ -11,10 +11,13 @@ using System.Threading.Tasks;
 using ATI.Web.Controllers;
 using ATI.Revenue.Web.PageModel.Cases;
 using System;
+using Abp.AspNetCore.Mvc.Authorization;
+using ATI.Authorization;
 
 namespace ATI.Revenue.Web.Areas.Revenue.Controllers
 {
     [Area("Revenue")]
+    [AbpMvcAuthorize(AppPermissions.Pages_Revenue_Cases)]
     public class CasesController : ATIControllerBase
     {
         private readonly ICasesAppService _casesAppService;

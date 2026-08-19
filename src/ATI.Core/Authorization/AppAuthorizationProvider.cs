@@ -32,10 +32,36 @@ namespace ATI.Authorization
             pages.CreateChildPermission(AppPermissions.Pages_DemoUiComponents, L("DemoUiComponents"));
             pages.CreateChildPermission(AppPermissions.Pages_Medrev, L("Revenue"));
 
-            var hospitalProductPrices = pages.CreateChildPermission(AppPermissions.Pages_Revenue_HospitalProductPrices, L("HospitalProductPrices"));
+            var revenue = pages.CreateChildPermission(AppPermissions.Pages_Revenue, L("Revenue"));
+
+            var hospitalProductPrices = revenue.CreateChildPermission(AppPermissions.Pages_Revenue_HospitalProductPrices, L("HospitalProductPrices"));
             hospitalProductPrices.CreateChildPermission(AppPermissions.Pages_Revenue_HospitalProductPrices_Create, L("CreatingHospitalProductPrice"));
             hospitalProductPrices.CreateChildPermission(AppPermissions.Pages_Revenue_HospitalProductPrices_Edit, L("EditingHospitalProductPrice"));
             hospitalProductPrices.CreateChildPermission(AppPermissions.Pages_Revenue_HospitalProductPrices_Delete, L("DeletingHospitalProductPrice"));
+
+            var procedureTransactions = revenue.CreateChildPermission(AppPermissions.Pages_Revenue_ProcedureTransactions, L("RevenueTransactions"));
+            procedureTransactions.CreateChildPermission(AppPermissions.Pages_Revenue_ProcedureTransactions_Create, L("CreatingRevenueTransaction"));
+            procedureTransactions.CreateChildPermission(AppPermissions.Pages_Revenue_ProcedureTransactions_Edit, L("EditingRevenueTransaction"));
+            procedureTransactions.CreateChildPermission(AppPermissions.Pages_Revenue_ProcedureTransactions_Delete, L("DeletingRevenueTransaction"));
+
+            var productQuotas = revenue.CreateChildPermission(AppPermissions.Pages_Revenue_ProductQuotas, L("ProductQuotas"));
+            productQuotas.CreateChildPermission(AppPermissions.Pages_Revenue_ProductQuotas_Create, L("CreatingProductQuota"));
+            productQuotas.CreateChildPermission(AppPermissions.Pages_Revenue_ProductQuotas_Edit, L("EditingProductQuota"));
+            productQuotas.CreateChildPermission(AppPermissions.Pages_Revenue_ProductQuotas_Delete, L("DeletingProductQuota"));
+
+            var revenueProducts = revenue.CreateChildPermission(AppPermissions.Pages_Revenue_Products, L("Products"));
+            revenueProducts.CreateChildPermission(AppPermissions.Pages_Revenue_Products_Create, L("CreatingProduct"));
+            revenueProducts.CreateChildPermission(AppPermissions.Pages_Revenue_Products_Edit, L("EditingProduct"));
+            revenueProducts.CreateChildPermission(AppPermissions.Pages_Revenue_Products_Delete, L("DeletingProduct"));
+
+            var revenueCases = revenue.CreateChildPermission(AppPermissions.Pages_Revenue_Cases, L("Cases"));
+            revenueCases.CreateChildPermission(AppPermissions.Pages_Revenue_Cases_Create, L("CreatingCase"));
+            revenueCases.CreateChildPermission(AppPermissions.Pages_Revenue_Cases_Edit, L("EditingCase"));
+            revenueCases.CreateChildPermission(AppPermissions.Pages_Revenue_Cases_Delete, L("DeletingCase"));
+
+            revenue.CreateChildPermission(AppPermissions.Pages_Revenue_Reports, L("Reports"));
+            revenue.CreateChildPermission(AppPermissions.Pages_Revenue_Dashboard, L("RevenueDashboard"));
+
             var administration = pages.CreateChildPermission(AppPermissions.Pages_Administration, L("Administration"));
 
             var roles = administration.CreateChildPermission(AppPermissions.Pages_Administration_Roles, L("Roles"));

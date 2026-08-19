@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ATI.Revenue.Application.Products;
 using ATI.Revenue.Application.Products.Dtos;
@@ -9,10 +9,13 @@ using Abp.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
+using Abp.AspNetCore.Mvc.Authorization;
+using ATI.Authorization;
 
 namespace ATI.Revenue.Web.Areas.Revenue.Controllers
 {
     [Area("Revenue")]
+    [AbpMvcAuthorize(AppPermissions.Pages_Revenue_Products)]
     public class ProductsController : ATIControllerBase
     {
         private readonly IProductsAppService _productsAppService;

@@ -19,10 +19,35 @@
         public const string Pages_Administration_LafayetteQuota_Products_Create = "Pages.Administration.LafayetteQuota.Products.Create";
         public const string Pages_Administration_LafayetteQuota_Products_Edit = "Pages.Administration.LafayetteQuota.Products.Edit";
 
+        public const string Pages_Revenue = "Pages.Revenue";
+
         public const string Pages_Revenue_HospitalProductPrices = "Pages.Revenue.HospitalProductPrices";
         public const string Pages_Revenue_HospitalProductPrices_Create = "Pages.Revenue.HospitalProductPrices.Create";
         public const string Pages_Revenue_HospitalProductPrices_Edit = "Pages.Revenue.HospitalProductPrices.Edit";
         public const string Pages_Revenue_HospitalProductPrices_Delete = "Pages.Revenue.HospitalProductPrices.Delete";
+
+        public const string Pages_Revenue_ProcedureTransactions = "Pages.Revenue.ProcedureTransactions";
+        public const string Pages_Revenue_ProcedureTransactions_Create = "Pages.Revenue.ProcedureTransactions.Create";
+        public const string Pages_Revenue_ProcedureTransactions_Edit = "Pages.Revenue.ProcedureTransactions.Edit";
+        public const string Pages_Revenue_ProcedureTransactions_Delete = "Pages.Revenue.ProcedureTransactions.Delete";
+
+        public const string Pages_Revenue_ProductQuotas = "Pages.Revenue.ProductQuotas";
+        public const string Pages_Revenue_ProductQuotas_Create = "Pages.Revenue.ProductQuotas.Create";
+        public const string Pages_Revenue_ProductQuotas_Edit = "Pages.Revenue.ProductQuotas.Edit";
+        public const string Pages_Revenue_ProductQuotas_Delete = "Pages.Revenue.ProductQuotas.Delete";
+
+        public const string Pages_Revenue_Products = "Pages.Revenue.Products";
+        public const string Pages_Revenue_Products_Create = "Pages.Revenue.Products.Create";
+        public const string Pages_Revenue_Products_Edit = "Pages.Revenue.Products.Edit";
+        public const string Pages_Revenue_Products_Delete = "Pages.Revenue.Products.Delete";
+
+        public const string Pages_Revenue_Cases = "Pages.Revenue.Cases";
+        public const string Pages_Revenue_Cases_Create = "Pages.Revenue.Cases.Create";
+        public const string Pages_Revenue_Cases_Edit = "Pages.Revenue.Cases.Edit";
+        public const string Pages_Revenue_Cases_Delete = "Pages.Revenue.Cases.Delete";
+
+        public const string Pages_Revenue_Reports = "Pages.Revenue.Reports";
+        public const string Pages_Revenue_Dashboard = "Pages.Revenue.Dashboard";
         //COMMON PERMISSIONS (FOR BOTH OF TENANTS AND HOST)
 
         public const string Pages = "Pages";

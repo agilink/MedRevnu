@@ -1,12 +1,12 @@
-(function () {
+﻿(function () {
     $(function () {
         var _$transactionsTable = $('#ProcedureTransactionsTable');
         var _transactionsService = abp.services.app.procedureTransactions;
 
         var _permissions = {
-            create: true, // abp.auth.hasPermission('Pages.Revenue.ProcedureTransactions.Create'),
-            edit: true, // abp.auth.hasPermission('Pages.Revenue.ProcedureTransactions.Edit'),
-            delete: true // abp.auth.hasPermission('Pages.Revenue.ProcedureTransactions.Delete')
+            create: abp.auth.hasPermission('Pages.Revenue.ProcedureTransactions.Create'),
+            edit: abp.auth.hasPermission('Pages.Revenue.ProcedureTransactions.Edit'),
+            delete: abp.auth.hasPermission('Pages.Revenue.ProcedureTransactions.Delete')
         };
 
         var _createOrEditModal = new app.ModalManager({

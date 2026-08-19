@@ -1,11 +1,14 @@
-using ATI.Revenue.Application.ProcedureQuotas;
+﻿using ATI.Revenue.Application.ProcedureQuotas;
 using ATI.Revenue.Application.ProcedureQuotas.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using Abp.AspNetCore.Mvc.Authorization;
+using ATI.Authorization;
 
 namespace ATI.Revenue.Web.Areas.Revenue.Controllers
 {
     [Area("Revenue")]
+    [AbpMvcAuthorize(AppPermissions.Pages_Revenue)]
     public class ProcedureQuotasController : Controller
     {
         private readonly IProcedureQuotasAppService _procedureQuotasAppService;

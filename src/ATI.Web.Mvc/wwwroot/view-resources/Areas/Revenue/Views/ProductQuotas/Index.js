@@ -1,12 +1,12 @@
-(function () {
+﻿(function () {
     $(function () {
         var _$quotasTable = $('#ProductQuotasTable');
         var _quotasService = abp.services.app.productQuotas;
 
         var _permissions = {
-            create: true, // abp.auth.hasPermission('Pages.Revenue.ProductQuotas.Create'),
-            edit: true, // abp.auth.hasPermission('Pages.Revenue.ProductQuotas.Edit'),
-            delete: true // abp.auth.hasPermission('Pages.Revenue.ProductQuotas.Delete')
+            create: abp.auth.hasPermission('Pages.Revenue.ProductQuotas.Create'),
+            edit: abp.auth.hasPermission('Pages.Revenue.ProductQuotas.Edit'),
+            delete: abp.auth.hasPermission('Pages.Revenue.ProductQuotas.Delete')
         };
 
         var _createOrEditModal = new app.ModalManager({

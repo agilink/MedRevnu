@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ATI.Revenue.Application.ProductQuotas;
@@ -12,10 +12,13 @@ using ATI.Web.Controllers;
 using ATI.Revenue.Web.PageModel.ProductQuotas;
 using ATI.Admin.Domain.Entities;
 using ATI.Revenue.Domain.Entities;
+using Abp.AspNetCore.Mvc.Authorization;
+using ATI.Authorization;
 
 namespace ATI.Revenue.Web.Areas.Revenue.Controllers
 {
     [Area("Revenue")]
+    [AbpMvcAuthorize(AppPermissions.Pages_Revenue_ProductQuotas)]
     public class ProductQuotasController : ATIControllerBase
     {
         private readonly IProductQuotasAppService _productQuotasAppService;

@@ -176,7 +176,23 @@ namespace ATI.Web.Areas.Core.Startup
                         CorePageNames.MedRevnuPages.Revenue,
                         L("Revenue"),
                         icon: "flaticon-line-graph",
-                        permissionDependency: new SimplePermissionDependency(AppPermissions.Pages)
+                        permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue)
+                    )
+                    .AddItem(new MenuItemDefinition(
+                            "Revenue.Dashboard",
+                            L("RevenueDashboard"),
+                            url: "Revenue/Dashboard",
+                            icon: "flaticon-pie-chart",
+                            permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_Dashboard)
+                        )
+                    )
+                    .AddItem(new MenuItemDefinition(
+                            "Revenue.ProcedureTransactions",
+                            L("RevenueTransactions"),
+                            url: "Revenue/ProcedureTransactions",
+                            icon: "flaticon-line-graph",
+                            permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_ProcedureTransactions)
+                        )
                     )
                     .AddItem(new MenuItemDefinition(
                             "Revenue.Cases",
@@ -186,26 +202,68 @@ namespace ATI.Web.Areas.Core.Startup
                             permissionDependency: new SimplePermissionDependency(AppPermissions.Pages)
                         )
                     )
-                ).AddItem(new MenuItemDefinition(
-                        "Revenue.Products",
-                        L("Products"),
-                        url: "Revenue/Products",
-                        icon: "flaticon-medical",
-                        permissionDependency: new SimplePermissionDependency(AppPermissions.Pages)
+                    .AddItem(new MenuItemDefinition(
+                            "Revenue.Products",
+                            L("Products"),
+                            url: "Revenue/Products",
+                            icon: "flaticon-medical",
+                            permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_Products)
+                        )
                     )
-                ).AddItem(new MenuItemDefinition(
-                        "Revenue.ProductQuotas",
-                        L("Product Quotas"),
-                        url: "Revenue/ProductQuotas",
-                        icon: "flaticon-stopwatch",
-                        permissionDependency: new SimplePermissionDependency(AppPermissions.Pages)
+                    .AddItem(new MenuItemDefinition(
+                            "Revenue.ProductQuotas",
+                            L("ProductQuotas"),
+                            url: "Revenue/ProductQuotas",
+                            icon: "flaticon-stopwatch",
+                            permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_ProductQuotas)
+                        )
                     )
-                ).AddItem(new MenuItemDefinition(
-                        "Revenue.HospitalProductPrices",
-                        L("Hospital Product Prices"),
-                        url: "Revenue/HospitalProductPrices",
-                        icon: "flaticon-price-tag",
-                        permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_HospitalProductPrices)
+                    .AddItem(new MenuItemDefinition(
+                            "Revenue.HospitalProductPrices",
+                            L("HospitalProductPrices"),
+                            url: "Revenue/HospitalProductPrices",
+                            icon: "flaticon-price-tag",
+                            permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_HospitalProductPrices)
+                        )
+                    )
+                    .AddItem(new MenuItemDefinition(
+                            "Revenue.Reports",
+                            L("Reports"),
+                            icon: "flaticon-list-3",
+                            permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_Reports)
+                        )
+                        .AddItem(new MenuItemDefinition(
+                                "Revenue.Reports.RateChart",
+                                L("RateChart"),
+                                url: "Revenue/Reports/RateChart",
+                                icon: "flaticon-price-tag",
+                                permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_Reports)
+                            )
+                        )
+                        .AddItem(new MenuItemDefinition(
+                                "Revenue.Reports.MonthlyRevenue",
+                                L("MonthlyRevenue"),
+                                url: "Revenue/Reports/MonthlyRevenue",
+                                icon: "flaticon-calendar-3",
+                                permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_Reports)
+                            )
+                        )
+                        .AddItem(new MenuItemDefinition(
+                                "Revenue.Reports.CasesByPerson",
+                                L("CasesByPerson"),
+                                url: "Revenue/Reports/CasesByPerson",
+                                icon: "flaticon-user",
+                                permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_Reports)
+                            )
+                        )
+                        .AddItem(new MenuItemDefinition(
+                                "Revenue.Reports.TransactionAmount",
+                                L("TransactionAmount"),
+                                url: "Revenue/Reports/TransactionAmount",
+                                icon: "flaticon-coins",
+                                permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_Reports)
+                            )
+                        )
                     )
                 );
         }

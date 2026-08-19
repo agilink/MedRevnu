@@ -1390,5 +1390,24 @@
     <text name="ProcedureTransactionDeleteWarningMessage">This transaction will be deleted. Are you sure?</text>
     <text name="HospitalAutoPopulated">Auto-populated from physician</text>
     <text name="AutoPopulatedFromProduct">Auto-populated based on product and procedure type</text>
+    <!-- Revenue permissions & navigation (ATI-78 Phase 1) -->
+    <text name="Products">Products</text>
+    <text name="Reports">Reports</text>
+    <text name="RevenueDashboard">Revenue Dashboard</text>
+    <text name="CreatingProduct">Creating Product</text>
+    <text name="EditingProduct">Editing Product</text>
+    <text name="DeletingProduct">Deleting Product</text>
+    <text name="CreatingRevenueTransaction">Creating Revenue Transaction</text>
+    <text name="EditingRevenueTransaction">Editing Revenue Transaction</text>
+    <text name="DeletingRevenueTransaction">Deleting Revenue Transaction</text>
+    <text name="CreatingProductQuota">Creating Product Quota</text>
+    <text name="EditingProductQuota">Editing Product Quota</text>
+    <text name="DeletingProductQuota">Deleting Product Quota</text>
+    <text name="RateChart">Rate Chart</text>
+    <text name="MonthlyRevenue">Monthly Revenue</text>
+    <text name="CasesByPerson">Cases by Person</text>
+    <text name="CreatingCase">Creating Case</text>
+    <text name="EditingCase">Editing Case</text>
+    <text name="DeletingCase">Deleting Case</text>
   </texts>
 </localizationDictionary>

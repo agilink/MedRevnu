@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ATI.Revenue.Application.ProcedureTransactions;
@@ -12,10 +12,13 @@ using System.Threading.Tasks;
 using ATI.Web.Controllers;
 using ATI.Revenue.Web.PageModel.ProcedureTransactions;
 using ATI.Admin.Domain.Entities;
+using Abp.AspNetCore.Mvc.Authorization;
+using ATI.Authorization;
 
 namespace ATI.Revenue.Web.Areas.Revenue.Controllers
 {
     [Area("Revenue")]
+    [AbpMvcAuthorize(AppPermissions.Pages_Revenue_ProcedureTransactions)]
     public class ProcedureTransactionsController : ATIControllerBase
     {
         private readonly IProcedureTransactionsAppService _procedureTransactionsAppService;
