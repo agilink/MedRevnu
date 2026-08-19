@@ -1,4 +1,3 @@
-using ATI.Revenue.Domain.Enums;
 using System;
 using System.Collections.Generic;
 
@@ -8,7 +7,11 @@ namespace ATI.Revenue.Application.Dashboard.Dtos
     {
         public DateTime Date { get; set; }
         public decimal TotalRevenue { get; set; }
+
+        /// <summary>Number of cases, i.e. the sum of transaction quantities.</summary>
         public int TotalCases { get; set; }
+
+        public int TransactionCount { get; set; }
         public List<RevenueByCategoryDto> RevenueByCategory { get; set; }
 
         public DailyRevenueSummaryDto()
@@ -19,9 +22,10 @@ namespace ATI.Revenue.Application.Dashboard.Dtos
 
     public class RevenueByCategoryDto
     {
-        public CategoryGroup CategoryGroup { get; set; }
-        public string CategoryName { get; set; }
+        public int ProductCategoryId { get; set; }
+        public string ProductCategoryName { get; set; }
         public decimal Revenue { get; set; }
         public int CaseCount { get; set; }
+        public int TransactionCount { get; set; }
     }
 }

@@ -1,5 +1,13 @@
 (function () {
     $(function () {
+
+        function money(value) {
+            return '$' + (value || 0).toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
         var dashboardService = {
             init: function () {
                 this.loadDailySummary();
@@ -33,60 +41,82 @@
             },
 
             updateDailySummary: function (data) {
-                $('#TotalRevenue').text('$' + data.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 }));
-                $('#TotalCases').text(data.totalCases);
+                $('#TotalRevenue').text(money(data.totalRevenue));
+                $('#TotalCases').text(data.totalCases || 0);
 
-                // Update category cards
-                var categories = data.revenueByCategory || [];
-                var pacemakerRevenue = 0;
-                var defibrillatorRevenue = 0;
+                this.renderCategoryCards(data.revenueByCategory || []);
+                this.renderCategoryBreakdown(data.revenueByCategory || []);
+            },
 
-                categories.forEach(function (cat) {
-                    if (cat.categoryName === 'Pacemaker') {
-                        pacemakerRevenue = cat.revenue;
-                    } else if (cat.categoryName === 'Defibrillator') {
-                        defibrillatorRevenue = cat.revenue;
-                    }
+            // Cards are built from whatever categories actually have revenue, so adding
+            // or renaming a product category does not need a change here.
+            renderCategoryCards: function (categories) {
+                var container = $('#CategoryCards');
+                container.empty();
+
+                if (!categories.length) {
+                    container.html('<div class="text-muted">No category revenue on this date.</div>');
+                    return;
+                }
+
+                var palette = ['bg-warning', 'bg-danger', 'bg-info', 'bg-secondary'];
+                var row = $('<div class="row"></div>');
+
+                categories.slice(0, 4).forEach(function (cat, i) {
+                    var card = ''
+                        + '<div class="col-6 mb-2">'
+                        + '  <div class="info-box">'
+                        + '    <span class="info-box-icon ' + palette[i % palette.length] + '"><i class="fas fa-heartbeat"></i></span>'
+                        + '    <div class="info-box-content">'
+                        + '      <span class="info-box-text"></span>'
+                        + '      <span class="info-box-number"></span>'
+                        + '    </div>'
+                        + '  </div>'
+                        + '</div>';
+
+                    var $card = $(card);
+                    $card.find('.info-box-text').text(cat.productCategoryName);
+                    $card.find('.info-box-number').text(money(cat.revenue));
+                    row.append($card);
                 });
 
-                $('#PacemakerRevenue').text('$' + pacemakerRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 }));
-                $('#DefibrillatorRevenue').text('$' + defibrillatorRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 }));
-
-                // Update category breakdown
-                this.renderCategoryBreakdown(categories);
+                container.append(row);
             },
 
             renderCategoryBreakdown: function (categories) {
-                var html = '<table class="table table-sm">';
-                html += '<thead><tr><th>Category</th><th>Revenue</th><th>Cases</th></tr></thead><tbody>';
+                var table = $('<table class="table table-sm"></table>');
+                table.append('<thead><tr><th>Category</th><th>Revenue</th><th>Cases</th></tr></thead>');
+                var tbody = $('<tbody></tbody>');
+
+                if (!categories.length) {
+                    tbody.append('<tr><td colspan="3" class="text-center">No revenue recorded on this date</td></tr>');
+                }
 
                 categories.forEach(function (cat) {
-                    html += '<tr>';
-                    html += '<td>' + cat.categoryName + '</td>';
-                    html += '<td>$' + cat.revenue.toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</td>';
-                    html += '<td>' + cat.caseCount + '</td>';
-                    html += '</tr>';
+                    var tr = $('<tr></tr>');
+                    tr.append($('<td></td>').text(cat.productCategoryName));
+                    tr.append($('<td></td>').text(money(cat.revenue)));
+                    tr.append($('<td></td>').text(cat.caseCount || 0));
+                    tbody.append(tr);
                 });
 
-                html += '</tbody></table>';
-                $('#CategoryBreakdown').html(html);
+                table.append(tbody);
+                $('#CategoryBreakdown').empty().append(table);
             },
 
             loadMonthlyQuota: function () {
                 var now = new Date();
-                var month = now.getMonth() + 1;
-                var year = now.getFullYear();
 
                 $.ajax({
                     url: '/Revenue/Dashboard/GetRevenueVsQuota',
                     type: 'POST',
-                    data: JSON.stringify({ month: month, year: year }),
+                    data: JSON.stringify({ month: now.getMonth() + 1, year: now.getFullYear() }),
                     contentType: 'application/json',
                     success: function (data) {
                         dashboardService.updateQuotaTable(data);
                     },
                     error: function () {
-                        $('#QuotaTableBody').html('<tr><td colspan="7" class="text-center text-danger">Failed to load quota data</td></tr>');
+                        $('#QuotaTableBody').html('<tr><td colspan="8" class="text-center text-danger">Failed to load quota data</td></tr>');
                     }
                 });
             },
@@ -96,13 +126,15 @@
                 tbody.empty();
 
                 if (!data || data.length === 0) {
-                    tbody.html('<tr><td colspan="7" class="text-center">No quota data available</td></tr>');
+                    tbody.html('<tr><td colspan="8" class="text-center">No quota or revenue data for this month</td></tr>');
                     return;
                 }
 
                 data.forEach(function (item) {
-                    var percentClass = '';
-                    if (item.percentageAchieved >= 100) {
+                    var percentClass;
+                    if (!item.hasQuota) {
+                        percentClass = 'text-muted';
+                    } else if (item.percentageAchieved >= 100) {
                         percentClass = 'text-success';
                     } else if (item.percentageAchieved >= 80) {
                         percentClass = 'text-warning';
@@ -110,19 +142,31 @@
                         percentClass = 'text-danger';
                     }
 
-                    var varianceClass = item.variance >= 0 ? 'text-success' : 'text-danger';
+                    var tr = $('<tr></tr>');
+                    tr.append($('<td></td>').text(item.hospitalName || '-'));
+                    tr.append($('<td></td>').text(item.productCategoryName || '-'));
+                    tr.append($('<td></td>').text(item.productName || 'All devices'));
 
-                    var row = '<tr>';
-                    row += '<td>' + item.procedureTypeName + '</td>';
-                    row += '<td>' + item.categoryGroupName + '</td>';
-                    row += '<td>$' + item.quotaValue.toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</td>';
-                    row += '<td>$' + item.actualRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</td>';
-                    row += '<td class="' + varianceClass + '">$' + item.variance.toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</td>';
-                    row += '<td class="' + percentClass + '">' + item.percentageAchieved.toFixed(1) + '%</td>';
-                    row += '<td>' + item.caseCount + '</td>';
-                    row += '</tr>';
+                    // Revenue with no quota behind it is listed so it cannot go
+                    // unnoticed, but it has no target to compare against.
+                    if (item.hasQuota) {
+                        tr.append($('<td></td>').text(money(item.targetAmount)));
+                        tr.append($('<td></td>').text(money(item.actualRevenue)));
+                        tr.append($('<td></td>')
+                            .addClass(item.variance >= 0 ? 'text-success' : 'text-danger')
+                            .text(money(item.variance)));
+                        tr.append($('<td></td>')
+                            .addClass(percentClass)
+                            .text(item.percentageAchieved.toFixed(1) + '%'));
+                    } else {
+                        tr.append($('<td class="text-muted">No target set</td>'));
+                        tr.append($('<td></td>').text(money(item.actualRevenue)));
+                        tr.append($('<td class="text-muted">-</td>'));
+                        tr.append($('<td class="text-muted">-</td>'));
+                    }
 
-                    tbody.append(row);
+                    tr.append($('<td></td>').text(item.actualUnits || 0));
+                    tbody.append(tr);
                 });
             }
         };
