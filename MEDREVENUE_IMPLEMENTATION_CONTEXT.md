@@ -59,7 +59,7 @@ This implementation adds comprehensive product transaction tracking and quota ma
 - **Details Modal Features:**
   - Hospital: Auto-populated from Physician's FacilityId (hidden in UI)
   - Physician: Dropdown from Personnel table
-  - Date, Product dropdown, Procedure Type (radio: NEW/DE_NOVO or GEN_CHANGE, default NEW)
+  - Date, Product dropdown, Implant Type (radio: DeNovo or GenChange, default DeNovo)
   - No of Cases, Base Price (readonly), Transaction Amount
   - Validation: Transaction Amount required, No Of cases required, Procedure_Type required
   - Auto-Calculation: Base Price fetched when Physician/Procedure Type selected
@@ -94,7 +94,7 @@ CREATE TABLE [REV].[ProductSubcategory] (
     [Id] int NOT NULL IDENTITY(1,1) PRIMARY KEY,
     [ProductCategoryId] int NOT NULL,
     [SubcategoryName] nvarchar(200) NOT NULL,
-    [ProcedureType] nvarchar(20) NOT NULL,  -- 'DE_NOVO' or 'GEN_CHANGE'
+    [ImplantType] int NOT NULL,  -- ImplantType enum: 1 = DeNovo, 2 = GenChange
     [Description] nvarchar(500) NOT NULL,
     [CreationTime] datetime2 NOT NULL,
     [CreatorUserId] bigint NULL,
@@ -111,10 +111,10 @@ CREATE INDEX [IX_ProductSubcategory_ProductCategoryId]
 ```
 
 **Seeded Data:** 23 subcategories including:
-- CRM: Pacemaker Single Chamber (DE_NOVO), Pacemaker Dual Chamber (DE_NOVO), etc.
-- ICD: ICD Single Chamber (DE_NOVO), ICD Dual Chamber (DE_NOVO), etc.
-- Leadless: Leadless AR (DE_NOVO), Leadless VR (DE_NOVO), etc.
-- Battery Changes: Multiple GEN_CHANGE types
+- CRM: Pacemaker Single Chamber (DeNovo), Pacemaker Dual Chamber (DeNovo), etc.
+- ICD: ICD Single Chamber (DeNovo), ICD Dual Chamber (DeNovo), etc.
+- Leadless: Leadless AR (DeNovo), Leadless VR (DeNovo), etc.
+- Battery Changes: Multiple GenChange types
 
 **2. ProcedureTransaction**
 ```sql
@@ -124,7 +124,7 @@ CREATE TABLE [REV].[ProcedureTransaction] (
     [HospitalId] int NULL,
     [PhysicianId] int NOT NULL,
     [ProductId] int NOT NULL,
-    [ProcedureType] nvarchar(20) NOT NULL,  -- 'DE_NOVO' or 'GEN_CHANGE'
+    [ImplantType] int NOT NULL,  -- ImplantType enum: 1 = DeNovo, 2 = GenChange
     [Quantity] int NOT NULL DEFAULT 1,
     [UnitPrice] decimal(18,2) NOT NULL,
     [TotalAmount] decimal(18,2) NOT NULL,
@@ -326,7 +326,13 @@ ALTER TABLE [REV].[ProductCategory] ADD [ShortDescription] nvarchar(100) NULL;
 
 **File:** `src/ATI.Web.Mvc/Areas/Core/Startup/CoreNavigationProvider.cs`
 
-**Added Menu Items:**
+> NOTE: the structure below describes the intended menu. It was not actually
+> present in `CoreNavigationProvider.cs` - Revenue Transactions, Reports and the
+> Dashboard had no menu entry at all, and Products / Product Quotas / Hospital
+> Product Prices were chained onto the outer menu rather than the Revenue parent,
+> so they rendered as top-level items. Corrected in ATI-78 Phase 1.
+
+**Menu Items:**
 ```
 Revenue (parent)
 ├── Cases
@@ -496,8 +502,8 @@ public async Task<List<CasesByPersonReportDto>> GetCasesByPersonReport(CasesByPe
             PhysicianName = (g.Key.PhysicianFirstName + " " + g.Key.PhysicianLastName).Trim(),
             HospitalName = g.Key.HospitalName,
             TotalCases = g.Sum(pt => pt.Quantity),
-            DeNovoCases = g.Where(pt => pt.ProcedureType == "DE_NOVO").Sum(pt => pt.Quantity),
-            GenChangeCases = g.Where(pt => pt.ProcedureType == "GEN_CHANGE").Sum(pt => pt.Quantity),
+            DeNovoCases = g.Where(pt => pt.ImplantType == ImplantType.DeNovo).Sum(pt => pt.Quantity),
+            GenChangeCases = g.Where(pt => pt.ImplantType == ImplantType.GenChange).Sum(pt => pt.Quantity),
             TotalRevenue = g.Sum(pt => pt.TotalAmount)
         })
         .OrderByDescending(r => r.TotalCases)
@@ -827,19 +833,18 @@ POST /Revenue/Reports/GetTransactionAmountData
 ## Known Issues & Future Work
 
 ### Known Issues
-1. **No Permission Gates** - Controllers need `[AbpAuthorize]` attributes
+1. ~~**No Permission Gates**~~ - RESOLVED in ATI-78 Phase 1. Every Revenue
+   controller now carries `[AbpMvcAuthorize]` against the `Pages.Revenue.*` tree.
 2. **No Client-Side Validation** - jQuery Validation rules needed
 3. **No Error Handling UI** - Generic AJAX error messages
 
 ### Future Enhancements
 
 #### High Priority
-1. **Add Permission Definitions**
-   ```csharp
-   public const string Pages_Revenue_ProcedureTransactions = "Pages.Revenue.ProcedureTransactions";
-   public const string Pages_Revenue_ProductQuotas = "Pages.Revenue.ProductQuotas";
-   public const string Pages_Revenue_Reports = "Pages.Revenue.Reports";
-   ```
+1. ~~**Add Permission Definitions**~~ - DONE in ATI-78 Phase 1. See
+   `AppPermissions.Pages_Revenue*` and `AppAuthorizationProvider`. Existing
+   databases are granted the new permissions by
+   `DbScripts/ATI-78_dbo.AbpPermissions_GrantRevenuePermissions.sql`.
 
 2. **Implement Bulk Import**
    - CSV/Excel import for transactions
@@ -950,6 +955,47 @@ git checkout HEAD -- MedRevenue/Revenue.Domain/Entities/AggregateRoots/ProductCa
 git checkout HEAD -- MedRevenue/Revenue.Application/RevenueDtoMapper.cs
 git checkout HEAD -- src/ATI.Web.Mvc/Areas/Core/Startup/CoreNavigationProvider.cs
 ```
+
+---
+
+## ATI-78 Phase 1 Changes
+
+This document describes the state as originally built. The following changed in
+ATI-78 Phase 1; where the two disagree, this section is current.
+
+**Single source of truth.** The module had two revenue models (Case/CaseProduct
+and ProcedureTransaction) and two quota models (ProcedureQuota and ProductQuota).
+The dashboard read Case + ProcedureQuota while the reports read
+ProcedureTransaction and the only quota screen wrote ProductQuota, so the same
+question had different answers per screen. ProcedureTransaction and ProductQuota
+are now authoritative; `RevenueDashboardAppService` was rewritten against them.
+ProcedureQuota is no longer read - see
+`DbScripts/ATI-78_REV.ProcedureQuota_ReportForRetirement.sql`.
+
+**ImplantType enum.** `ProcedureTransaction.ProcedureType` and
+`ProductSubcategory.ProcedureType` (nvarchar(20), compared against the string
+literals 'DE_NOVO'/'GEN_CHANGE') became `ImplantType` (enum: DeNovo = 1,
+GenChange = 2). The old name also collided with the unrelated ProcedureType
+entity. Migration: `ConvertProcedureTypeToImplantType`.
+
+**Pricing.** `GetProductPriceByHospital` ignored effective dates, so a
+future-dated price applied immediately; it now resolves through
+`GetEffectiveUnitPrice(hospitalId, productId, asOfDate)`. Transaction create used
+`GetProductBasePrice`, which ignored the hospital entirely - it now uses the
+hospital's contracted price as of the procedure date. `GetProductBasePrice` was
+removed; it was unreachable from the UI and encoded a pricing rule that does not
+hold. Note that De Novo and Gen Change still share one price per product; per
+implant-type pricing is Phase 2.
+
+**Authorization and navigation.** All Revenue controllers are gated, the
+`Pages.Revenue.*` permission tree exists, and the menu exposes the pages that
+were previously built but unreachable.
+
+**Still open.** Case/CaseProduct remains in the codebase as the legacy model
+(retirement not yet done); the duplicated Revenue web layer under
+`MedRevenue/Revenue.Web` and `src/ATI.Web.Mvc/Areas/Revenue` is still two copies
+kept in sync by hand; De Novo vs Gen Change pricing, case status workflow, Excel
+export, hospital/physician management pages and spreadsheet import are Phase 2+.
 
 ---
 
