@@ -51,6 +51,13 @@ namespace ATI.Migrations
                 oldType: "nvarchar(500)",
                 oldMaxLength: 500);
 
+            // SQL Server will not alter a column an index depends on, so
+            // IX_Product_ProductCode is dropped and recreated around the change.
+            migrationBuilder.DropIndex(
+                name: "IX_Product_ProductCode",
+                schema: "REV",
+                table: "Product");
+
             migrationBuilder.AlterColumn<string>(
                 name: "ProductCode",
                 schema: "REV",
@@ -61,6 +68,12 @@ namespace ATI.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(30)",
                 oldMaxLength: 30);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Product_ProductCode",
+                schema: "REV",
+                table: "Product",
+                column: "ProductCode");
 
             migrationBuilder.AlterColumn<string>(
                 name: "ModelNo",
@@ -141,16 +154,15 @@ namespace ATI.Migrations
                 schema: "REV",
                 table: "ProductSubcategory");
 
-            migrationBuilder.AlterColumn<string>(
-                name: "Notes",
-                schema: "REV",
-                table: "ProcedureQuota",
-                type: "nvarchar(500)",
-                maxLength: 500,
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(500)",
-                oldMaxLength: 500);
+            // REV.ProcedureQuota is in the model but its table was never created
+            // (AddProcedureTypesIncrementally created ProcedureType only), and it is
+            // being retired in favour of ProductQuota. Guarded so this migration runs
+            // whether or not the table is present.
+            migrationBuilder.Sql(@"
+                IF EXISTS (SELECT 1 FROM sys.columns
+                           WHERE object_id = OBJECT_ID(N'[REV].[ProcedureQuota]')
+                             AND name = 'Notes' AND is_nullable = 0)
+                    ALTER TABLE [REV].[ProcedureQuota] ALTER COLUMN [Notes] nvarchar(500) NULL;");
 
             migrationBuilder.AlterColumn<string>(
                 name: "ProductCode",
@@ -248,6 +260,11 @@ namespace ATI.Migrations
                 oldMaxLength: 500,
                 oldNullable: true);
 
+            migrationBuilder.DropIndex(
+                name: "IX_Product_ProductCode",
+                schema: "REV",
+                table: "Product");
+
             migrationBuilder.AlterColumn<string>(
                 name: "ProductCode",
                 schema: "REV",
@@ -260,6 +277,12 @@ namespace ATI.Migrations
                 oldType: "nvarchar(30)",
                 oldMaxLength: 30,
                 oldNullable: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Product_ProductCode",
+                schema: "REV",
+                table: "Product",
+                column: "ProductCode");
 
             migrationBuilder.AlterColumn<string>(
                 name: "ModelNo",
@@ -322,18 +345,14 @@ namespace ATI.Migrations
                 nullable: false,
                 defaultValue: "");
 
-            migrationBuilder.AlterColumn<string>(
-                name: "Notes",
-                schema: "REV",
-                table: "ProcedureQuota",
-                type: "nvarchar(500)",
-                maxLength: 500,
-                nullable: false,
-                defaultValue: "",
-                oldClrType: typeof(string),
-                oldType: "nvarchar(500)",
-                oldMaxLength: 500,
-                oldNullable: true);
+            migrationBuilder.Sql(@"
+                IF EXISTS (SELECT 1 FROM sys.columns
+                           WHERE object_id = OBJECT_ID(N'[REV].[ProcedureQuota]')
+                             AND name = 'Notes' AND is_nullable = 1)
+                BEGIN
+                    UPDATE [REV].[ProcedureQuota] SET [Notes] = '' WHERE [Notes] IS NULL;
+                    ALTER TABLE [REV].[ProcedureQuota] ALTER COLUMN [Notes] nvarchar(500) NOT NULL;
+                END");
 
             migrationBuilder.AlterColumn<string>(
                 name: "ProductCode",

@@ -7,138 +7,109 @@
 --
 -- ImplantType values: 1 = DeNovo, 2 = GenChange
 --
--- Re-runnable: each step is guarded, so running twice is a no-op. The conversion is
--- data-preserving - the new column is populated from the old one before it is dropped.
+-- Re-runnable: every step is guarded, so a second run is a no-op. The statements that
+-- read the old column go through sp_executesql because SQL Server compiles a whole
+-- batch up front - a guarded reference to a column that has already been dropped is
+-- still a compile-time error, so the guard alone is not enough.
 
 SET NOCOUNT ON;
 
-/* ---------------------------------------------------------------------------
-   REV.ProcedureTransaction
-   --------------------------------------------------------------------------- */
+DECLARE @Tables TABLE (TableName SYSNAME PRIMARY KEY);
+INSERT INTO @Tables (TableName) VALUES ('ProcedureTransaction'), ('ProductSubcategory');
 
-IF NOT EXISTS (SELECT 1 FROM sys.columns
-               WHERE object_id = OBJECT_ID(N'[REV].[ProcedureTransaction]')
-                 AND name = 'ImplantType')
+DECLARE @TableName SYSNAME, @Sql NVARCHAR(MAX), @Unmapped INT;
+
+DECLARE TableCursor CURSOR LOCAL FAST_FORWARD FOR SELECT TableName FROM @Tables;
+OPEN TableCursor;
+FETCH NEXT FROM TableCursor INTO @TableName;
+
+WHILE @@FETCH_STATUS = 0
 BEGIN
-    ALTER TABLE [REV].[ProcedureTransaction] ADD [ImplantType] INT NULL;
-    PRINT 'REV.ProcedureTransaction: added ImplantType.';
+    IF OBJECT_ID(N'[REV].[' + @TableName + N']') IS NULL
+    BEGIN
+        PRINT 'REV.' + @TableName + ' does not exist - skipped.';
+        FETCH NEXT FROM TableCursor INTO @TableName;
+        CONTINUE;
+    END
+
+    -- 1. Add the enum column.
+    IF NOT EXISTS (SELECT 1 FROM sys.columns
+                   WHERE object_id = OBJECT_ID(N'[REV].[' + @TableName + N']')
+                     AND name = 'ImplantType')
+    BEGIN
+        SET @Sql = N'ALTER TABLE [REV].' + QUOTENAME(@TableName) + N' ADD [ImplantType] INT NULL;';
+        EXEC sp_executesql @Sql;
+        PRINT 'REV.' + @TableName + ': added ImplantType.';
+    END
+
+    -- 2. Carry the old string values across.
+    IF EXISTS (SELECT 1 FROM sys.columns
+               WHERE object_id = OBJECT_ID(N'[REV].[' + @TableName + N']')
+                 AND name = 'ProcedureType')
+    BEGIN
+        SET @Sql = N'
+            SELECT @UnmappedOut = COUNT(*)
+            FROM [REV].' + QUOTENAME(@TableName) + N'
+            WHERE [ImplantType] IS NULL
+              AND UPPER(LTRIM(RTRIM(ISNULL([ProcedureType], '''')))) NOT IN (''DE_NOVO'', ''GEN_CHANGE'');';
+
+        EXEC sp_executesql @Sql, N'@UnmappedOut INT OUTPUT', @UnmappedOut = @Unmapped OUTPUT;
+
+        IF @Unmapped > 0
+            PRINT 'REV.' + @TableName + ': ' + CAST(@Unmapped AS VARCHAR(20))
+                + ' row(s) had an unrecognised ProcedureType and default to DeNovo.';
+
+        SET @Sql = N'
+            UPDATE [REV].' + QUOTENAME(@TableName) + N'
+            SET [ImplantType] = CASE UPPER(LTRIM(RTRIM(ISNULL([ProcedureType], ''''))))
+                                    WHEN ''GEN_CHANGE'' THEN 2
+                                    ELSE 1
+                                END
+            WHERE [ImplantType] IS NULL;';
+
+        EXEC sp_executesql @Sql;
+        PRINT 'REV.' + @TableName + ': populated ImplantType from ProcedureType.';
+    END
+    ELSE
+    BEGIN
+        -- Old column already gone; make sure no row was left without a value.
+        SET @Sql = N'UPDATE [REV].' + QUOTENAME(@TableName)
+                 + N' SET [ImplantType] = 1 WHERE [ImplantType] IS NULL;';
+        EXEC sp_executesql @Sql;
+    END
+
+    -- 3. Enforce NOT NULL.
+    IF EXISTS (SELECT 1 FROM sys.columns
+               WHERE object_id = OBJECT_ID(N'[REV].[' + @TableName + N']')
+                 AND name = 'ImplantType' AND is_nullable = 1)
+    BEGIN
+        SET @Sql = N'ALTER TABLE [REV].' + QUOTENAME(@TableName)
+                 + N' ALTER COLUMN [ImplantType] INT NOT NULL;';
+        EXEC sp_executesql @Sql;
+        PRINT 'REV.' + @TableName + ': ImplantType set to NOT NULL.';
+    END
+
+    -- 4. Drop the old column.
+    IF EXISTS (SELECT 1 FROM sys.columns
+               WHERE object_id = OBJECT_ID(N'[REV].[' + @TableName + N']')
+                 AND name = 'ProcedureType')
+    BEGIN
+        SET @Sql = N'ALTER TABLE [REV].' + QUOTENAME(@TableName)
+                 + N' DROP COLUMN [ProcedureType];';
+        EXEC sp_executesql @Sql;
+        PRINT 'REV.' + @TableName + ': dropped ProcedureType.';
+    END
+
+    FETCH NEXT FROM TableCursor INTO @TableName;
 END
-GO
 
-IF EXISTS (SELECT 1 FROM sys.columns
-           WHERE object_id = OBJECT_ID(N'[REV].[ProcedureTransaction]')
-             AND name = 'ProcedureType')
-BEGIN
-    DECLARE @Unmapped INT;
-
-    SELECT @Unmapped = COUNT(*)
-    FROM [REV].[ProcedureTransaction]
-    WHERE [ImplantType] IS NULL
-      AND UPPER(LTRIM(RTRIM(ISNULL([ProcedureType], '')))) NOT IN ('DE_NOVO', 'GEN_CHANGE');
-
-    IF @Unmapped > 0
-        PRINT 'REV.ProcedureTransaction: ' + CAST(@Unmapped AS VARCHAR(20))
-            + ' row(s) had an unrecognised ProcedureType and default to DeNovo.';
-
-    UPDATE [REV].[ProcedureTransaction]
-    SET [ImplantType] = CASE UPPER(LTRIM(RTRIM(ISNULL([ProcedureType], ''))))
-                            WHEN 'GEN_CHANGE' THEN 2
-                            ELSE 1
-                        END
-    WHERE [ImplantType] IS NULL;
-
-    PRINT 'REV.ProcedureTransaction: populated ImplantType from ProcedureType.';
-END
-ELSE
-BEGIN
-    -- Column already dropped by a previous run; make sure nothing was left behind.
-    UPDATE [REV].[ProcedureTransaction] SET [ImplantType] = 1 WHERE [ImplantType] IS NULL;
-END
-GO
-
-IF EXISTS (SELECT 1 FROM sys.columns
-           WHERE object_id = OBJECT_ID(N'[REV].[ProcedureTransaction]')
-             AND name = 'ImplantType' AND is_nullable = 1)
-BEGIN
-    ALTER TABLE [REV].[ProcedureTransaction] ALTER COLUMN [ImplantType] INT NOT NULL;
-    PRINT 'REV.ProcedureTransaction: ImplantType set to NOT NULL.';
-END
-GO
-
-IF EXISTS (SELECT 1 FROM sys.columns
-           WHERE object_id = OBJECT_ID(N'[REV].[ProcedureTransaction]')
-             AND name = 'ProcedureType')
-BEGIN
-    ALTER TABLE [REV].[ProcedureTransaction] DROP COLUMN [ProcedureType];
-    PRINT 'REV.ProcedureTransaction: dropped ProcedureType.';
-END
-GO
-
-/* ---------------------------------------------------------------------------
-   REV.ProductSubcategory
-   --------------------------------------------------------------------------- */
-
-IF NOT EXISTS (SELECT 1 FROM sys.columns
-               WHERE object_id = OBJECT_ID(N'[REV].[ProductSubcategory]')
-                 AND name = 'ImplantType')
-BEGIN
-    ALTER TABLE [REV].[ProductSubcategory] ADD [ImplantType] INT NULL;
-    PRINT 'REV.ProductSubcategory: added ImplantType.';
-END
-GO
-
-IF EXISTS (SELECT 1 FROM sys.columns
-           WHERE object_id = OBJECT_ID(N'[REV].[ProductSubcategory]')
-             AND name = 'ProcedureType')
-BEGIN
-    DECLARE @UnmappedSub INT;
-
-    SELECT @UnmappedSub = COUNT(*)
-    FROM [REV].[ProductSubcategory]
-    WHERE [ImplantType] IS NULL
-      AND UPPER(LTRIM(RTRIM(ISNULL([ProcedureType], '')))) NOT IN ('DE_NOVO', 'GEN_CHANGE');
-
-    IF @UnmappedSub > 0
-        PRINT 'REV.ProductSubcategory: ' + CAST(@UnmappedSub AS VARCHAR(20))
-            + ' row(s) had an unrecognised ProcedureType and default to DeNovo.';
-
-    UPDATE [REV].[ProductSubcategory]
-    SET [ImplantType] = CASE UPPER(LTRIM(RTRIM(ISNULL([ProcedureType], ''))))
-                            WHEN 'GEN_CHANGE' THEN 2
-                            ELSE 1
-                        END
-    WHERE [ImplantType] IS NULL;
-
-    PRINT 'REV.ProductSubcategory: populated ImplantType from ProcedureType.';
-END
-ELSE
-BEGIN
-    UPDATE [REV].[ProductSubcategory] SET [ImplantType] = 1 WHERE [ImplantType] IS NULL;
-END
-GO
-
-IF EXISTS (SELECT 1 FROM sys.columns
-           WHERE object_id = OBJECT_ID(N'[REV].[ProductSubcategory]')
-             AND name = 'ImplantType' AND is_nullable = 1)
-BEGIN
-    ALTER TABLE [REV].[ProductSubcategory] ALTER COLUMN [ImplantType] INT NOT NULL;
-    PRINT 'REV.ProductSubcategory: ImplantType set to NOT NULL.';
-END
-GO
-
-IF EXISTS (SELECT 1 FROM sys.columns
-           WHERE object_id = OBJECT_ID(N'[REV].[ProductSubcategory]')
-             AND name = 'ProcedureType')
-BEGIN
-    ALTER TABLE [REV].[ProductSubcategory] DROP COLUMN [ProcedureType];
-    PRINT 'REV.ProductSubcategory: dropped ProcedureType.';
-END
-GO
+CLOSE TableCursor;
+DEALLOCATE TableCursor;
 
 SELECT
     'ProcedureTransaction' AS TableName,
     [ImplantType],
-    COUNT(*) AS RowCountByType
+    COUNT(*) AS RowsByType
 FROM [REV].[ProcedureTransaction]
 GROUP BY [ImplantType]
 UNION ALL
@@ -149,4 +120,3 @@ SELECT
 FROM [REV].[ProductSubcategory]
 GROUP BY [ImplantType]
 ORDER BY TableName, [ImplantType];
-GO
