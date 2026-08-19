@@ -1,8 +1,9 @@
-using Abp.Application.Services;
+﻿using Abp.Application.Services;
 using Abp.Domain.Repositories;
 using ATI.Admin.Domain.Entities;
 using ATI.Revenue.Application.Reports.Dtos;
 using ATI.Revenue.Domain.Entities;
+using ATI.Revenue.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -128,8 +129,8 @@ namespace ATI.Revenue.Application.Reports
                     PhysicianName = (g.Key.PhysicianFirstName + " " + g.Key.PhysicianLastName).Trim(),
                     HospitalName = g.Key.HospitalName,
                     TotalCases = g.Sum(pt => pt.Quantity),
-                    DeNovoCases = g.Where(pt => pt.ProcedureType == "DE_NOVO").Sum(pt => pt.Quantity),
-                    GenChangeCases = g.Where(pt => pt.ProcedureType == "GEN_CHANGE").Sum(pt => pt.Quantity),
+                    DeNovoCases = g.Where(pt => pt.ImplantType == ImplantType.DeNovo).Sum(pt => pt.Quantity),
+                    GenChangeCases = g.Where(pt => pt.ImplantType == ImplantType.GenChange).Sum(pt => pt.Quantity),
                     TotalRevenue = g.Sum(pt => pt.TotalAmount)
                 })
                 .OrderByDescending(r => r.TotalCases)
@@ -166,20 +167,20 @@ namespace ATI.Revenue.Application.Reports
                     PhysicianFirstName = pt.Physician.FIRST_NAME,
                     PhysicianLastName = pt.Physician.LAST_NAME,
                     CategoryName = pt.Product.ProductCategory.Name,
-                    ProcedureType = pt.ProcedureType
+                    ImplantType = pt.ImplantType
                 })
                 .Select(g => new TransactionAmountReportDto
                 {
                     PhysicianName = (g.Key.PhysicianFirstName + " " + g.Key.PhysicianLastName).Trim(),
                     ProductCategoryName = g.Key.CategoryName,
-                    ProcedureType = g.Key.ProcedureType,
+                    ImplantType = g.Key.ImplantType,
                     TotalCases = g.Sum(pt => pt.Quantity),
                     TotalAmount = g.Sum(pt => pt.TotalAmount),
                     AverageAmount = g.Average(pt => pt.TotalAmount)
                 })
                 .OrderBy(r => r.PhysicianName)
                 .ThenBy(r => r.ProductCategoryName)
-                .ThenBy(r => r.ProcedureType)
+                .ThenBy(r => r.ImplantType)
                 .ToListAsync();
 
             return report;

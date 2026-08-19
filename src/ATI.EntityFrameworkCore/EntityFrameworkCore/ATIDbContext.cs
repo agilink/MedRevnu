@@ -322,7 +322,7 @@ namespace ATI.EntityFrameworkCore
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.ProductCategoryId).IsRequired();
                 entity.Property(e => e.SubcategoryName).IsRequired().HasMaxLength(50);
-                entity.Property(e => e.ProcedureType).IsRequired().HasMaxLength(20);
+                entity.Property(e => e.ImplantType).IsRequired();
                 entity.Property(e => e.Description).HasMaxLength(500);
 
                 entity.HasOne(e => e.ProductCategory)
@@ -403,7 +403,7 @@ namespace ATI.EntityFrameworkCore
                 entity.Property(e => e.ProcedureDate).IsRequired();
                 entity.Property(e => e.PhysicianId).IsRequired();
                 entity.Property(e => e.ProductId).IsRequired();
-                entity.Property(e => e.ProcedureType).IsRequired().HasMaxLength(20);
+                entity.Property(e => e.ImplantType).IsRequired();
                 entity.Property(e => e.Quantity).IsRequired();
                 entity.Property(e => e.UnitPrice).HasPrecision(10, 2).IsRequired();
                 entity.Property(e => e.TotalAmount).HasPrecision(10, 2);

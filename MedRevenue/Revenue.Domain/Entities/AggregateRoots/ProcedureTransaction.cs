@@ -1,5 +1,6 @@
 using Abp.Domain.Entities.Auditing;
 using ATI.Admin.Domain.Entities;
+using ATI.Revenue.Domain.Enums;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -21,8 +22,7 @@ namespace ATI.Revenue.Domain.Entities
         public int ProductId { get; set; }
 
         [Required]
-        [MaxLength(20)]
-        public string ProcedureType { get; set; } // DE_NOVO or GEN_CHANGE
+        public ImplantType ImplantType { get; set; }
 
         public int Quantity { get; set; } = 1;
 

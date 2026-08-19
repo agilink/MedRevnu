@@ -1,4 +1,5 @@
-using Abp.Application.Services.Dto;
+﻿using Abp.Application.Services.Dto;
+using ATI.Revenue.Domain.Enums;
 using System;
 
 namespace ATI.Revenue.Application.ProcedureTransactions.Dtos
@@ -11,7 +12,7 @@ namespace ATI.Revenue.Application.ProcedureTransactions.Dtos
         public int? HospitalIdFilter { get; set; }
         public int? PhysicianIdFilter { get; set; }
         public int? ProductIdFilter { get; set; }
-        public string? ProcedureTypeFilter { get; set; }
+        public ImplantType? ImplantTypeFilter { get; set; }
         public DateTime? MinProcedureDateFilter { get; set; }
         public DateTime? MaxProcedureDateFilter { get; set; }
     }

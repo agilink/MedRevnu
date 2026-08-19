@@ -10,6 +10,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using ATI.Web.Controllers;
+using ATI.Revenue.Domain.Enums;
 using ATI.Revenue.Web.PageModel.ProcedureTransactions;
 using ATI.Admin.Domain.Entities;
 using Abp.AspNetCore.Mvc.Authorization;
@@ -71,7 +72,7 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
                     ProcedureTransaction = new CreateOrEditProcedureTransactionDto
                     {
                         ProcedureDate = DateTime.Now,
-                        ProcedureType = "DE_NOVO", // Default to NEW
+                        ImplantType = ImplantType.DeNovo,
                         Quantity = 1,
                         UnitPrice = 0,
                         TotalAmount = 0
@@ -93,21 +94,6 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         {
             var output = await _procedureTransactionsAppService.GetProcedureTransactionForView(id);
             return View(output.ProcedureTransaction);
-        }
-
-        // API endpoint to get product base price based on procedure type
-        [HttpPost]
-        public async Task<JsonResult> GetProductBasePrice(int productId, string procedureType)
-        {
-            try
-            {
-                var basePrice = await _procedureTransactionsAppService.GetProductBasePrice(productId, procedureType);
-                return Json(new { success = true, basePrice = basePrice });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
         }
 
         // API endpoint to get physician's facility

@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
     $(function () {
         var _$table = $('#TransactionAmountTable');
 
@@ -50,13 +50,14 @@
                     row.append('<td>' + (item.physicianName || '') + '</td>');
                     row.append('<td>' + (item.productCategoryName || '') + '</td>');
 
-                    var procedureTypeBadge = '';
-                    if (item.procedureType === 'DE_NOVO') {
-                        procedureTypeBadge = '<span class="badge bg-success">NEW (De Novo)</span>';
-                    } else if (item.procedureType === 'GEN_CHANGE') {
-                        procedureTypeBadge = '<span class="badge bg-info">GEN CHANGE</span>';
+                    // ImplantType enum: 1 = DeNovo, 2 = GenChange
+                    var implantTypeBadge = '';
+                    if (item.implantType === 1) {
+                        implantTypeBadge = '<span class="badge bg-success">NEW (De Novo)</span>';
+                    } else if (item.implantType === 2) {
+                        implantTypeBadge = '<span class="badge bg-info">GEN CHANGE</span>';
                     }
-                    row.append('<td>' + procedureTypeBadge + '</td>');
+                    row.append('<td>' + implantTypeBadge + '</td>');
 
                     row.append('<td class="text-center">' + (item.totalCases || 0) + '</td>');
                     row.append('<td>$' + (item.totalAmount ? item.totalAmount.toFixed(2) : '0.00') + '</td>');

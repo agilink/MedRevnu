@@ -1,6 +1,7 @@
 using Abp.Application.Services.Dto;
 using Abp.AutoMapper;
 using ATI.Revenue.Domain.Entities;
+using ATI.Revenue.Domain.Enums;
 using System;
 using System.ComponentModel.DataAnnotations;
 
@@ -23,8 +24,7 @@ namespace ATI.Revenue.Application.ProcedureTransactions.Dtos
         public int ProductId { get; set; }
 
         [Required]
-        [StringLength(20)]
-        public string ProcedureType { get; set; } // DE_NOVO or GEN_CHANGE
+        public ImplantType ImplantType { get; set; } = ImplantType.DeNovo;
 
         [Required]
         [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1")]

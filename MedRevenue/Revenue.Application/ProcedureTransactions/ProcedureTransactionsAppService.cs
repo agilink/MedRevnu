@@ -1,4 +1,4 @@
-using Abp.Application.Services;
+﻿using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using Abp.Domain.Repositories;
 using Abp.Extensions;
@@ -7,6 +7,7 @@ using Abp.UI;
 using ATI.Admin.Domain.Entities;
 using ATI.Revenue.Application.ProcedureTransactions.Dtos;
 using ATI.Revenue.Domain.Entities;
+using ATI.Revenue.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
@@ -61,7 +62,7 @@ namespace ATI.Revenue.Application.ProcedureTransactions
                 ProductId = pt.ProductId,
                 ProductName = pt.Product != null ? (pt.Product.Name ?? "") : "",
                 ProductCode = pt.Product != null ? (pt.Product.ProductCode ?? "") : "",
-                ProcedureType = pt.ProcedureType,
+                ImplantType = pt.ImplantType,
                 Quantity = pt.Quantity,
                 UnitPrice = pt.UnitPrice,
                 TotalAmount = pt.TotalAmount
@@ -85,7 +86,7 @@ namespace ATI.Revenue.Application.ProcedureTransactions
                     ProductId = pt.ProductId,
                     ProductName = pt.Product != null ? (pt.Product.Name ?? "") : "",
                     ProductCode = pt.Product != null ? (pt.Product.ProductCode ?? "") : "",
-                    ProcedureType = pt.ProcedureType,
+                    ImplantType = pt.ImplantType,
                     Quantity = pt.Quantity,
                     UnitPrice = pt.UnitPrice,
                     TotalAmount = pt.TotalAmount
@@ -116,7 +117,7 @@ namespace ATI.Revenue.Application.ProcedureTransactions
                 HospitalId = entity.HospitalId,
                 PhysicianId = entity.PhysicianId,
                 ProductId = entity.ProductId,
-                ProcedureType = entity.ProcedureType,
+                ImplantType = entity.ImplantType,
                 Quantity = entity.Quantity,
                 UnitPrice = entity.UnitPrice,
                 TotalAmount = entity.TotalAmount
@@ -146,14 +147,15 @@ namespace ATI.Revenue.Application.ProcedureTransactions
             var physician = await _personnelRepository.GetAsync(input.PhysicianId);
             input.HospitalId = physician.FacilityId;
 
-            // If UnitPrice is 0, fetch from Product based on ProcedureType
+            // If UnitPrice was not supplied, take the hospital's contracted price as of
+            // the procedure date rather than the product's generic base price.
             if (input.UnitPrice == 0)
             {
-                input.UnitPrice = await GetProductBasePrice(input.ProductId, input.ProcedureType);
+                input.UnitPrice = await GetEffectiveUnitPrice(input.HospitalId, input.ProductId, input.ProcedureDate);
             }
 
-            // Calculate TotalAmount if not provided or if it's automatic
-            if (input.TotalAmount == 0 || input.TotalAmount == input.UnitPrice * input.Quantity)
+            // Calculate TotalAmount if not provided; a supplied value is a deliberate override.
+            if (input.TotalAmount == 0)
             {
                 input.TotalAmount = input.UnitPrice * input.Quantity;
             }
@@ -164,7 +166,7 @@ namespace ATI.Revenue.Application.ProcedureTransactions
                 HospitalId = input.HospitalId,
                 PhysicianId = input.PhysicianId,
                 ProductId = input.ProductId,
-                ProcedureType = input.ProcedureType,
+                ImplantType = input.ImplantType,
                 Quantity = input.Quantity,
                 UnitPrice = input.UnitPrice,
                 TotalAmount = input.TotalAmount
@@ -186,7 +188,7 @@ namespace ATI.Revenue.Application.ProcedureTransactions
                     ProductId = pt.ProductId,
                     ProductName = pt.Product != null ? (pt.Product.Name ?? "") : "",
                     ProductCode = pt.Product != null ? (pt.Product.ProductCode ?? "") : "",
-                    ProcedureType = pt.ProcedureType,
+                    ImplantType = pt.ImplantType,
                     Quantity = pt.Quantity,
                     UnitPrice = pt.UnitPrice,
                     TotalAmount = pt.TotalAmount
@@ -209,7 +211,7 @@ namespace ATI.Revenue.Application.ProcedureTransactions
             entity.HospitalId = input.HospitalId;
             entity.PhysicianId = input.PhysicianId;
             entity.ProductId = input.ProductId;
-            entity.ProcedureType = input.ProcedureType;
+            entity.ImplantType = input.ImplantType;
             entity.Quantity = input.Quantity;
             entity.UnitPrice = input.UnitPrice;
             entity.TotalAmount = input.TotalAmount;
@@ -231,7 +233,7 @@ namespace ATI.Revenue.Application.ProcedureTransactions
                     ProductId = pt.ProductId,
                     ProductName = pt.Product != null ? (pt.Product.Name ?? "") : "",
                     ProductCode = pt.Product != null ? (pt.Product.ProductCode ?? "") : "",
-                    ProcedureType = pt.ProcedureType,
+                    ImplantType = pt.ImplantType,
                     Quantity = pt.Quantity,
                     UnitPrice = pt.UnitPrice,
                     TotalAmount = pt.TotalAmount
@@ -245,33 +247,43 @@ namespace ATI.Revenue.Application.ProcedureTransactions
             await CurrentUnitOfWork.SaveChangesAsync();
         }
 
-        public async Task<decimal> GetProductBasePrice(int productId, string procedureType)
+        /// <summary>
+        /// Price the UI offers when a hospital and product are chosen. Uses today as the
+        /// effective date; the server re-resolves against the procedure date on save.
+        /// </summary>
+        public Task<decimal> GetProductPriceByHospital(int hospitalId, int productId)
         {
-            var product = await _productRepository.GetAsync(productId);
-
-            // Base price logic:
-            // - For DE_NOVO (new implant with leads), use full BasePrice
-            // - For GEN_CHANGE (battery replacement), use BasePrice (generator only)
-            // The BasePrice in the database already accounts for this distinction
-            return product.BasePrice;
+            return GetEffectiveUnitPrice(hospitalId, productId, Abp.Timing.Clock.Now);
         }
 
-        public async Task<decimal> GetProductPriceByHospital(int hospitalId, int productId)
+        /// <summary>
+        /// The hospital's contracted price for a product on a given date, falling back to
+        /// the product's base price when the hospital has no contracted price.
+        /// </summary>
+        /// <remarks>
+        /// Only prices already in effect on <paramref name="asOfDate"/> are considered, so a
+        /// future-dated price increase does not retroactively reprice today's procedures.
+        /// Rows with no effective date act as an undated baseline: SQL Server sorts NULLs
+        /// last on a descending sort, so any dated row that has come into effect wins.
+        /// </remarks>
+        public async Task<decimal> GetEffectiveUnitPrice(int? hospitalId, int productId, DateTime asOfDate)
         {
-            // First, try to get the hospital-specific price
-            var hospitalPrice = await _hospitalProductPriceRepository.GetAll()
-                .Where(hpp => hpp.HospitalId == hospitalId
-                    && hpp.ProductId == productId
-                    && hpp.IsActive)
-                .OrderByDescending(hpp => hpp.EffectiveDate)
-                .FirstOrDefaultAsync();
-
-            if (hospitalPrice != null)
+            if (hospitalId.HasValue)
             {
-                return hospitalPrice.UnitPrice;
+                var hospitalPrice = await _hospitalProductPriceRepository.GetAll()
+                    .Where(hpp => hpp.HospitalId == hospitalId.Value
+                        && hpp.ProductId == productId
+                        && hpp.IsActive
+                        && (hpp.EffectiveDate == null || hpp.EffectiveDate <= asOfDate))
+                    .OrderByDescending(hpp => hpp.EffectiveDate)
+                    .FirstOrDefaultAsync();
+
+                if (hospitalPrice != null)
+                {
+                    return hospitalPrice.UnitPrice;
+                }
             }
 
-            // Fallback to product's base price if no hospital-specific price exists
             var product = await _productRepository.GetAsync(productId);
             return product.BasePrice;
         }
@@ -309,10 +321,10 @@ namespace ATI.Revenue.Application.ProcedureTransactions
                 query = query.Where(pt => pt.ProductId == input.ProductIdFilter.Value);
             }
 
-            // Procedure Type filter
-            if (!string.IsNullOrWhiteSpace(input.ProcedureTypeFilter))
+            // Implant type filter (De Novo vs Gen Change)
+            if (input.ImplantTypeFilter.HasValue)
             {
-                query = query.Where(pt => pt.ProcedureType == input.ProcedureTypeFilter);
+                query = query.Where(pt => pt.ImplantType == input.ImplantTypeFilter.Value);
             }
 
             // Date range filters

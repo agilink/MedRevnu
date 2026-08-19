@@ -1,6 +1,7 @@
-using Abp.Application.Services.Dto;
+﻿using Abp.Application.Services.Dto;
 using Abp.AutoMapper;
 using ATI.Revenue.Domain.Entities;
+using ATI.Revenue.Domain.Enums;
 using System;
 
 namespace ATI.Revenue.Application.ProcedureTransactions.Dtos
@@ -16,7 +17,7 @@ namespace ATI.Revenue.Application.ProcedureTransactions.Dtos
         public int ProductId { get; set; }
         public string ProductName { get; set; }
         public string ProductCode { get; set; }
-        public string ProcedureType { get; set; }
+        public ImplantType ImplantType { get; set; }
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
         public decimal TotalAmount { get; set; }

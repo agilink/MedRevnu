@@ -1,4 +1,5 @@
 using Abp.Domain.Entities.Auditing;
+using ATI.Revenue.Domain.Enums;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -14,7 +15,7 @@ namespace ATI.Revenue.Domain.Entities
 
         public int ProductCategoryId { get; set; }
         public string SubcategoryName { get; set; }
-        public string ProcedureType { get; set; } // DE_NOVO or GEN_CHANGE
+        public ImplantType ImplantType { get; set; }
         public string? Description { get; set; }
 
         [ForeignKey("ProductCategoryId")]

@@ -1,3 +1,4 @@
+﻿@using ATI.Revenue.Domain.Enums
 @using ATI.Revenue.Web.PageModel.ProcedureTransactions
 @model CreateOrEditProcedureTransactionModalViewModel
 
@@ -59,20 +60,21 @@
 
         <div class="row">
             <div class="col-md-6 mb-5">
-                <label class="form-label required">@L("ProcedureType")</label>
+                <label class="form-label required">@L("ImplantType")</label>
                 <div class="pt-2">
                     @{
-                        var isDeNovo = Model.ProcedureTransaction?.ProcedureType == "DE_NOVO" || Model.ProcedureTransaction?.ProcedureType == null;
+                        var isDeNovo = Model.ProcedureTransaction == null
+                            || Model.ProcedureTransaction.ImplantType == ImplantType.DeNovo;
                     }
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="ProcedureType" id="ProcedureTypeNew" value="DE_NOVO"
-                               @(isDeNovo ? "checked" : "") required />
-                        <label class="form-check-label" for="ProcedureTypeNew">NEW (De Novo)</label>
+                        <input class="form-check-input" type="radio" name="ImplantType" id="ImplantTypeDeNovo"
+                               value="@((int)ImplantType.DeNovo)" @(isDeNovo ? "checked" : "") required />
+                        <label class="form-check-label" for="ImplantTypeDeNovo">NEW (De Novo)</label>
                     </div>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="ProcedureType" id="ProcedureTypeChange" value="GEN_CHANGE"
-                               @(!isDeNovo ? "checked" : "") />
-                        <label class="form-check-label" for="ProcedureTypeChange">GEN CHANGE</label>
+                        <input class="form-check-input" type="radio" name="ImplantType" id="ImplantTypeGenChange"
+                               value="@((int)ImplantType.GenChange)" @(!isDeNovo ? "checked" : "") />
+                        <label class="form-check-label" for="ImplantTypeGenChange">GEN CHANGE</label>
                     </div>
                 </div>
             </div>

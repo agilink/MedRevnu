@@ -1,6 +1,7 @@
 using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using ATI.Revenue.Application.ProcedureTransactions.Dtos;
+using System;
 using System.Threading.Tasks;
 
 namespace ATI.Revenue.Application.ProcedureTransactions
@@ -12,7 +13,7 @@ namespace ATI.Revenue.Application.ProcedureTransactions
         Task<GetProcedureTransactionForEditOutput> GetProcedureTransactionForEdit(EntityDto<int> input);
         Task<ProcedureTransactionDto> CreateOrEdit(CreateOrEditProcedureTransactionDto input);
         Task Delete(EntityDto<int> input);
-        Task<decimal> GetProductBasePrice(int productId, string procedureType);
         Task<decimal> GetProductPriceByHospital(int hospitalId, int productId);
+        Task<decimal> GetEffectiveUnitPrice(int? hospitalId, int productId, DateTime asOfDate);
     }
 }

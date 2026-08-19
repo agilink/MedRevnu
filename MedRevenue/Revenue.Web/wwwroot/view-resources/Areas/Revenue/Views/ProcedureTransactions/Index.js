@@ -34,7 +34,7 @@
                         monthFilter: month ? parseInt(month) : null,
                         hospitalIdFilter: hospitalId ? parseInt(hospitalId) : null,
                         physicianIdFilter: physicianId ? parseInt(physicianId) : null,
-                        procedureTypeFilter: null
+                        implantTypeFilter: null
                     };
                 }
             },
@@ -109,15 +109,16 @@
                 },
                 {
                     targets: 6,
-                    data: 'procedureType',
-                    name: 'procedureType',
-                    render: function (procedureType) {
-                        if (procedureType === 'DE_NOVO') {
+                    data: 'implantType',
+                    name: 'implantType',
+                    render: function (implantType) {
+                        // ImplantType enum: 1 = DeNovo, 2 = GenChange
+                        if (implantType === 1) {
                             return '<span class="badge bg-success">NEW (De Novo)</span>';
-                        } else if (procedureType === 'GEN_CHANGE') {
+                        } else if (implantType === 2) {
                             return '<span class="badge bg-info">GEN CHANGE</span>';
                         }
-                        return procedureType;
+                        return '-';
                     }
                 },
                 {

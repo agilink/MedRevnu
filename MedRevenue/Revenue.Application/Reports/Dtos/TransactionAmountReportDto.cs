@@ -1,3 +1,5 @@
+﻿using ATI.Revenue.Domain.Enums;
+
 namespace ATI.Revenue.Application.Reports.Dtos
 {
     /// <summary>
@@ -7,7 +9,7 @@ namespace ATI.Revenue.Application.Reports.Dtos
     {
         public string PhysicianName { get; set; }
         public string ProductCategoryName { get; set; }
-        public string ProcedureType { get; set; }
+        public ImplantType ImplantType { get; set; }
         public int TotalCases { get; set; }
         public decimal TotalAmount { get; set; }
         public decimal AverageAmount { get; set; }

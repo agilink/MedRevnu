@@ -1409,5 +1409,8 @@
     <text name="CreatingCase">Creating Case</text>
     <text name="EditingCase">Editing Case</text>
     <text name="DeletingCase">Deleting Case</text>
+    <text name="ImplantType">Implant Type</text>
+    <text name="DeNovo">NEW (De Novo)</text>
+    <text name="GenChange">GEN CHANGE</text>
   </texts>
 </localizationDictionary>
