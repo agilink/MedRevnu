@@ -1,4 +1,4 @@
-using Abp.AspNetCore.Mvc.Authorization;
+﻿using Abp.AspNetCore.Mvc.Authorization;
 using Abp.Domain.Repositories;
 using ATI.Authorization;
 using ATI.Revenue.Domain.Entities;
@@ -44,7 +44,9 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
             var transactions = _procedureTransactionRepository.GetAll()
                 .Where(t => t.ProcedureDate.Year == year);
 
-            ViewBag.CasesCount = await transactions.SumAsync(t => (int?)t.Quantity) ?? 0;
+            // A case is one transaction row; summing device quantities would
+            // report a multi-device procedure as several cases.
+            ViewBag.CasesCount = await transactions.CountAsync();
             ViewBag.Revenue = await transactions.SumAsync(t => (decimal?)t.TotalAmount) ?? 0m;
             ViewBag.ProductsCount = await _productRepository.CountAsync(p => p.IsActive);
             ViewBag.Year = year;

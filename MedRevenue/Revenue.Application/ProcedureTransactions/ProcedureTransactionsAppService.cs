@@ -1,7 +1,6 @@
-﻿using Abp.Application.Services;
+using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using Abp.Domain.Repositories;
-using Abp.Extensions;
 using Abp.Linq.Extensions;
 using Abp.UI;
 using ATI.Admin.Domain.Entities;
@@ -10,15 +9,25 @@ using ATI.Revenue.Domain.Entities;
 using ATI.Revenue.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 
 namespace ATI.Revenue.Application.ProcedureTransactions
 {
+    /// <summary>
+    /// Cases and the devices used in them.
+    /// </summary>
+    /// <remarks>
+    /// One case is one row, identified by its case number, with a line per device. A
+    /// procedure can involve two or three devices, which the previous one-product-per-row
+    /// shape could not record.
+    /// </remarks>
     public class ProcedureTransactionsAppService : ApplicationService, IProcedureTransactionsAppService
     {
         private readonly IRepository<ProcedureTransaction, int> _procedureTransactionRepository;
+        private readonly IRepository<ProcedureTransactionProduct, int> _transactionProductRepository;
         private readonly IRepository<Personnel, int> _personnelRepository;
         private readonly IRepository<Product, int> _productRepository;
         private readonly IRepository<Facility, int> _facilityRepository;
@@ -26,12 +35,14 @@ namespace ATI.Revenue.Application.ProcedureTransactions
 
         public ProcedureTransactionsAppService(
             IRepository<ProcedureTransaction, int> procedureTransactionRepository,
+            IRepository<ProcedureTransactionProduct, int> transactionProductRepository,
             IRepository<Personnel, int> personnelRepository,
             IRepository<Product, int> productRepository,
             IRepository<Facility, int> facilityRepository,
             IRepository<HospitalProductPrice, int> hospitalProductPriceRepository)
         {
             _procedureTransactionRepository = procedureTransactionRepository;
+            _transactionProductRepository = transactionProductRepository;
             _personnelRepository = personnelRepository;
             _productRepository = productRepository;
             _facilityRepository = facilityRepository;
@@ -49,200 +60,198 @@ namespace ATI.Revenue.Application.ProcedureTransactions
             else
                 query = query.OrderByDescending(pt => pt.ProcedureDate);
 
-            query = query.PageBy(input);
+            var rows = await query.PageBy(input)
+                .Select(pt => new
+                {
+                    pt.Id,
+                    pt.CaseNumber,
+                    pt.ProcedureDate,
+                    pt.HospitalId,
+                    HospitalName = pt.Hospital != null ? (pt.Hospital.FacilityName ?? "") : "",
+                    pt.PhysicianId,
+                    PhysicianName = pt.Physician != null
+                        ? ((pt.Physician.FIRST_NAME ?? "") + " " + (pt.Physician.LAST_NAME ?? "")).Trim()
+                        : "",
+                    pt.ImplantType,
+                    pt.TotalAmount,
+                    Lines = pt.Products.Select(l => new
+                    {
+                        ProductName = l.Product != null ? (l.Product.Name ?? "") : "",
+                        ProductCode = l.Product != null ? (l.Product.ProductCode ?? "") : "",
+                        l.Quantity
+                    }).ToList()
+                })
+                .ToListAsync();
 
-            var dtos = await query.Select(pt => new ProcedureTransactionDto
+            var dtos = rows.Select(r => new ProcedureTransactionDto
             {
-                Id = pt.Id,
-                ProcedureDate = pt.ProcedureDate,
-                HospitalId = pt.HospitalId,
-                HospitalName = pt.Hospital != null ? (pt.Hospital.FacilityName ?? "") : "",
-                PhysicianId = pt.PhysicianId,
-                PhysicianName = pt.Physician != null ? ((pt.Physician.FIRST_NAME ?? "") + " " + (pt.Physician.LAST_NAME ?? "")).Trim() : "",
-                ProductId = pt.ProductId,
-                ProductName = pt.Product != null ? (pt.Product.Name ?? "") : "",
-                ProductCode = pt.Product != null ? (pt.Product.ProductCode ?? "") : "",
-                ImplantType = pt.ImplantType,
-                Quantity = pt.Quantity,
-                UnitPrice = pt.UnitPrice,
-                TotalAmount = pt.TotalAmount
-            }).ToListAsync();
+                Id = r.Id,
+                CaseNumber = r.CaseNumber,
+                ProcedureDate = r.ProcedureDate,
+                HospitalId = r.HospitalId,
+                HospitalName = r.HospitalName,
+                PhysicianId = r.PhysicianId,
+                PhysicianName = r.PhysicianName,
+                ImplantType = r.ImplantType,
+                TotalAmount = r.TotalAmount,
+                DeviceCount = r.Lines.Count,
+                TotalUnits = r.Lines.Sum(l => l.Quantity),
+                ProductSummary = Summarise(r.Lines.Select(l =>
+                    string.IsNullOrWhiteSpace(l.ProductCode) ? l.ProductName : l.ProductCode))
+            }).ToList();
 
             return new PagedResultDto<ProcedureTransactionDto>(totalCount, dtos);
         }
 
         public async Task<GetProcedureTransactionForViewDto> GetProcedureTransactionForView(int id)
         {
-            var dto = await _procedureTransactionRepository.GetAll()
-                .Where(pt => pt.Id == id)
-                .Select(pt => new ProcedureTransactionDto
-                {
-                    Id = pt.Id,
-                    ProcedureDate = pt.ProcedureDate,
-                    HospitalId = pt.HospitalId,
-                    HospitalName = pt.Hospital != null ? (pt.Hospital.FacilityName ?? "") : "",
-                    PhysicianId = pt.PhysicianId,
-                    PhysicianName = pt.Physician != null ? ((pt.Physician.FIRST_NAME ?? "") + " " + (pt.Physician.LAST_NAME ?? "")).Trim() : "",
-                    ProductId = pt.ProductId,
-                    ProductName = pt.Product != null ? (pt.Product.Name ?? "") : "",
-                    ProductCode = pt.Product != null ? (pt.Product.ProductCode ?? "") : "",
-                    ImplantType = pt.ImplantType,
-                    Quantity = pt.Quantity,
-                    UnitPrice = pt.UnitPrice,
-                    TotalAmount = pt.TotalAmount
-                })
-                .FirstOrDefaultAsync();
+            var dto = await ProjectWithLines(_procedureTransactionRepository.GetAll().Where(pt => pt.Id == id));
 
             if (dto == null)
-                throw new UserFriendlyException("Procedure Transaction not found");
+                throw new UserFriendlyException("Case not found");
 
             return new GetProcedureTransactionForViewDto { ProcedureTransaction = dto };
         }
 
         public async Task<GetProcedureTransactionForEditOutput> GetProcedureTransactionForEdit(EntityDto<int> input)
         {
-            var entity = await _procedureTransactionRepository
-                .GetAll()
-                .FirstOrDefaultAsync(e => e.Id == input.Id);
+            var entity = await _procedureTransactionRepository.GetAll()
+                .Where(pt => pt.Id == input.Id)
+                .Select(pt => new
+                {
+                    pt.Id,
+                    pt.CaseNumber,
+                    pt.ProcedureDate,
+                    pt.HospitalId,
+                    pt.PhysicianId,
+                    pt.ImplantType,
+                    pt.TotalAmount,
+                    Lines = pt.Products.Select(l => new CreateOrEditProcedureTransactionProductDto
+                    {
+                        Id = l.Id,
+                        ProductId = l.ProductId,
+                        Quantity = l.Quantity,
+                        UnitPrice = l.UnitPrice
+                    }).ToList()
+                })
+                .FirstOrDefaultAsync();
 
             if (entity == null)
-            {
-                throw new UserFriendlyException("Procedure Transaction not found");
-            }
-
-            var editDto = new CreateOrEditProcedureTransactionDto
-            {
-                Id = entity.Id,
-                ProcedureDate = entity.ProcedureDate,
-                HospitalId = entity.HospitalId,
-                PhysicianId = entity.PhysicianId,
-                ProductId = entity.ProductId,
-                ImplantType = entity.ImplantType,
-                Quantity = entity.Quantity,
-                UnitPrice = entity.UnitPrice,
-                TotalAmount = entity.TotalAmount
-            };
+                throw new UserFriendlyException("Case not found");
 
             return new GetProcedureTransactionForEditOutput
             {
-                ProcedureTransaction = editDto
+                ProcedureTransaction = new CreateOrEditProcedureTransactionDto
+                {
+                    Id = entity.Id,
+                    CaseNumber = entity.CaseNumber,
+                    ProcedureDate = entity.ProcedureDate,
+                    HospitalId = entity.HospitalId,
+                    PhysicianId = entity.PhysicianId,
+                    ImplantType = entity.ImplantType,
+                    TotalAmount = entity.TotalAmount,
+                    Products = entity.Lines
+                }
             };
         }
 
         public async Task<ProcedureTransactionDto> CreateOrEdit(CreateOrEditProcedureTransactionDto input)
         {
-            if (input.Id == 0)
+            if (input.Products == null || !input.Products.Any())
             {
-                return await Create(input);
+                throw new UserFriendlyException("A case needs at least one device.");
             }
-            else
-            {
-                return await Update(input);
-            }
-        }
 
-        private async Task<ProcedureTransactionDto> Create(CreateOrEditProcedureTransactionDto input)
-        {
-            await EnsureImplantTypeMatchesProduct(input.ProductId, input.ImplantType);
+            input.CaseNumber = input.CaseNumber?.Trim();
+            await EnsureCaseNumberIsUnique(input.Id, input.CaseNumber);
+            await EnsureEveryDeviceMatchesImplantType(input.Products, input.ImplantType);
 
-            // Auto-populate HospitalId from Physician's FacilityId
+            // The hospital comes from the physician's facility, and the case's devices are
+            // then priced against that hospital.
             var physician = await _personnelRepository.GetAsync(input.PhysicianId);
             input.HospitalId = physician.FacilityId;
 
-            // If UnitPrice was not supplied, take the hospital's contracted price as of
-            // the procedure date rather than the product's generic base price.
-            if (input.UnitPrice == 0)
-            {
-                input.UnitPrice = await GetEffectiveUnitPrice(input.HospitalId, input.ProductId, input.ProcedureDate);
-            }
+            var entity = input.Id == 0
+                ? new ProcedureTransaction()
+                : await _procedureTransactionRepository.GetAllIncluding(pt => pt.Products)
+                      .FirstOrDefaultAsync(pt => pt.Id == input.Id);
 
-            // Calculate TotalAmount if not provided; a supplied value is a deliberate override.
-            if (input.TotalAmount == 0)
-            {
-                input.TotalAmount = input.UnitPrice * input.Quantity;
-            }
+            if (entity == null)
+                throw new UserFriendlyException("Case not found");
 
-            var entity = new ProcedureTransaction
-            {
-                ProcedureDate = input.ProcedureDate,
-                HospitalId = input.HospitalId,
-                PhysicianId = input.PhysicianId,
-                ProductId = input.ProductId,
-                ImplantType = input.ImplantType,
-                Quantity = input.Quantity,
-                UnitPrice = input.UnitPrice,
-                TotalAmount = input.TotalAmount
-            };
-
-            var id = await _procedureTransactionRepository.InsertAndGetIdAsync(entity);
-            await CurrentUnitOfWork.SaveChangesAsync();
-
-            return await _procedureTransactionRepository.GetAll()
-                .Where(pt => pt.Id == id)
-                .Select(pt => new ProcedureTransactionDto
-                {
-                    Id = pt.Id,
-                    ProcedureDate = pt.ProcedureDate,
-                    HospitalId = pt.HospitalId,
-                    HospitalName = pt.Hospital != null ? (pt.Hospital.FacilityName ?? "") : "",
-                    PhysicianId = pt.PhysicianId,
-                    PhysicianName = pt.Physician != null ? ((pt.Physician.FIRST_NAME ?? "") + " " + (pt.Physician.LAST_NAME ?? "")).Trim() : "",
-                    ProductId = pt.ProductId,
-                    ProductName = pt.Product != null ? (pt.Product.Name ?? "") : "",
-                    ProductCode = pt.Product != null ? (pt.Product.ProductCode ?? "") : "",
-                    ImplantType = pt.ImplantType,
-                    Quantity = pt.Quantity,
-                    UnitPrice = pt.UnitPrice,
-                    TotalAmount = pt.TotalAmount
-                })
-                .FirstOrDefaultAsync();
-        }
-
-        private async Task<ProcedureTransactionDto> Update(CreateOrEditProcedureTransactionDto input)
-        {
-            await EnsureImplantTypeMatchesProduct(input.ProductId, input.ImplantType);
-
-            var entity = await _procedureTransactionRepository.GetAsync(input.Id);
-
-            // Auto-populate HospitalId from Physician's FacilityId if Physician changed
-            if (entity.PhysicianId != input.PhysicianId)
-            {
-                var physician = await _personnelRepository.GetAsync(input.PhysicianId);
-                input.HospitalId = physician.FacilityId;
-            }
-
+            entity.CaseNumber = input.CaseNumber;
             entity.ProcedureDate = input.ProcedureDate;
             entity.HospitalId = input.HospitalId;
             entity.PhysicianId = input.PhysicianId;
-            entity.ProductId = input.ProductId;
             entity.ImplantType = input.ImplantType;
-            entity.Quantity = input.Quantity;
-            entity.UnitPrice = input.UnitPrice;
-            entity.TotalAmount = input.TotalAmount;
 
-            await _procedureTransactionRepository.UpdateAsync(entity);
+            await ApplyLines(entity, input);
+
+            // A supplied total is a deliberate override; otherwise it is the sum of lines.
+            entity.TotalAmount = input.TotalAmount > 0
+                ? input.TotalAmount
+                : entity.Products.Sum(l => l.LineTotal);
+
+            int id;
+            if (input.Id == 0)
+            {
+                id = await _procedureTransactionRepository.InsertAndGetIdAsync(entity);
+            }
+            else
+            {
+                await _procedureTransactionRepository.UpdateAsync(entity);
+                id = entity.Id;
+            }
+
             await CurrentUnitOfWork.SaveChangesAsync();
 
-            var savedId = entity.Id;
-            return await _procedureTransactionRepository.GetAll()
-                .Where(pt => pt.Id == savedId)
-                .Select(pt => new ProcedureTransactionDto
+            return await ProjectWithLines(_procedureTransactionRepository.GetAll().Where(pt => pt.Id == id));
+        }
+
+        /// <summary>
+        /// Replaces the case's device lines with the supplied set, pricing each one from
+        /// the hospital's contracted price unless a price was given.
+        /// </summary>
+        private async Task ApplyLines(ProcedureTransaction entity, CreateOrEditProcedureTransactionDto input)
+        {
+            var keptIds = input.Products.Where(l => l.Id > 0).Select(l => l.Id).ToHashSet();
+
+            foreach (var removed in entity.Products.Where(l => !keptIds.Contains(l.Id)).ToList())
+            {
+                entity.Products.Remove(removed);
+                await _transactionProductRepository.DeleteAsync(removed);
+            }
+
+            foreach (var line in input.Products)
+            {
+                var unitPrice = line.UnitPrice > 0
+                    ? line.UnitPrice
+                    : await GetEffectiveUnitPrice(input.HospitalId, line.ProductId, input.ProcedureDate);
+
+                var quantity = line.Quantity > 0 ? line.Quantity : 1;
+
+                var existing = line.Id > 0
+                    ? entity.Products.FirstOrDefault(l => l.Id == line.Id)
+                    : null;
+
+                if (existing == null)
                 {
-                    Id = pt.Id,
-                    ProcedureDate = pt.ProcedureDate,
-                    HospitalId = pt.HospitalId,
-                    HospitalName = pt.Hospital != null ? (pt.Hospital.FacilityName ?? "") : "",
-                    PhysicianId = pt.PhysicianId,
-                    PhysicianName = pt.Physician != null ? ((pt.Physician.FIRST_NAME ?? "") + " " + (pt.Physician.LAST_NAME ?? "")).Trim() : "",
-                    ProductId = pt.ProductId,
-                    ProductName = pt.Product != null ? (pt.Product.Name ?? "") : "",
-                    ProductCode = pt.Product != null ? (pt.Product.ProductCode ?? "") : "",
-                    ImplantType = pt.ImplantType,
-                    Quantity = pt.Quantity,
-                    UnitPrice = pt.UnitPrice,
-                    TotalAmount = pt.TotalAmount
-                })
-                .FirstOrDefaultAsync();
+                    entity.Products.Add(new ProcedureTransactionProduct
+                    {
+                        ProductId = line.ProductId,
+                        Quantity = quantity,
+                        UnitPrice = unitPrice,
+                        LineTotal = unitPrice * quantity
+                    });
+                }
+                else
+                {
+                    existing.ProductId = line.ProductId;
+                    existing.Quantity = quantity;
+                    existing.UnitPrice = unitPrice;
+                    existing.LineTotal = unitPrice * quantity;
+                }
+            }
         }
 
         public async Task Delete(EntityDto<int> input)
@@ -251,49 +260,112 @@ namespace ATI.Revenue.Application.ProcedureTransactions
             await CurrentUnitOfWork.SaveChangesAsync();
         }
 
+        private async Task EnsureCaseNumberIsUnique(int id, string caseNumber)
+        {
+            if (string.IsNullOrWhiteSpace(caseNumber))
+            {
+                throw new UserFriendlyException("A case number is required.");
+            }
+
+            var taken = await _procedureTransactionRepository.GetAll()
+                .AnyAsync(pt => pt.Id != id && pt.CaseNumber == caseNumber);
+
+            if (taken)
+            {
+                throw new UserFriendlyException($"Case number \"{caseNumber}\" is already in use.");
+            }
+        }
+
         /// <summary>
-        /// Rejects a transaction whose implant type contradicts the product it records.
+        /// Rejects any device whose subcategory contradicts the case's implant type.
         /// </summary>
         /// <remarks>
-        /// De Novo and Gen Change are modelled as separate product subcategories
-        /// ("Single Chamber" vs "Single Chamber Gen Change"), so the product already
-        /// determines which one a transaction is. Nothing previously tied the radio
-        /// button to the product chosen, so a battery replacement could be recorded
-        /// against a de novo device - and that mismatch would land straight in the
-        /// De Novo / Gen Change columns the business reports on.
-        ///
-        /// Products with no subcategory cannot be checked and are left to the user.
+        /// De Novo and Gen Change are separate product subcategories ("Single Chamber" vs
+        /// "Single Chamber Gen Change"), so a product determines which it is. Every device
+        /// on a case must agree with the case, otherwise the De Novo / Gen Change columns
+        /// the business reports on would be wrong. Products with no subcategory cannot be
+        /// checked and are left to the user.
         /// </remarks>
-        private async Task EnsureImplantTypeMatchesProduct(int productId, ImplantType implantType)
+        private async Task EnsureEveryDeviceMatchesImplantType(
+            List<CreateOrEditProcedureTransactionProductDto> lines,
+            ImplantType implantType)
         {
-            var expected = await _productRepository.GetAll()
-                .Where(p => p.Id == productId && p.ProductSubcategory != null)
+            var productIds = lines.Select(l => l.ProductId).Distinct().ToList();
+
+            var mismatches = await _productRepository.GetAll()
+                .Where(p => productIds.Contains(p.Id)
+                            && p.ProductSubcategory != null
+                            && p.ProductSubcategory.ImplantType != implantType)
                 .Select(p => new
                 {
-                    ProductName = p.Name,
+                    p.Name,
                     SubcategoryName = p.ProductSubcategory.SubcategoryName,
                     p.ProductSubcategory.ImplantType
                 })
-                .FirstOrDefaultAsync();
+                .ToListAsync();
 
-            if (expected == null || expected.ImplantType == implantType)
+            if (!mismatches.Any())
             {
                 return;
             }
 
+            var detail = string.Join("; ", mismatches.Select(m =>
+                $"{m.Name} is in \"{m.SubcategoryName}\", which is {Describe(m.ImplantType)}"));
+
             throw new UserFriendlyException(
-                "Implant type does not match the selected product",
-                string.Format(
-                    "{0} belongs to the \"{1}\" subcategory, which is {2}. Either choose a {3} product or change the implant type to {2}.",
-                    expected.ProductName,
-                    expected.SubcategoryName,
-                    Describe(expected.ImplantType),
-                    Describe(implantType)));
+                $"Every device on a {Describe(implantType)} case must be {Describe(implantType)}",
+                detail + ". Remove those devices or change the case's implant type.");
         }
 
         private static string Describe(ImplantType implantType)
         {
             return implantType == ImplantType.GenChange ? "Gen Change" : "De Novo";
+        }
+
+        private static string Summarise(IEnumerable<string> names)
+        {
+            var list = names.Where(n => !string.IsNullOrWhiteSpace(n)).ToList();
+
+            if (!list.Any()) return "";
+            if (list.Count == 1) return list[0];
+
+            return $"{list[0]} +{list.Count - 1} more";
+        }
+
+        private static Task<ProcedureTransactionDto> ProjectWithLines(IQueryable<ProcedureTransaction> query)
+        {
+            return query.Select(pt => new ProcedureTransactionDto
+            {
+                Id = pt.Id,
+                CaseNumber = pt.CaseNumber,
+                ProcedureDate = pt.ProcedureDate,
+                HospitalId = pt.HospitalId,
+                HospitalName = pt.Hospital != null ? (pt.Hospital.FacilityName ?? "") : "",
+                PhysicianId = pt.PhysicianId,
+                PhysicianName = pt.Physician != null
+                    ? ((pt.Physician.FIRST_NAME ?? "") + " " + (pt.Physician.LAST_NAME ?? "")).Trim()
+                    : "",
+                ImplantType = pt.ImplantType,
+                TotalAmount = pt.TotalAmount,
+                DeviceCount = pt.Products.Count,
+                TotalUnits = pt.Products.Sum(l => l.Quantity),
+                Products = pt.Products.Select(l => new ProcedureTransactionProductDto
+                {
+                    Id = l.Id,
+                    ProductId = l.ProductId,
+                    ProductName = l.Product != null ? (l.Product.Name ?? "") : "",
+                    ProductCode = l.Product != null ? (l.Product.ProductCode ?? "") : "",
+                    SubcategoryName = l.Product != null && l.Product.ProductSubcategory != null
+                        ? (l.Product.ProductSubcategory.SubcategoryName ?? "")
+                        : "",
+                    ProductImplantType = l.Product != null && l.Product.ProductSubcategory != null
+                        ? l.Product.ProductSubcategory.ImplantType
+                        : (ImplantType?)null,
+                    Quantity = l.Quantity,
+                    UnitPrice = l.UnitPrice,
+                    LineTotal = l.LineTotal
+                }).ToList()
+            }).FirstOrDefaultAsync();
         }
 
         /// <summary>
@@ -339,67 +411,23 @@ namespace ATI.Revenue.Application.ProcedureTransactions
 
         private IQueryable<ProcedureTransaction> CreateFilteredQuery(GetAllProcedureTransactionsInput input)
         {
-            var query = _procedureTransactionRepository.GetAll();
-
-            // Year and Month filters
-            if (input.YearFilter.HasValue)
-            {
-                query = query.Where(pt => pt.ProcedureDate.Year == input.YearFilter.Value);
-            }
-
-            if (input.MonthFilter.HasValue)
-            {
-                query = query.Where(pt => pt.ProcedureDate.Month == input.MonthFilter.Value);
-            }
-
-            // Hospital filter
-            if (input.HospitalIdFilter.HasValue)
-            {
-                query = query.Where(pt => pt.HospitalId == input.HospitalIdFilter.Value);
-            }
-
-            // Physician filter
-            if (input.PhysicianIdFilter.HasValue)
-            {
-                query = query.Where(pt => pt.PhysicianId == input.PhysicianIdFilter.Value);
-            }
-
-            // Product filter
-            if (input.ProductIdFilter.HasValue)
-            {
-                query = query.Where(pt => pt.ProductId == input.ProductIdFilter.Value);
-            }
-
-            // Implant type filter (De Novo vs Gen Change)
-            if (input.ImplantTypeFilter.HasValue)
-            {
-                query = query.Where(pt => pt.ImplantType == input.ImplantTypeFilter.Value);
-            }
-
-            // Date range filters
-            if (input.MinProcedureDateFilter.HasValue)
-            {
-                query = query.Where(pt => pt.ProcedureDate >= input.MinProcedureDateFilter.Value);
-            }
-
-            if (input.MaxProcedureDateFilter.HasValue)
-            {
-                query = query.Where(pt => pt.ProcedureDate <= input.MaxProcedureDateFilter.Value);
-            }
-
-            // General text filter
-            if (!string.IsNullOrWhiteSpace(input.Filter))
-            {
-                query = query.Where(pt =>
+            return _procedureTransactionRepository.GetAll()
+                .WhereIf(input.YearFilter.HasValue, pt => pt.ProcedureDate.Year == input.YearFilter.Value)
+                .WhereIf(input.MonthFilter.HasValue, pt => pt.ProcedureDate.Month == input.MonthFilter.Value)
+                .WhereIf(input.HospitalIdFilter.HasValue, pt => pt.HospitalId == input.HospitalIdFilter.Value)
+                .WhereIf(input.PhysicianIdFilter.HasValue, pt => pt.PhysicianId == input.PhysicianIdFilter.Value)
+                // A case matches a product filter when any of its devices is that product.
+                .WhereIf(input.ProductIdFilter.HasValue,
+                    pt => pt.Products.Any(l => l.ProductId == input.ProductIdFilter.Value))
+                .WhereIf(input.ImplantTypeFilter.HasValue, pt => pt.ImplantType == input.ImplantTypeFilter.Value)
+                .WhereIf(input.MinProcedureDateFilter.HasValue, pt => pt.ProcedureDate >= input.MinProcedureDateFilter.Value)
+                .WhereIf(input.MaxProcedureDateFilter.HasValue, pt => pt.ProcedureDate <= input.MaxProcedureDateFilter.Value)
+                .WhereIf(!string.IsNullOrWhiteSpace(input.Filter), pt =>
+                    pt.CaseNumber.Contains(input.Filter) ||
                     pt.Physician.FIRST_NAME.Contains(input.Filter) ||
                     pt.Physician.LAST_NAME.Contains(input.Filter) ||
-                    pt.Product.Name.Contains(input.Filter) ||
-                    pt.Product.ProductCode.Contains(input.Filter)
-                );
-            }
-
-            return query;
+                    pt.Products.Any(l => l.Product.Name.Contains(input.Filter)
+                                         || l.Product.ProductCode.Contains(input.Filter)));
         }
-
     }
 }

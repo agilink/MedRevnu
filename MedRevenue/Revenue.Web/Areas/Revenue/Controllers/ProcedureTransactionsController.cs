@@ -75,8 +75,6 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
                     {
                         ProcedureDate = DateTime.Now,
                         ImplantType = ImplantType.DeNovo,
-                        Quantity = 1,
-                        UnitPrice = 0,
                         TotalAmount = 0
                     },
                     IsEditMode = false

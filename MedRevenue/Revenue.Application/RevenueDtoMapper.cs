@@ -23,22 +23,23 @@ namespace ATI.Revenue.Application
             configuration.CreateMap<ProcedureType, ProcedureTypeDto>();
             configuration.CreateMap<CreateOrEditProcedureTypeDto, ProcedureType>();
 
-            // ProcedureTransaction mappings
+            // ProcedureTransaction (case) mappings. The device lines are projected
+            // explicitly in the app service, so they are not mapped here.
             configuration.CreateMap<ProcedureTransaction, ProcedureTransactionDto>()
                 .ForMember(dto => dto.HospitalName,
                     opt => opt.MapFrom(src => src.Hospital != null ? src.Hospital.FacilityName : string.Empty))
                 .ForMember(dto => dto.PhysicianName,
                     opt => opt.MapFrom(src => src.Physician != null ?
                         (src.Physician.FIRST_NAME + " " + src.Physician.LAST_NAME).Trim() : string.Empty))
-                .ForMember(dto => dto.ProductName,
-                    opt => opt.MapFrom(src => src.Product != null ? src.Product.Name : string.Empty))
-                .ForMember(dto => dto.ProductCode,
-                    opt => opt.MapFrom(src => src.Product != null ? src.Product.ProductCode : string.Empty));
+                .ForMember(dto => dto.DeviceCount, opt => opt.MapFrom(src => src.Products.Count))
+                .ForMember(dto => dto.TotalUnits, opt => opt.Ignore())
+                .ForMember(dto => dto.ProductSummary, opt => opt.Ignore())
+                .ForMember(dto => dto.Products, opt => opt.Ignore());
 
             configuration.CreateMap<CreateOrEditProcedureTransactionDto, ProcedureTransaction>()
                 .ForMember(ent => ent.Hospital, opt => opt.Ignore())
                 .ForMember(ent => ent.Physician, opt => opt.Ignore())
-                .ForMember(ent => ent.Product, opt => opt.Ignore());
+                .ForMember(ent => ent.Products, opt => opt.Ignore());
 
             // ProductQuota mappings
             configuration.CreateMap<ProductQuota, ProductQuotaDto>()

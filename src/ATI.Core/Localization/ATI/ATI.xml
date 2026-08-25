@@ -1448,5 +1448,18 @@
     <text name="AllQuarters">All Quarters</text>
     <text name="Variance">Variance</text>
     <text name="ExportFailed">The export could not be created</text>
+    <text name="DevicesUsed">Devices Used</text>
+    <text name="AddDevice">Add Device</text>
+    <text name="NoDevicesYet">No devices added yet</text>
+    <text name="LineTotal">Line Total</text>
+    <text name="CreateCase">Create Case</text>
+    <text name="EditCase">Edit Case</text>
+    <text name="CaseNeedsAtLeastOneDevice">Add at least one device to the case.</text>
+    <text name="DeviceImplantTypeMismatch">This device does not match the case's implant type</text>
+    <text name="EveryDeviceMustMatchImplantType">Every device on the case must match this</text>
+    <text name="RecalculateFromDevices">Recalculate from devices</text>
+    <text name="TotalOverrideHint">Calculated from the devices; edit to override with a negotiated price</text>
+    <text name="FailedToLoadPrice">Failed to load price</text>
+    <text name="Quantity">Quantity</text>
   </texts>
 </localizationDictionary>

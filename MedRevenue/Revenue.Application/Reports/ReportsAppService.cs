@@ -71,30 +71,29 @@ namespace ATI.Revenue.Application.Reports
             var year = input.Year ?? Abp.Timing.Clock.Now.Year;
             var month = input.Month ?? Abp.Timing.Clock.Now.Month;
 
-            var query = _procedureTransactionRepository
-                .GetAll()
-                .Include(pt => pt.Product)
-                    .ThenInclude(p => p.ProductCategory)
-                .Where(pt => pt.ProcedureDate.Year == year &&
-                             pt.ProcedureDate.Month == month);
-
-            if (input.HospitalId.HasValue)
-            {
-                query = query.Where(pt => pt.HospitalId == input.HospitalId.Value);
-            }
-
-            var report = await query
-                .GroupBy(pt => new
+            // Revenue per category comes from the device lines: one case can involve
+            // devices from more than one category, so the case total cannot be attributed
+            // to a single one.
+            var report = await _procedureTransactionRepository.GetAll()
+                .WhereIf(input.HospitalId.HasValue, pt => pt.HospitalId == input.HospitalId.Value)
+                .Where(pt => pt.ProcedureDate.Year == year && pt.ProcedureDate.Month == month)
+                .SelectMany(pt => pt.Products.Select(l => new
                 {
+                    CaseId = pt.Id,
                     Date = pt.ProcedureDate.Date,
-                    CategoryName = pt.Product.ProductCategory.Name
-                })
+                    CategoryName = l.Product != null && l.Product.ProductCategory != null
+                        ? l.Product.ProductCategory.Name
+                        : null,
+                    l.LineTotal
+                }))
+                .GroupBy(x => new { x.Date, x.CategoryName })
                 .Select(g => new MonthlyRevenueReportDto
                 {
                     ProcedureDate = g.Key.Date,
-                    ProductCategoryName = g.Key.CategoryName,
-                    DailyRevenue = g.Sum(pt => pt.TotalAmount),
-                    TransactionCount = g.Count()
+                    ProductCategoryName = g.Key.CategoryName ?? "(Uncategorised)",
+                    DailyRevenue = g.Sum(x => x.LineTotal),
+                    // Cases, not device lines.
+                    TransactionCount = g.Select(x => x.CaseId).Distinct().Count()
                 })
                 .OrderBy(r => r.ProcedureDate)
                 .ThenBy(r => r.ProductCategoryName)
@@ -138,9 +137,11 @@ namespace ATI.Revenue.Application.Reports
                 {
                     PhysicianName = (g.Key.PhysicianFirstName + " " + g.Key.PhysicianLastName).Trim(),
                     HospitalName = g.Key.HospitalName,
-                    TotalCases = g.Sum(pt => pt.Quantity),
-                    DeNovoCases = g.Where(pt => pt.ImplantType == ImplantType.DeNovo).Sum(pt => pt.Quantity),
-                    GenChangeCases = g.Where(pt => pt.ImplantType == ImplantType.GenChange).Sum(pt => pt.Quantity),
+                    // A case is one row, so counts are row counts. Summing device
+                    // quantities would report a three-device procedure as three cases.
+                    TotalCases = g.Count(),
+                    DeNovoCases = g.Count(pt => pt.ImplantType == ImplantType.DeNovo),
+                    GenChangeCases = g.Count(pt => pt.ImplantType == ImplantType.GenChange),
                     TotalRevenue = g.Sum(pt => pt.TotalAmount)
                 })
                 .OrderByDescending(r => r.TotalCases)
@@ -156,47 +157,57 @@ namespace ATI.Revenue.Application.Reports
         {
             var year = input.Year ?? Abp.Timing.Clock.Now.Year;
 
-            var query = _procedureTransactionRepository
-                .GetAll()
-                .Include(pt => pt.Physician)
-                .Include(pt => pt.Product)
-                    .ThenInclude(p => p.ProductCategory)
-                .Where(pt => pt.ProcedureDate.Year == year);
-
-            if (input.PhysicianId.HasValue)
-            {
-                query = query.Where(pt => pt.PhysicianId == input.PhysicianId.Value);
-            }
-
-            if (input.ProductCategoryId.HasValue)
-            {
-                query = query.Where(pt => pt.Product.ProductCategoryId == input.ProductCategoryId.Value);
-            }
-
-            var report = await query
-                .GroupBy(pt => new
+            // Per-category figures come from the device lines, since a case can involve
+            // devices from several categories. Case counts are distinct cases, and the
+            // average is per case rather than per line.
+            var rows = await _procedureTransactionRepository.GetAll()
+                .Where(pt => pt.ProcedureDate.Year == year)
+                .WhereIf(input.PhysicianId.HasValue, pt => pt.PhysicianId == input.PhysicianId.Value)
+                .SelectMany(pt => pt.Products.Select(l => new
                 {
+                    CaseId = pt.Id,
                     PhysicianFirstName = pt.Physician.FIRST_NAME,
                     PhysicianLastName = pt.Physician.LAST_NAME,
-                    CategoryName = pt.Product.ProductCategory.Name,
-                    ImplantType = pt.ImplantType
-                })
-                .Select(g => new TransactionAmountReportDto
+                    pt.ImplantType,
+                    ProductCategoryId = l.Product != null ? l.Product.ProductCategoryId : null,
+                    CategoryName = l.Product != null && l.Product.ProductCategory != null
+                        ? l.Product.ProductCategory.Name
+                        : null,
+                    l.LineTotal
+                }))
+                .WhereIf(input.ProductCategoryId.HasValue,
+                    x => x.ProductCategoryId == input.ProductCategoryId.Value)
+                .ToListAsync();
+
+            return rows
+                .GroupBy(x => new
                 {
-                    PhysicianName = (g.Key.PhysicianFirstName + " " + g.Key.PhysicianLastName).Trim(),
-                    ProductCategoryName = g.Key.CategoryName,
-                    ImplantType = g.Key.ImplantType,
-                    TotalCases = g.Sum(pt => pt.Quantity),
-                    TotalAmount = g.Sum(pt => pt.TotalAmount),
-                    AverageAmount = g.Average(pt => pt.TotalAmount)
+                    x.PhysicianFirstName,
+                    x.PhysicianLastName,
+                    x.CategoryName,
+                    x.ImplantType
+                })
+                .Select(g =>
+                {
+                    var caseCount = g.Select(x => x.CaseId).Distinct().Count();
+                    var total = g.Sum(x => x.LineTotal);
+
+                    return new TransactionAmountReportDto
+                    {
+                        PhysicianName = ((g.Key.PhysicianFirstName ?? "") + " " + (g.Key.PhysicianLastName ?? "")).Trim(),
+                        ProductCategoryName = g.Key.CategoryName ?? "(Uncategorised)",
+                        ImplantType = g.Key.ImplantType,
+                        TotalCases = caseCount,
+                        TotalAmount = total,
+                        AverageAmount = caseCount > 0 ? total / caseCount : 0m
+                    };
                 })
                 .OrderBy(r => r.PhysicianName)
                 .ThenBy(r => r.ProductCategoryName)
                 .ThenBy(r => r.ImplantType)
-                .ToListAsync();
-
-            return report;
+                .ToList();
         }
+
         /// <summary>
         /// Report 5: Quarterly rollup - three months of targets against actuals.
         /// </summary>
@@ -231,20 +242,25 @@ namespace ATI.Revenue.Application.Reports
                 })
                 .ToListAsync();
 
+            // Quotas are per product category, so actuals come from the device lines: one
+            // case can involve devices from more than one category.
             var actuals = await _procedureTransactionRepository.GetAll()
                 .Where(pt => pt.ProcedureDate.Year == year && allMonths.Contains(pt.ProcedureDate.Month))
                 .WhereIf(input.HospitalId.HasValue, pt => pt.HospitalId == input.HospitalId.Value)
-                .Select(pt => new
+                .SelectMany(pt => pt.Products.Select(l => new
                 {
+                    CaseId = pt.Id,
                     Month = pt.ProcedureDate.Month,
                     pt.HospitalId,
                     HospitalName = pt.Hospital != null ? pt.Hospital.FacilityName : null,
-                    ProductCategoryId = pt.Product.ProductCategoryId,
-                    ProductCategoryName = pt.Product.ProductCategory != null ? pt.Product.ProductCategory.Name : null,
+                    ProductCategoryId = l.Product != null ? l.Product.ProductCategoryId : null,
+                    ProductCategoryName = l.Product != null && l.Product.ProductCategory != null
+                        ? l.Product.ProductCategory.Name
+                        : null,
                     pt.ImplantType,
-                    pt.Quantity,
-                    pt.TotalAmount
-                })
+                    l.Quantity,
+                    l.LineTotal
+                }))
                 .ToListAsync();
 
             var report = new List<QuarterlyRollupReportDto>();
@@ -279,7 +295,7 @@ namespace ATI.Revenue.Application.Reports
                         .Where(a => (a.HospitalId ?? 0) == key.HospitalId && (a.ProductCategoryId ?? 0) == key.CategoryId)
                         .ToList();
 
-                    var sold = rows.Sum(a => a.TotalAmount);
+                    var sold = rows.Sum(a => a.LineTotal);
 
                     report.Add(new QuarterlyRollupReportDto
                     {
@@ -296,9 +312,12 @@ namespace ATI.Revenue.Application.Reports
                         TotalSold = sold,
                         Variance = sold - plan,
                         PercentToPlan = plan > 0 ? (sold / plan) * 100 : 0,
-                        TotalCases = rows.Sum(a => a.Quantity),
-                        DeNovoCases = rows.Where(a => a.ImplantType == ImplantType.DeNovo).Sum(a => a.Quantity),
-                        GenChangeCases = rows.Where(a => a.ImplantType == ImplantType.GenChange).Sum(a => a.Quantity),
+                        // Distinct cases, not device lines.
+                        TotalCases = rows.Select(a => a.CaseId).Distinct().Count(),
+                        DeNovoCases = rows.Where(a => a.ImplantType == ImplantType.DeNovo)
+                                          .Select(a => a.CaseId).Distinct().Count(),
+                        GenChangeCases = rows.Where(a => a.ImplantType == ImplantType.GenChange)
+                                             .Select(a => a.CaseId).Distinct().Count(),
                         HasPlan = plan > 0
                     });
                 }

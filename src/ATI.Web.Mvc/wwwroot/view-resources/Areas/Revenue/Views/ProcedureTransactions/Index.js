@@ -72,6 +72,11 @@
                 },
                 {
                     targets: 1,
+                    data: 'caseNumber',
+                    name: 'caseNumber'
+                },
+                {
+                    targets: 2,
                     data: 'hospitalName',
                     name: 'hospitalName',
                     render: function (hospitalName) {
@@ -79,36 +84,20 @@
                     }
                 },
                 {
-                    targets: 2,
+                    targets: 3,
                     data: 'physicianName',
                     name: 'physicianName'
                 },
                 {
-                    targets: 3,
+                    targets: 4,
                     data: 'procedureDate',
                     name: 'procedureDate',
                     render: function (procedureDate) {
-                        if (procedureDate) {
-                            return moment(procedureDate).format('L');
-                        }
-                        return '';
+                        return procedureDate ? moment(procedureDate).format('L') : '';
                     }
-                },
-                {
-                    targets: 4,
-                    data: 'productName',
-                    name: 'productName'
                 },
                 {
                     targets: 5,
-                    data: 'productCode',
-                    name: 'productCode',
-                    render: function (productCode) {
-                        return productCode || '-';
-                    }
-                },
-                {
-                    targets: 6,
                     data: 'implantType',
                     name: 'implantType',
                     render: function (implantType) {
@@ -122,31 +111,31 @@
                     }
                 },
                 {
-                    targets: 7,
-                    data: 'quantity',
-                    name: 'quantity',
-                    className: 'text-center'
-                },
-                {
-                    targets: 8,
-                    data: 'unitPrice',
-                    name: 'unitPrice',
-                    render: function (unitPrice) {
-                        if (unitPrice) {
-                            return '$' + unitPrice.toFixed(2);
+                    // A case can use several devices, so the grid summarises them.
+                    targets: 6,
+                    data: 'productSummary',
+                    name: 'productSummary',
+                    orderable: false,
+                    render: function (productSummary, type, row) {
+                        if (!row.deviceCount) {
+                            return '<span class="text-danger">' + app.localize('NoDevicesYet') + '</span>';
                         }
-                        return '$0.00';
+                        var units = row.totalUnits && row.totalUnits !== row.deviceCount
+                            ? ' (' + row.totalUnits + ' units)'
+                            : '';
+                        return $('<span></span>').text((productSummary || '') + units).html();
                     }
                 },
                 {
-                    targets: 9,
+                    targets: 7,
                     data: 'totalAmount',
                     name: 'totalAmount',
+                    className: 'text-end',
                     render: function (totalAmount) {
-                        if (totalAmount) {
-                            return '$' + totalAmount.toFixed(2);
-                        }
-                        return '$0.00';
+                        return '$' + (totalAmount || 0).toLocaleString('en-US', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        });
                     }
                 }
             ]

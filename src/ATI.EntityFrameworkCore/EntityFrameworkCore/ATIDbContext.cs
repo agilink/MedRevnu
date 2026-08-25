@@ -48,6 +48,7 @@ namespace ATI.EntityFrameworkCore
         public virtual DbSet<ProductSubcategory> ProductSubcategories { get; set; }
         public virtual DbSet<ProcedureType> ProcedureTypes { get; set; }
         public virtual DbSet<ProcedureTransaction> ProcedureTransactions { get; set; }
+        public virtual DbSet<ProcedureTransactionProduct> ProcedureTransactionProducts { get; set; }
         public virtual DbSet<ProductQuota> ProductQuotas { get; set; }
         public virtual DbSet<HospitalProductPrice> HospitalProductPrices { get; set; }
 
@@ -324,17 +325,43 @@ namespace ATI.EntityFrameworkCore
             {
                 entity.ToTable("ProcedureTransaction", revSchema);
                 entity.HasKey(e => e.Id);
+                entity.Property(e => e.CaseNumber).IsRequired().HasMaxLength(50);
                 entity.Property(e => e.ProcedureDate).IsRequired();
                 entity.Property(e => e.PhysicianId).IsRequired();
-                entity.Property(e => e.ProductId).IsRequired();
                 entity.Property(e => e.ImplantType).IsRequired();
-                entity.Property(e => e.Quantity).IsRequired();
-                entity.Property(e => e.UnitPrice).HasPrecision(10, 2).IsRequired();
-                entity.Property(e => e.TotalAmount).HasPrecision(10, 2);
+                entity.Property(e => e.TotalAmount).HasPrecision(18, 2);
 
                 entity.HasIndex(e => e.ProcedureDate);
                 entity.HasIndex(e => e.PhysicianId);
                 entity.HasIndex(e => e.HospitalId);
+
+                // The case number identifies a case to the client, so it must be unique.
+                entity.HasIndex(e => e.CaseNumber).IsUnique();
+
+                entity.HasMany(e => e.Products)
+                    .WithOne(e => e.ProcedureTransaction)
+                    .HasForeignKey(e => e.ProcedureTransactionId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // ProcedureTransactionProduct entity configuration - the devices on a case
+            modelBuilder.Entity<ProcedureTransactionProduct>(entity =>
+            {
+                entity.ToTable("ProcedureTransactionProduct", revSchema);
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.ProcedureTransactionId).IsRequired();
+                entity.Property(e => e.ProductId).IsRequired();
+                entity.Property(e => e.Quantity).IsRequired();
+                entity.Property(e => e.UnitPrice).HasPrecision(18, 2).IsRequired();
+                entity.Property(e => e.LineTotal).HasPrecision(18, 2);
+
+                entity.HasIndex(e => e.ProcedureTransactionId);
+                entity.HasIndex(e => e.ProductId);
+
+                entity.HasOne(e => e.Product)
+                    .WithMany()
+                    .HasForeignKey(e => e.ProductId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             // ProductQuota entity configuration

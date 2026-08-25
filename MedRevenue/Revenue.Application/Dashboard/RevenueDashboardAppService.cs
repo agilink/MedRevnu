@@ -1,4 +1,4 @@
-﻿using Abp.Application.Services;
+using Abp.Application.Services;
 using Abp.Domain.Repositories;
 using Abp.Linq.Extensions;
 using ATI.Revenue.Application.Dashboard.Dtos;
@@ -15,12 +15,22 @@ namespace ATI.Revenue.Application.Dashboard
     /// Read model for the Revenue dashboard.
     /// </summary>
     /// <remarks>
-    /// Revenue comes from ProcedureTransaction and targets come from ProductQuota.
-    /// This previously read revenue from Case and targets from ProcedureQuota, while
-    /// the reports read ProcedureTransaction and the only quota screen in the menu
-    /// wrote ProductQuota - so the dashboard and the reports answered "how much did
-    /// we bill this month" from different tables, and quota-vs-actual compared
-    /// against targets nobody could enter.
+    /// Revenue comes from ProcedureTransaction and targets come from ProductQuota. This
+    /// previously read revenue from Case and targets from ProcedureQuota, while the
+    /// reports read ProcedureTransaction and the only quota screen wrote ProductQuota -
+    /// so the dashboard and the reports answered "how much did we bill this month" from
+    /// different tables.
+    ///
+    /// A case is one ProcedureTransaction row with a line per device, which splits the two
+    /// figures apart:
+    ///  - case counts come from the case rows, since counting device lines would report a
+    ///    three-device procedure as three cases;
+    ///  - anything broken down by product or category comes from the lines, since one case
+    ///    can span several categories.
+    ///
+    /// Device lines are always reached through the case, so ABP's soft-delete filter on
+    /// the case applies; querying the line table directly would still return lines
+    /// belonging to deleted cases.
     /// </remarks>
     public class RevenueDashboardAppService : ApplicationService, IRevenueDashboardAppService
     {
@@ -41,31 +51,30 @@ namespace ATI.Revenue.Application.Dashboard
             // chosen, so an absent date means today rather than a validation error.
             var day = (date ?? Abp.Timing.Clock.Now).Date;
 
-            var rows = await QueryTransactions(hospitalId)
+            var cases = await QueryCases(hospitalId)
                 .Where(pt => pt.ProcedureDate.Date == day)
-                .Select(pt => new
-                {
-                    ProductCategoryId = pt.Product.ProductCategoryId,
-                    ProductCategoryName = pt.Product.ProductCategory != null ? pt.Product.ProductCategory.Name : null,
-                    pt.Quantity,
-                    pt.TotalAmount
-                })
+                .Select(pt => new { pt.Id, pt.TotalAmount })
+                .ToListAsync();
+
+            var lines = await QueryLines(hospitalId)
+                .Where(l => l.ProcedureDate.Date == day)
                 .ToListAsync();
 
             return new DailyRevenueSummaryDto
             {
                 Date = day,
-                TotalRevenue = rows.Sum(r => r.TotalAmount),
-                TotalCases = rows.Sum(r => r.Quantity),
-                TransactionCount = rows.Count,
-                RevenueByCategory = rows
-                    .GroupBy(r => new { r.ProductCategoryId, r.ProductCategoryName })
+                TotalRevenue = cases.Sum(c => c.TotalAmount),
+                TotalCases = cases.Count,
+                TransactionCount = cases.Count,
+                RevenueByCategory = lines
+                    .GroupBy(l => new { l.ProductCategoryId, l.ProductCategoryName })
                     .Select(g => new RevenueByCategoryDto
                     {
                         ProductCategoryId = g.Key.ProductCategoryId ?? 0,
                         ProductCategoryName = CategoryLabel(g.Key.ProductCategoryName),
-                        Revenue = g.Sum(r => r.TotalAmount),
-                        CaseCount = g.Sum(r => r.Quantity),
+                        Revenue = g.Sum(l => l.LineTotal),
+                        // Distinct cases, so a case with two devices in one category counts once.
+                        CaseCount = g.Select(l => l.CaseId).Distinct().Count(),
                         TransactionCount = g.Count()
                     })
                     .OrderByDescending(c => c.Revenue)
@@ -78,27 +87,19 @@ namespace ATI.Revenue.Application.Dashboard
             var resolvedYear = year ?? Abp.Timing.Clock.Now.Year;
             var resolvedMonth = month ?? Abp.Timing.Clock.Now.Month;
 
-            var rows = await QueryTransactions(hospitalId)
-                .Where(pt => pt.ProcedureDate.Year == resolvedYear && pt.ProcedureDate.Month == resolvedMonth)
-                .Select(pt => new
-                {
-                    ProductCategoryId = pt.Product.ProductCategoryId,
-                    ProductCategoryName = pt.Product.ProductCategory != null ? pt.Product.ProductCategory.Name : null,
-                    pt.ImplantType,
-                    pt.Quantity,
-                    pt.TotalAmount
-                })
+            var lines = await QueryLines(hospitalId)
+                .Where(l => l.ProcedureDate.Year == resolvedYear && l.ProcedureDate.Month == resolvedMonth)
                 .ToListAsync();
 
-            return rows
-                .GroupBy(r => new { r.ProductCategoryId, r.ProductCategoryName, r.ImplantType })
+            return lines
+                .GroupBy(l => new { l.ProductCategoryId, l.ProductCategoryName, l.ImplantType })
                 .Select(g => new MonthlyRevenueByCategoryDto
                 {
                     ProductCategoryId = g.Key.ProductCategoryId ?? 0,
                     ProductCategoryName = CategoryLabel(g.Key.ProductCategoryName),
                     ImplantType = g.Key.ImplantType,
-                    TotalRevenue = g.Sum(r => r.TotalAmount),
-                    CaseCount = g.Sum(r => r.Quantity),
+                    TotalRevenue = g.Sum(l => l.LineTotal),
+                    CaseCount = g.Select(l => l.CaseId).Distinct().Count(),
                     TransactionCount = g.Count()
                 })
                 .OrderBy(r => r.ProductCategoryName)
@@ -116,7 +117,6 @@ namespace ATI.Revenue.Application.Dashboard
                 .WhereIf(hospitalId.HasValue, q => q.HospitalId == hospitalId.Value)
                 .Select(q => new
                 {
-                    q.Id,
                     q.HospitalId,
                     HospitalName = q.Hospital != null ? q.Hospital.FacilityName : null,
                     q.ProductCategoryId,
@@ -128,77 +128,53 @@ namespace ATI.Revenue.Application.Dashboard
                 })
                 .ToListAsync();
 
-            var actuals = await QueryTransactions(hospitalId)
-                .Where(pt => pt.ProcedureDate.Year == resolvedYear && pt.ProcedureDate.Month == resolvedMonth)
-                .Select(pt => new ActualRow
-                {
-                    HospitalId = pt.HospitalId ?? 0,
-                    HospitalName = pt.Hospital != null ? pt.Hospital.FacilityName : null,
-                    ProductCategoryId = pt.Product.ProductCategoryId ?? 0,
-                    ProductCategoryName = pt.Product.ProductCategory != null ? pt.Product.ProductCategory.Name : null,
-                    ProductId = pt.ProductId,
-                    ProductName = pt.Product.Name,
-                    Quantity = pt.Quantity,
-                    TotalAmount = pt.TotalAmount
-                })
+            // Quotas are per hospital and product category, so actuals must come from the
+            // device lines - a case can contribute to more than one category.
+            var actuals = await QueryLines(hospitalId)
+                .Where(l => l.ProcedureDate.Year == resolvedYear && l.ProcedureDate.Month == resolvedMonth)
                 .ToListAsync();
 
-            // Products that have their own quota line are excluded from the
-            // category-level line, so revenue is never counted against two targets.
             var productLevelQuotaKeys = quotas
                 .Where(q => q.ProductId.HasValue)
                 .Select(q => (q.HospitalId, q.ProductCategoryId, ProductId: q.ProductId.Value))
                 .ToHashSet();
 
             var result = new List<RevenueVsQuotaDto>();
-            var matchedActuals = new HashSet<ActualRow>();
+            var matched = new HashSet<LineRow>();
 
             foreach (var quota in quotas)
             {
                 var matching = actuals
                     .Where(a => a.HospitalId == quota.HospitalId
-                                && a.ProductCategoryId == quota.ProductCategoryId
+                                && (a.ProductCategoryId ?? 0) == quota.ProductCategoryId
                                 && (quota.ProductId.HasValue
                                         ? a.ProductId == quota.ProductId.Value
-                                        : !productLevelQuotaKeys.Contains((a.HospitalId, a.ProductCategoryId, a.ProductId))))
+                                        : !productLevelQuotaKeys.Contains((a.HospitalId, a.ProductCategoryId ?? 0, a.ProductId))))
                     .ToList();
 
                 foreach (var row in matching)
                 {
-                    matchedActuals.Add(row);
+                    matched.Add(row);
                 }
 
                 result.Add(BuildRow(
-                    quota.HospitalId,
-                    quota.HospitalName,
-                    quota.ProductCategoryId,
-                    quota.ProductCategoryName,
-                    quota.ProductId,
-                    quota.ProductName,
-                    quota.TargetAmount,
-                    quota.TargetUnits,
-                    matching,
-                    hasQuota: true));
+                    quota.HospitalId, quota.HospitalName,
+                    quota.ProductCategoryId, quota.ProductCategoryName,
+                    quota.ProductId, quota.ProductName,
+                    quota.TargetAmount, quota.TargetUnits,
+                    matching, hasQuota: true));
             }
 
             // Revenue with no quota covering it, so it still shows on the dashboard.
-            var unquoted = actuals
-                .Where(a => !matchedActuals.Contains(a))
-                .GroupBy(a => new { a.HospitalId, a.HospitalName, a.ProductCategoryId, a.ProductCategoryName });
-
-            foreach (var group in unquoted)
+            foreach (var group in actuals.Where(a => !matched.Contains(a))
+                                         .GroupBy(a => new { a.HospitalId, a.HospitalName, a.ProductCategoryId, a.ProductCategoryName }))
             {
                 result.Add(BuildRow(
-                    group.Key.HospitalId,
-                    group.Key.HospitalName,
-                    group.Key.ProductCategoryId,
-                    group.Key.ProductCategoryName,
-                    productId: null,
-                    productName: null,
-                    targetAmount: 0m,
-                    targetUnits: null,
-                    rows: group.ToList(),
-                    hasQuota: false));
+                    group.Key.HospitalId, group.Key.HospitalName,
+                    group.Key.ProductCategoryId ?? 0, group.Key.ProductCategoryName,
+                    productId: null, productName: null,
+                    targetAmount: 0m, targetUnits: null,
+                    rows: group.ToList(), hasQuota: false));
             }
 
             return result
@@ -214,43 +190,63 @@ namespace ATI.Revenue.Application.Dashboard
             var to = (endDate ?? Abp.Timing.Clock.Now).Date;
             var from = (startDate ?? new DateTime(to.Year, to.Month, 1)).Date;
 
-            var rows = await QueryTransactions(hospitalId)
+            var cases = await QueryCases(hospitalId)
                 .Where(pt => pt.ProcedureDate >= from && pt.ProcedureDate < to.AddDays(1))
-                .Select(pt => new { pt.ProcedureDate, pt.Quantity, pt.TotalAmount })
+                .Select(pt => new { pt.ProcedureDate, pt.TotalAmount })
                 .ToListAsync();
 
-            return rows
-                .GroupBy(r => r.ProcedureDate.Date)
+            return cases
+                .GroupBy(c => c.ProcedureDate.Date)
                 .Select(g => new RevenueTrendDto
                 {
                     Date = g.Key,
-                    Revenue = g.Sum(r => r.TotalAmount),
-                    CaseCount = g.Sum(r => r.Quantity),
+                    Revenue = g.Sum(c => c.TotalAmount),
+                    CaseCount = g.Count(),
                     TransactionCount = g.Count()
                 })
                 .OrderBy(t => t.Date)
                 .ToList();
         }
 
-        private IQueryable<ProcedureTransaction> QueryTransactions(int? hospitalId)
+        private IQueryable<ProcedureTransaction> QueryCases(int? hospitalId)
         {
             return _procedureTransactionRepository.GetAll()
                 .WhereIf(hospitalId.HasValue, pt => pt.HospitalId == hospitalId.Value);
         }
 
-        private static RevenueVsQuotaDto BuildRow(
-            int hospitalId,
-            string hospitalName,
-            int productCategoryId,
-            string productCategoryName,
-            int? productId,
-            string productName,
-            decimal targetAmount,
-            int? targetUnits,
-            List<ActualRow> rows,
-            bool hasQuota)
+        /// <summary>
+        /// Device lines flattened out of their cases, carrying the case-level fields the
+        /// breakdowns need.
+        /// </summary>
+        private IQueryable<LineRow> QueryLines(int? hospitalId)
         {
-            var actualRevenue = rows.Sum(r => r.TotalAmount);
+            return QueryCases(hospitalId)
+                .SelectMany(pt => pt.Products.Select(l => new LineRow
+                {
+                    CaseId = pt.Id,
+                    ProcedureDate = pt.ProcedureDate,
+                    HospitalId = pt.HospitalId ?? 0,
+                    HospitalName = pt.Hospital != null ? pt.Hospital.FacilityName : null,
+                    ImplantType = pt.ImplantType,
+                    ProductId = l.ProductId,
+                    ProductName = l.Product != null ? l.Product.Name : null,
+                    ProductCategoryId = l.Product != null ? l.Product.ProductCategoryId : null,
+                    ProductCategoryName = l.Product != null && l.Product.ProductCategory != null
+                        ? l.Product.ProductCategory.Name
+                        : null,
+                    Quantity = l.Quantity,
+                    LineTotal = l.LineTotal
+                }));
+        }
+
+        private static RevenueVsQuotaDto BuildRow(
+            int hospitalId, string hospitalName,
+            int productCategoryId, string productCategoryName,
+            int? productId, string productName,
+            decimal targetAmount, int? targetUnits,
+            List<LineRow> rows, bool hasQuota)
+        {
+            var actualRevenue = rows.Sum(r => r.LineTotal);
 
             return new RevenueVsQuotaDto
             {
@@ -264,7 +260,8 @@ namespace ATI.Revenue.Application.Dashboard
                 TargetUnits = targetUnits,
                 ActualRevenue = actualRevenue,
                 ActualUnits = rows.Sum(r => r.Quantity),
-                TransactionCount = rows.Count,
+                // Distinct cases, not device lines.
+                TransactionCount = rows.Select(r => r.CaseId).Distinct().Count(),
                 Variance = actualRevenue - targetAmount,
                 PercentageAchieved = targetAmount > 0 ? (actualRevenue / targetAmount) * 100 : 0,
                 HasQuota = hasQuota
@@ -277,19 +274,22 @@ namespace ATI.Revenue.Application.Dashboard
         }
 
         /// <summary>
-        /// Reference-equality class so each transaction row can be tracked individually
-        /// when working out which revenue a quota line has already claimed.
+        /// Reference-equality class so each device line can be tracked individually when
+        /// working out which revenue a quota line has already claimed.
         /// </summary>
-        private class ActualRow
+        private class LineRow
         {
+            public int CaseId { get; set; }
+            public DateTime ProcedureDate { get; set; }
             public int HospitalId { get; set; }
             public string HospitalName { get; set; }
-            public int ProductCategoryId { get; set; }
-            public string ProductCategoryName { get; set; }
+            public Domain.Enums.ImplantType ImplantType { get; set; }
             public int ProductId { get; set; }
             public string ProductName { get; set; }
+            public int? ProductCategoryId { get; set; }
+            public string ProductCategoryName { get; set; }
             public int Quantity { get; set; }
-            public decimal TotalAmount { get; set; }
+            public decimal LineTotal { get; set; }
         }
     }
 }

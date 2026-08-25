@@ -1,12 +1,17 @@
-﻿@using ATI.Revenue.Domain.Enums
+@using ATI.Revenue.Domain.Enums
 @using ATI.Revenue.Application.Products.Dtos
 @using System.Collections.Generic
 @using ATI.Revenue.Web.PageModel.ProcedureTransactions
 @model CreateOrEditProcedureTransactionModalViewModel
 
+@{
+    var products = (List<ProductDto>)ViewBag.Products;
+    var existingLines = Model.ProcedureTransaction?.Products ?? new List<ATI.Revenue.Application.ProcedureTransactions.Dtos.CreateOrEditProcedureTransactionProductDto>();
+}
+
 <div class="modal-header">
     <h5 class="modal-title">
-        <span>@(Model.IsEditMode ? L("EditTransaction") : L("CreateTransaction"))</span>
+        <span>@(Model.IsEditMode ? L("EditCase") : L("CreateCase"))</span>
     </h5>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
 </div>
@@ -16,18 +21,12 @@
         <input type="hidden" name="Id" value="@(Model.ProcedureTransaction?.Id ?? 0)" />
 
         <div class="row">
-            <div class="col-md-6 mb-5">
-                <label class="form-label required" for="HospitalId">@L("Hospital")</label>
-                <select class="form-control" id="HospitalId" name="HospitalId" required>
-                    <option value="">@L("SelectHospital")</option>
-                    @foreach (var hospital in ViewBag.Hospitals)
-                    {
-                        var isSelected = Model.ProcedureTransaction != null && hospital.Value == Model.ProcedureTransaction.HospitalId.ToString();
-                        <option value="@hospital.Value" selected="@isSelected">@hospital.Text</option>
-                    }
-                </select>
+            <div class="col-md-4 mb-5">
+                <label class="form-label required" for="CaseNumber">@L("CaseNumber")</label>
+                <input class="form-control" type="text" name="CaseNumber" id="CaseNumber"
+                       value="@Model.ProcedureTransaction?.CaseNumber" required maxlength="50" />
             </div>
-            <div class="col-md-6 mb-5">
+            <div class="col-md-4 mb-5">
                 <label class="form-label required" for="PhysicianId">@L("Physician")</label>
                 <select class="form-control" id="PhysicianId" name="PhysicianId" required>
                     <option value="">@L("SelectPhysician")</option>
@@ -39,24 +38,7 @@
                 </select>
                 <small class="form-text text-muted">@L("HospitalAutoPopulated")</small>
             </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6 mb-5">
-                <label class="form-label required" for="ProductId">@L("Product")</label>
-                @* data-implant-type lets the form set the De Novo / Gen Change radio from
-                   the product, since the two are separate product subcategories. *@
-                <select class="form-control" id="ProductId" name="ProductId" required>
-                    <option value="">@L("SelectProduct")</option>
-                    @foreach (var product in (List<ProductDto>)ViewBag.Products)
-                    {
-                        var isSelected = Model.ProcedureTransaction != null && product.Id == Model.ProcedureTransaction.ProductId;
-                        <option value="@product.Id" selected="@isSelected"
-                                data-implant-type="@(product.ImplantType.HasValue ? ((int)product.ImplantType.Value).ToString() : "")">@product.Name</option>
-                    }
-                </select>
-            </div>
-            <div class="col-md-6 mb-5">
+            <div class="col-md-4 mb-5">
                 <label class="form-label required" for="ProcedureDate">@L("Date")</label>
                 <input class="form-control" type="date" name="ProcedureDate" id="ProcedureDate"
                        value="@(Model.ProcedureTransaction?.ProcedureDate.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString("yyyy-MM-dd"))" required />
@@ -64,6 +46,17 @@
         </div>
 
         <div class="row">
+            <div class="col-md-6 mb-5">
+                <label class="form-label" for="HospitalId">@L("Hospital")</label>
+                <select class="form-control" id="HospitalId" name="HospitalId">
+                    <option value="">@L("SelectHospital")</option>
+                    @foreach (var hospital in ViewBag.Hospitals)
+                    {
+                        var isSelected = Model.ProcedureTransaction != null && hospital.Value == Model.ProcedureTransaction.HospitalId.ToString();
+                        <option value="@hospital.Value" selected="@isSelected">@hospital.Text</option>
+                    }
+                </select>
+            </div>
             <div class="col-md-6 mb-5">
                 <label class="form-label required">@L("ImplantType")</label>
                 <div class="pt-2">
@@ -82,35 +75,78 @@
                         <label class="form-check-label" for="ImplantTypeGenChange">GEN CHANGE</label>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-6 mb-5">
-                <label class="form-label required" for="Quantity">@L("NumberOfCases")</label>
-                <input class="form-control" type="number" name="Quantity" id="Quantity"
-                       value="@(Model.ProcedureTransaction?.Quantity ?? 1)" required min="1" />
+                <small class="form-text text-muted">@L("EveryDeviceMustMatchImplantType")</small>
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-md-6 mb-5">
-                <label class="form-label required" for="UnitPrice">@L("BasePrice")</label>
-                <div class="input-group">
-                    <span class="input-group-text">$</span>
-                    <input class="form-control" type="number" name="UnitPrice" id="UnitPrice"
-                           value="@(Model.ProcedureTransaction?.UnitPrice ?? 0)" step="0.01" readonly required />
-                </div>
-                <small class="form-text text-muted">@L("AutoPopulatedByHospitalProduct")</small>
-            </div>
-            <div class="col-md-6 mb-5">
-                <label class="form-label required" for="TotalAmount">@L("TransactionAmount")</label>
+        @* A procedure can involve two or three devices, so products are lines on the case.
+           Each option carries its implant type so the form can flag a device that does not
+           belong on this case before the server rejects it. *@
+        <div class="separator separator-dashed my-4"></div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0">@L("DevicesUsed")</h6>
+            <button type="button" id="AddDeviceLineButton" class="btn btn-sm btn-light-primary">
+                <i class="fa fa-plus"></i> <span>@L("AddDevice")</span>
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-sm align-middle" id="DeviceLinesTable">
+                <thead>
+                    <tr class="fw-bold">
+                        <th style="width: 45%">@L("Product")</th>
+                        <th style="width: 12%">@L("Quantity")</th>
+                        <th style="width: 18%">@L("UnitPrice")</th>
+                        <th style="width: 18%">@L("LineTotal")</th>
+                        <th style="width: 7%"></th>
+                    </tr>
+                </thead>
+                <tbody id="DeviceLinesBody"></tbody>
+            </table>
+        </div>
+
+        <div id="DeviceLinesEmpty" class="text-muted small mb-3" style="display: none;">
+            @L("NoDevicesYet")
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6 offset-md-6 mb-3">
+                <label class="form-label" for="TotalAmount">@L("TransactionAmount")</label>
                 <div class="input-group">
                     <span class="input-group-text">$</span>
                     <input class="form-control" type="number" name="TotalAmount" id="TotalAmount"
-                           value="@(Model.ProcedureTransaction?.TotalAmount ?? 0)" step="0.01" required min="0.01" />
+                           value="@(Model.ProcedureTransaction?.TotalAmount ?? 0)" step="0.01" min="0" />
+                    <button type="button" class="btn btn-light" id="RecalculateTotalButton" title="@L("RecalculateFromDevices")">
+                        <i class="fa fa-sync"></i>
+                    </button>
                 </div>
+                <small class="form-text text-muted">@L("TotalOverrideHint")</small>
             </div>
         </div>
     </form>
 </div>
+
+@* Product catalogue and any existing lines, handed to the script as data rather than
+   rebuilt per row in Razor. *@
+<script type="application/json" id="DeviceLineProducts">
+    @Html.Raw(Json.Serialize(products.Select(p => new
+    {
+        id = p.Id,
+        name = string.IsNullOrWhiteSpace(p.ProductCode) ? p.Name : p.ProductCode + " - " + p.Name,
+        implantType = p.ImplantType.HasValue ? (int?)p.ImplantType.Value : null,
+        basePrice = p.BasePrice
+    })))
+</script>
+<script type="application/json" id="DeviceLineExisting">
+    @Html.Raw(Json.Serialize(existingLines.Select(l => new
+    {
+        id = l.Id,
+        productId = l.ProductId,
+        quantity = l.Quantity,
+        unitPrice = l.UnitPrice
+    })))
+</script>
 
 <div class="modal-footer">
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L("Cancel")</button>
