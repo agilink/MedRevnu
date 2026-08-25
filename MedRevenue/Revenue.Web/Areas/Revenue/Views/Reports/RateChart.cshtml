@@ -1,4 +1,4 @@
-@{
+﻿@{
     ViewData["Title"] = "Rate Chart Report";
 }
 
@@ -23,6 +23,9 @@
                     <div class="col-md-2 d-flex align-items-end">
                         <button id="GenerateReportButton" class="btn btn-primary">
                             <i class="fas fa-chart-bar"></i> Generate Report
+                        </button>
+                        <button id="ExportToExcelButton" class="btn btn-success ms-2">
+                            <i class="fa fa-file-excel"></i> <span>@L("ExportToExcel")</span>
                         </button>
                     </div>
                 </div>

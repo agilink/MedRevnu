@@ -1,4 +1,4 @@
-@{
+﻿@{
     ViewData["Title"] = "Quarterly Rollup";
     var currentYear = (int)ViewBag.CurrentYear;
 }
@@ -62,6 +62,9 @@
                     <div class="mb-5">
                         <button id="RunReportButton" class="btn btn-primary">
                             <i class="fa fa-search"></i> <span>@L("Show")</span>
+                        </button>
+                        <button id="ExportToExcelButton" class="btn btn-success ms-2">
+                            <i class="fa fa-file-excel"></i> <span>@L("ExportToExcel")</span>
                         </button>
                     </div>
                 </div>

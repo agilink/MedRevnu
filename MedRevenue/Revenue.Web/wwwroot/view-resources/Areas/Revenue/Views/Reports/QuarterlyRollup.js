@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
     $(function () {
         var _$body = $('#QuarterlyRollupTableBody');
 
@@ -127,6 +127,34 @@
                 }
             });
         }
+
+        $('#ExportToExcelButton').click(function (e) {
+            e.preventDefault();
+
+            var quarter = $('#QuarterFilter').val();
+            var hospitalId = $('#HospitalFilter').val();
+
+            abp.ui.setBusy();
+            $.ajax({
+                url: abp.appPath + 'Revenue/Reports/ExportQuarterlyRollup',
+                type: 'POST',
+                data: JSON.stringify({
+                    year: parseInt($('#YearFilter').val(), 10),
+                    quarter: quarter ? parseInt(quarter, 10) : null,
+                    hospitalId: hospitalId ? parseInt(hospitalId, 10) : null
+                }),
+                contentType: 'application/json',
+                success: function (file) {
+                    app.downloadTempFile(file);
+                },
+                error: function () {
+                    abp.notify.error(app.localize('ExportFailed'));
+                },
+                complete: function () {
+                    abp.ui.clearBusy();
+                }
+            });
+        });
 
         $('#RunReportButton').click(function (e) {
             e.preventDefault();

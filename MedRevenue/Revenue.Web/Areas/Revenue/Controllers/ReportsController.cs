@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ATI.Revenue.Application.Reports;
 using ATI.Revenue.Application.Reports.Dtos;
+using ATI.Revenue.Application.Reports.Exporting;
 using Abp.Domain.Repositories;
 using System;
 using System.Linq;
@@ -23,17 +24,20 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         private readonly IRepository<Facility, int> _facilityRepository;
         private readonly IRepository<ProductCategory, int> _productCategoryRepository;
         private readonly IRepository<Personnel, int> _personnelRepository;
+        private readonly IRevenueReportsExcelExporter _excelExporter;
 
         public ReportsController(
             IReportsAppService reportsAppService,
             IRepository<Facility, int> facilityRepository,
             IRepository<ProductCategory, int> productCategoryRepository,
-            IRepository<Personnel, int> personnelRepository)
+            IRepository<Personnel, int> personnelRepository,
+            IRevenueReportsExcelExporter excelExporter)
         {
             _reportsAppService = reportsAppService;
             _facilityRepository = facilityRepository;
             _productCategoryRepository = productCategoryRepository;
             _personnelRepository = personnelRepository;
+            _excelExporter = excelExporter;
         }
 
         // Report 1: Rate Chart - Products by ProductCategory with prices for a hospital
@@ -139,6 +143,65 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
             });
 
             return Json(new { success = true, data = data });
+        }
+
+        // Excel export for each report. The client keeps this data in a workbook today,
+        // so being able to take a report back out to Excel is what lets them stop
+        // maintaining it by hand while still sharing numbers the way they already do.
+
+        [HttpPost]
+        public async Task<JsonResult> ExportRateChart(int hospitalId)
+        {
+            var data = await _reportsAppService.GetRateChartReport(new RateChartReportInput { HospitalId = hospitalId });
+            return Json(_excelExporter.ExportRateChart(data));
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> ExportMonthlyRevenue(int year, int month, int? hospitalId)
+        {
+            var data = await _reportsAppService.GetMonthlyRevenueReport(new MonthlyRevenueReportInput
+            {
+                Year = year,
+                Month = month,
+                HospitalId = hospitalId
+            });
+            return Json(_excelExporter.ExportMonthlyRevenue(data));
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> ExportCasesByPerson(int year, int? hospitalId, int? physicianId)
+        {
+            var data = await _reportsAppService.GetCasesByPersonReport(new CasesByPersonReportInput
+            {
+                Year = year,
+                HospitalId = hospitalId,
+                PhysicianId = physicianId
+            });
+            return Json(_excelExporter.ExportCasesByPerson(data));
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> ExportTransactionAmount(int year, int? physicianId, int? productCategoryId)
+        {
+            var data = await _reportsAppService.GetTransactionAmountReport(new TransactionAmountReportInput
+            {
+                Year = year,
+                PhysicianId = physicianId,
+                ProductCategoryId = productCategoryId
+            });
+            return Json(_excelExporter.ExportTransactionAmount(data));
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> ExportQuarterlyRollup(int year, int? quarter, int? hospitalId)
+        {
+            var data = await _reportsAppService.GetQuarterlyRollupReport(new QuarterlyRollupReportInput
+            {
+                Year = year,
+                Quarter = quarter,
+                HospitalId = hospitalId
+            });
+            return Json(_excelExporter.ExportQuarterlyRollup(data));
         }
 
         // Helper methods for dropdowns

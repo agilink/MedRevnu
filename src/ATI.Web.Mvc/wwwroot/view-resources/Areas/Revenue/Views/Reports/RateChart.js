@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
     $(function () {
         var _$table = $('#RateChartTable');
 
@@ -52,5 +52,29 @@
                 tbody.append('<tr><td colspan="5" class="text-center">No data found</td></tr>');
             }
         }
+
+        // Export the report as it is currently filtered. The file comes back through the
+        // application's standard temp-file download.
+        $('#ExportToExcelButton').click(function (e) {
+            e.preventDefault();
+
+            abp.ui.setBusy();
+            $.ajax({
+                url: abp.appPath + 'Revenue/Reports/ExportRateChart',
+                type: 'POST',
+                data: JSON.stringify({ hospitalId: parseInt($('#HospitalFilter').val(), 10) }),
+                contentType: 'application/json',
+                success: function (file) {
+                    app.downloadTempFile(file);
+                },
+                error: function () {
+                    abp.notify.error(app.localize('ExportFailed'));
+                },
+                complete: function () {
+                    abp.ui.clearBusy();
+                }
+            });
+        });
+
     });
 })();

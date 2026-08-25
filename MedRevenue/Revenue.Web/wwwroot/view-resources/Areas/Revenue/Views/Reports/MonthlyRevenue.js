@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
     $(function () {
         var _$table = $('#MonthlyRevenueTable');
 
@@ -57,5 +57,29 @@
                 tbody.append('<tr><td colspan="4" class="text-center">No data found</td></tr>');
             }
         }
+
+        // Export the report as it is currently filtered. The file comes back through the
+        // application's standard temp-file download.
+        $('#ExportToExcelButton').click(function (e) {
+            e.preventDefault();
+
+            abp.ui.setBusy();
+            $.ajax({
+                url: abp.appPath + 'Revenue/Reports/ExportMonthlyRevenue',
+                type: 'POST',
+                data: JSON.stringify({ year: parseInt($('#YearFilter').val(), 10), month: parseInt($('#MonthFilter').val(), 10), hospitalId: $('#HospitalFilter').val() ? parseInt($('#HospitalFilter').val(), 10) : null }),
+                contentType: 'application/json',
+                success: function (file) {
+                    app.downloadTempFile(file);
+                },
+                error: function () {
+                    abp.notify.error(app.localize('ExportFailed'));
+                },
+                complete: function () {
+                    abp.ui.clearBusy();
+                }
+            });
+        });
+
     });
 })();
