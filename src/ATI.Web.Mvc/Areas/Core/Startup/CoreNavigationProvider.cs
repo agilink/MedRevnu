@@ -195,6 +195,22 @@ namespace ATI.Web.Areas.Core.Startup
                         )
                     )
                     .AddItem(new MenuItemDefinition(
+                            "Revenue.Physicians",
+                            L("Physicians"),
+                            url: "Revenue/Physicians",
+                            icon: "flaticon-user",
+                            permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_Physicians)
+                        )
+                    )
+                    .AddItem(new MenuItemDefinition(
+                            "Revenue.Hospitals",
+                            L("Hospitals"),
+                            url: "Revenue/Hospitals",
+                            icon: "flaticon-home-2",
+                            permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_Hospitals)
+                        )
+                    )
+                    .AddItem(new MenuItemDefinition(
                             "Revenue.Products",
                             L("Products"),
                             url: "Revenue/Products",

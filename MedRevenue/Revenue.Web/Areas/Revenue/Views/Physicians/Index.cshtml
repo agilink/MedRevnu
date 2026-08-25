@@ -1,0 +1,95 @@
+@using ATI.Authorization
+@{
+    ViewData["Title"] = "Physicians";
+}
+
+@section Scripts
+{
+    <script src="~/view-resources/Areas/Revenue/Views/Physicians/Index.js" asp-append-version="true"></script>
+}
+
+<div class="app-toolbar py-3 py-lg-6" id="kt_app_toolbar">
+    <div id="kt_app_toolbar_container" class="app-container container-fluid d-flex flex-stack">
+        <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
+            <h1 class="page-heading d-flex text-dark fw-bold fs-3 flex-column justify-content-center my-0">
+                @L("Physicians")
+            </h1>
+            <span class="text-muted me-4">@L("PhysiciansHeaderInfo")</span>
+        </div>
+        <div class="d-flex align-items-center">
+            @if (IsGranted(AppPermissions.Pages_Revenue_Physicians_Create))
+            {
+                <button id="CreateNewPhysicianButton" class="btn btn-primary">
+                    <i class="fa fa-plus btn-md-icon"></i>
+                    <span class="d-none d-md-inline-block">@L("CreateNew")</span>
+                </button>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="app-container container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <div class="form">
+                <div class="row align-items-center mb-4">
+                    <div class="col-xl-12">
+                        <div class="mb-5 align-items-center">
+                            <div class="input-group">
+                                <input type="text" id="PhysiciansTableFilter" class="form-control" placeholder="@L("SearchWithThreeDot")">
+                                <button id="GetPhysiciansButton" class="btn btn-primary" type="submit">
+                                    <i class="flaticon-search-1" aria-label="@L("Search")"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-xl-4">
+                        <div class="mb-5">
+                            <label for="HospitalFilter" class="form-label">@L("Hospital")</label>
+                            <select id="HospitalFilter" class="form-select">
+                                <option value="">@L("AllHospitals")</option>
+                                @foreach (var hospital in ViewBag.Hospitals)
+                                {
+                                    <option value="@hospital.Value">@hospital.Text</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-xl-4">
+                        <div class="mb-5">
+                            <label for="EmployeeStatusFilter" class="form-label">@L("EmployeeStatus")</label>
+                            <select id="EmployeeStatusFilter" class="form-select">
+                                <option value="">@L("AllStatuses")</option>
+                                <option value="1">Active</option>
+                                <option value="2">On Leave</option>
+                                <option value="3">Terminated</option>
+                                <option value="4">Retired</option>
+                                <option value="5">Suspended</option>
+                                <option value="6">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table id="PhysiciansTable" class="table table-striped table-row-bordered gy-4 gs-7 align-middle w-100">
+                    <thead>
+                        <tr class="fw-bold fs-6 text-gray-800">
+                            <th>@L("Actions")</th>
+                            <th>@L("LastName")</th>
+                            <th>@L("FirstName")</th>
+                            <th>@L("Hospital")</th>
+                            <th>@L("EmployeeId")</th>
+                            <th>@L("WorkEmail")</th>
+                            <th>@L("MobileNumber")</th>
+                            <th>@L("EmployeeStatus")</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

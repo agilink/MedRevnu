@@ -31,7 +31,15 @@ INSERT INTO @RevenuePermissions (Name) VALUES
     ('Pages.Revenue.Products'),
     ('Pages.Revenue.Products.Create'),
     ('Pages.Revenue.Products.Edit'),
-    ('Pages.Revenue.Products.Delete');
+    ('Pages.Revenue.Products.Delete'),
+    ('Pages.Revenue.Physicians'),
+    ('Pages.Revenue.Physicians.Create'),
+    ('Pages.Revenue.Physicians.Edit'),
+    ('Pages.Revenue.Physicians.Delete'),
+    ('Pages.Revenue.Hospitals'),
+    ('Pages.Revenue.Hospitals.Create'),
+    ('Pages.Revenue.Hospitals.Edit'),
+    ('Pages.Revenue.Hospitals.Delete');
 
 -- Insert a granted RolePermissionSetting for every Admin role that is missing it.
 INSERT INTO [dbo].[AbpPermissions]

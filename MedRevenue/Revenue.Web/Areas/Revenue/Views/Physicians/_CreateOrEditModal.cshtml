@@ -1,0 +1,101 @@
+﻿@using ATI.Revenue.Web.PageModel.Physicians
+@model CreateOrEditPhysicianModalViewModel
+
+<div class="modal-header">
+    <h4 class="modal-title">
+        <span>@(Model.IsEditMode ? L("EditPhysician") : L("CreateNewPhysician"))</span>
+    </h4>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<form name="PhysicianCreateOrEditForm" role="form" novalidate class="form-validation">
+    <input type="hidden" name="Id" value="@Model.Physician.Id" />
+
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-md-6 mb-5">
+                <label class="form-label required" for="FirstName">@L("FirstName")</label>
+                <input class="form-control" type="text" name="FirstName" id="FirstName"
+                       value="@Model.Physician.FirstName" required maxlength="100" />
+            </div>
+            <div class="col-md-6 mb-5">
+                <label class="form-label" for="MiddleName">@L("MiddleName")</label>
+                <input class="form-control" type="text" name="MiddleName" id="MiddleName"
+                       value="@Model.Physician.MiddleName" maxlength="100" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-5">
+                <label class="form-label required" for="LastName">@L("LastName")</label>
+                <input class="form-control" type="text" name="LastName" id="LastName"
+                       value="@Model.Physician.LastName" required maxlength="100" />
+            </div>
+            <div class="col-md-6 mb-5">
+                @* A revenue transaction takes its hospital from the physician, so this
+                   decides which hospital a procedure is credited to. *@
+                <label class="form-label" for="HospitalId">@L("Hospital")</label>
+                <select class="form-control" id="HospitalId" name="HospitalId">
+                    <option value="">@L("SelectHospital")</option>
+                    @foreach (var hospital in ViewBag.Hospitals)
+                    {
+                        var isSelected = Model.Physician.HospitalId.HasValue
+                            && Model.Physician.HospitalId.Value.ToString() == hospital.Value;
+                        <option value="@hospital.Value" selected="@isSelected">@hospital.Text</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-5">
+                <label class="form-label" for="EmployeeId">@L("EmployeeId")</label>
+                <input class="form-control" type="text" name="EmployeeId" id="EmployeeId"
+                       value="@Model.Physician.EmployeeId" maxlength="50" />
+            </div>
+            <div class="col-md-6 mb-5">
+                <label class="form-label" for="EmployeeStatus">@L("EmployeeStatus")</label>
+                <select class="form-control" id="EmployeeStatus" name="EmployeeStatus">
+                    <option value="">@L("NotSet")</option>
+                    @{
+                        var statuses = new[] { "Active", "OnLeave", "Terminated", "Retired", "Suspended", "Inactive" };
+                        var currentStatus = (int?)Model.Physician.EmployeeStatus;
+                    }
+                    @for (var i = 0; i < statuses.Length; i++)
+                    {
+                        var value = i + 1;
+                        <option value="@value" selected="@(currentStatus == value)">@statuses[i]</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-5">
+                <label class="form-label" for="EmailWork">@L("WorkEmail")</label>
+                <input class="form-control" type="email" name="EmailWork" id="EmailWork"
+                       value="@Model.Physician.EmailWork" maxlength="200" />
+            </div>
+            <div class="col-md-6 mb-5">
+                <label class="form-label" for="MobileNumber">@L("MobileNumber")</label>
+                <input class="form-control" type="text" name="MobileNumber" id="MobileNumber"
+                       value="@Model.Physician.MobileNumber" maxlength="50" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12 mb-5">
+                <label class="form-label" for="Notes">@L("Notes")</label>
+                <textarea class="form-control" name="Notes" id="Notes" rows="3" maxlength="1000">@Model.Physician.Notes</textarea>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L("Cancel")</button>
+    <button type="button" class="btn btn-primary save-button">
+        <i class="fa fa-save"></i> <span>@L("Save")</span>
+    </button>
+</div>

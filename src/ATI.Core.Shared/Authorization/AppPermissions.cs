@@ -41,6 +41,16 @@
         public const string Pages_Revenue_Products_Edit = "Pages.Revenue.Products.Edit";
         public const string Pages_Revenue_Products_Delete = "Pages.Revenue.Products.Delete";
 
+        public const string Pages_Revenue_Physicians = "Pages.Revenue.Physicians";
+        public const string Pages_Revenue_Physicians_Create = "Pages.Revenue.Physicians.Create";
+        public const string Pages_Revenue_Physicians_Edit = "Pages.Revenue.Physicians.Edit";
+        public const string Pages_Revenue_Physicians_Delete = "Pages.Revenue.Physicians.Delete";
+
+        public const string Pages_Revenue_Hospitals = "Pages.Revenue.Hospitals";
+        public const string Pages_Revenue_Hospitals_Create = "Pages.Revenue.Hospitals.Create";
+        public const string Pages_Revenue_Hospitals_Edit = "Pages.Revenue.Hospitals.Edit";
+        public const string Pages_Revenue_Hospitals_Delete = "Pages.Revenue.Hospitals.Delete";
+
         public const string Pages_Revenue_Reports = "Pages.Revenue.Reports";
         public const string Pages_Revenue_Dashboard = "Pages.Revenue.Dashboard";
         //COMMON PERMISSIONS (FOR BOTH OF TENANTS AND HOST)

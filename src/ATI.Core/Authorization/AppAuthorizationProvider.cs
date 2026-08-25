@@ -54,6 +54,16 @@ namespace ATI.Authorization
             revenueProducts.CreateChildPermission(AppPermissions.Pages_Revenue_Products_Edit, L("EditingProduct"));
             revenueProducts.CreateChildPermission(AppPermissions.Pages_Revenue_Products_Delete, L("DeletingProduct"));
 
+            var physicians = revenue.CreateChildPermission(AppPermissions.Pages_Revenue_Physicians, L("Physicians"));
+            physicians.CreateChildPermission(AppPermissions.Pages_Revenue_Physicians_Create, L("CreatingPhysician"));
+            physicians.CreateChildPermission(AppPermissions.Pages_Revenue_Physicians_Edit, L("EditingPhysician"));
+            physicians.CreateChildPermission(AppPermissions.Pages_Revenue_Physicians_Delete, L("DeletingPhysician"));
+
+            var hospitals = revenue.CreateChildPermission(AppPermissions.Pages_Revenue_Hospitals, L("Hospitals"));
+            hospitals.CreateChildPermission(AppPermissions.Pages_Revenue_Hospitals_Create, L("CreatingHospital"));
+            hospitals.CreateChildPermission(AppPermissions.Pages_Revenue_Hospitals_Edit, L("EditingHospital"));
+            hospitals.CreateChildPermission(AppPermissions.Pages_Revenue_Hospitals_Delete, L("DeletingHospital"));
+
             revenue.CreateChildPermission(AppPermissions.Pages_Revenue_Reports, L("Reports"));
             revenue.CreateChildPermission(AppPermissions.Pages_Revenue_Dashboard, L("RevenueDashboard"));
 

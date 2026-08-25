@@ -1412,5 +1412,37 @@
     <text name="ImplantType">Implant Type</text>
     <text name="DeNovo">NEW (De Novo)</text>
     <text name="GenChange">GEN CHANGE</text>
+    <!-- Physician and hospital management (ATI-78 Phase 3) -->
+    <text name="Physicians">Physicians</text>
+    <text name="PhysiciansHeaderInfo">Manage the physician roster</text>
+    <text name="CreatingPhysician">Creating Physician</text>
+    <text name="EditingPhysician">Editing Physician</text>
+    <text name="DeletingPhysician">Deleting Physician</text>
+    <text name="CreateNewPhysician">Create New Physician</text>
+    <text name="EditPhysician">Edit Physician</text>
+    <text name="PhysicianDeleteWarningMessage">This physician will be removed from the roster. Are you sure?</text>
+    <text name="Hospitals">Hospitals</text>
+    <text name="HospitalsHeaderInfo">Manage the hospital list</text>
+    <text name="CreatingHospital">Creating Hospital</text>
+    <text name="EditingHospital">Editing Hospital</text>
+    <text name="DeletingHospital">Deleting Hospital</text>
+    <text name="CreateNewHospital">Create New Hospital</text>
+    <text name="EditHospital">Edit Hospital</text>
+    <text name="HospitalDeleteWarningMessage">This hospital will be deleted. Are you sure?</text>
+    <text name="HospitalName">Hospital Name</text>
+    <text name="FirstName">First Name</text>
+    <text name="MiddleName">Middle Name</text>
+    <text name="LastName">Last Name</text>
+    <text name="EmployeeId">Employee ID</text>
+    <text name="WorkEmail">Work Email</text>
+    <text name="MobileNumber">Mobile Number</text>
+    <text name="PersonnelType">Personnel Type</text>
+    <text name="EmployeeStatus">Status</text>
+    <text name="AllStatuses">All Statuses</text>
+    <text name="Notes">Notes</text>
+    <text name="PhysicianCount">Physicians</text>
+    <text name="ProductPriceCount">Prices</text>
+    <text name="Company">Company</text>
+    <text name="NotSet">Not set</text>
   </texts>
 </localizationDictionary>

@@ -1,0 +1,34 @@
+﻿@using ATI.Revenue.Web.PageModel.Hospitals
+@model CreateOrEditHospitalModalViewModel
+
+<div class="modal-header">
+    <h4 class="modal-title">
+        <span>@(Model.IsEditMode ? L("EditHospital") : L("CreateNewHospital"))</span>
+    </h4>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<form name="HospitalCreateOrEditForm" role="form" novalidate class="form-validation">
+    <input type="hidden" name="Id" value="@Model.Hospital.Id" />
+
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-md-12 mb-5">
+                <label class="form-label required" for="HospitalName">@L("HospitalName")</label>
+                <input class="form-control" type="text" name="HospitalName" id="HospitalName"
+                       value="@Model.Hospital.HospitalName" required maxlength="200" />
+                <div class="form-text">
+                    This name identifies the hospital on every report and filter, so it must be unique.
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L("Cancel")</button>
+    <button type="button" class="btn btn-primary save-button">
+        <i class="fa fa-save"></i> <span>@L("Save")</span>
+    </button>
+</div>
