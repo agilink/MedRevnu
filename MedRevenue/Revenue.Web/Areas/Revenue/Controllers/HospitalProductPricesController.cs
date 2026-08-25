@@ -1,4 +1,4 @@
-using Abp.Application.Services.Dto;
+﻿using Abp.Application.Services.Dto;
 using Abp.Domain.Repositories;
 using ATI.Admin.Domain.Entities;
 using ATI.Revenue.Application.HospitalProductPrices;
@@ -12,10 +12,13 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Abp.AspNetCore.Mvc.Authorization;
+using ATI.Authorization;
 
 namespace ATI.Revenue.Web.Areas.Revenue.Controllers
 {
     [Area("Revenue")]
+    [AbpMvcAuthorize(AppPermissions.Pages_Revenue_HospitalProductPrices)]
     public class HospitalProductPricesController : ATIControllerBase
     {
         private readonly IHospitalProductPricesAppService _hospitalProductPricesAppService;
