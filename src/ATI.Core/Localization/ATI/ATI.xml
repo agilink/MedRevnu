@@ -1430,7 +1430,6 @@
     <text name="EditHospital">Edit Hospital</text>
     <text name="HospitalDeleteWarningMessage">This hospital will be deleted. Are you sure?</text>
     <text name="HospitalName">Hospital Name</text>
-    <text name="FirstName">First Name</text>
     <text name="MiddleName">Middle Name</text>
     <text name="LastName">Last Name</text>
     <text name="EmployeeId">Employee ID</text>
@@ -1448,8 +1447,6 @@
     <text name="Quarter">Quarter</text>
     <text name="AllQuarters">All Quarters</text>
     <text name="Variance">Variance</text>
-    <text name="ProductCategory">Product Category</text>
-    <text name="Show">Show</text>
     <text name="ExportFailed">The export could not be created</text>
   </texts>
 </localizationDictionary>
