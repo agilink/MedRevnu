@@ -1021,6 +1021,65 @@ having gone with the retired model. Report sample designs, quarterly rollup,
 Excel export, hospital and physician management pages and spreadsheet import
 remain for Phase 3.
 
+## ATI-78 Phase 3 Changes
+
+**Physician and hospital management.** Neither existed as a UI anywhere - the
+Admin module has only Application and Domain projects, and no Personnel or
+Facility controller existed in the solution, so the roster and hospital list
+could only be changed by running a seed script. (That is also why the old Cases
+page called `/Admin/Facilities/GetAll` behind an error handler reading
+"Facilities endpoint not available yet" - the endpoint was never written.) Both
+services live in the Revenue module, where the working web layer is.
+
+Physicians are ADM.Personnel; no physician discriminator was added because all 20
+rows are the surgeon roster and the transaction form already treats them that
+way. A physician with no hospital is flagged in the grid, since transactions take
+their hospital from the physician. Hospitals are ADM.Facility; duplicate names
+are rejected and delete refuses while transactions, quotas, prices or physicians
+still reference the hospital.
+
+**Quarterly rollup report.** The workbook's "Quarters" tab computed: ProductQuota
+targets against ProcedureTransaction revenue per quarter, hospital and category,
+with the De Novo / Gen Change split and per-quarter subtotals. Categories with
+revenue but no target show "No plan" rather than being dropped.
+
+**Excel export** for all five reports, via the application's existing MiniExcel
+exporter base, exporting each report as currently filtered.
+
+**Revenue home tiles** were hardcoded to 150 cases / 75 products / $250,000 and
+now come from the database. That controller was also ungated.
+
+### Two defects that only running the app exposed
+
+Every build in the session passed with 0 errors while both were live. ABP
+validates localization, permissions and navigation during startup, so those are
+only ever verified by actually starting the application.
+
+1. **Duplicate localization keys** (`FirstName`, `ProductCategory`, `Show`) added
+   by the Phase 3 scripts. ABP throws `A dictionary can not contain same key
+   twice` in `AbpKernelModule.PostInitialize`, so the process exited before
+   serving a request - the app would not start.
+2. **HospitalProductPricesController was never gated.** The Phase 1 commit
+   claimed every Revenue controller was gated; this one was missed. It looked
+   protected - the permission existed and the page's JS checked it for Edit and
+   Delete - but the controller had no attribute, so the page was open to anyone.
+   It surfaced as the only Revenue route returning 500 rather than 302, because
+   the anonymous request reached the authenticated layout and its user-delegation
+   view component threw.
+
+All eleven concrete Revenue controllers have since been audited rather than
+assumed. Verified on the running app: all 16 Revenue routes return 302 to login
+with zero application errors.
+
+### Running the app locally
+
+- `dotnet run --no-launch-profile` runs as **Production**, and
+  `appsettings.Production.json` points at `Server=localhost; Database=ATIDb`. Set
+  `ASPNETCORE_ENVIRONMENT=Development` to use the dev database.
+- `--urls` and `--App:...` command-line overrides are ignored; `Program.cs` does
+  not add command-line configuration. Change the port in `appsettings.json` or
+  `launchSettings.json`.
+
 **Noted, not addressed.** `MedRevenue/Revnue_All/` is a 51-file duplicate copy of
 the module referenced by no solution or project file. Migration
 `20260402134200_MakeProductCreationTimeNotNull` has no Designer file, so EF does
