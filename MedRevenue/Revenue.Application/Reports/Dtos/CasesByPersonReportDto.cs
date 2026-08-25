@@ -1,4 +1,4 @@
-namespace ATI.Revenue.Application.Reports.Dtos
+﻿namespace ATI.Revenue.Application.Reports.Dtos
 {
     /// <summary>
     /// Cases by Person: Cases per physician for last year
@@ -15,7 +15,8 @@ namespace ATI.Revenue.Application.Reports.Dtos
 
     public class CasesByPersonReportInput
     {
-        public int Year { get; set; }
+        /// <summary>Optional. Defaults to the current year.</summary>
+        public int? Year { get; set; }
         public int? HospitalId { get; set; }
         public int? PhysicianId { get; set; }
     }

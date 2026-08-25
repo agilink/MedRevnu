@@ -48,7 +48,7 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> GetRateChartData(int hospitalId)
+        public async Task<JsonResult> GetRateChartData(int? hospitalId)
         {
             var data = await _reportsAppService.GetRateChartReport(new RateChartReportInput
             {
@@ -68,7 +68,7 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> GetMonthlyRevenueData(int year, int month, int? hospitalId)
+        public async Task<JsonResult> GetMonthlyRevenueData(int? year, int? month, int? hospitalId)
         {
             var data = await _reportsAppService.GetMonthlyRevenueReport(new MonthlyRevenueReportInput
             {
@@ -90,7 +90,7 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> GetCasesByPersonData(int year, int? hospitalId, int? physicianId)
+        public async Task<JsonResult> GetCasesByPersonData(int? year, int? hospitalId, int? physicianId)
         {
             var data = await _reportsAppService.GetCasesByPersonReport(new CasesByPersonReportInput
             {
@@ -112,7 +112,7 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> GetTransactionAmountData(int year, int? physicianId, int? productCategoryId)
+        public async Task<JsonResult> GetTransactionAmountData(int? year, int? physicianId, int? productCategoryId)
         {
             var data = await _reportsAppService.GetTransactionAmountReport(new TransactionAmountReportInput
             {
@@ -133,7 +133,7 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> GetQuarterlyRollupData(int year, int? quarter, int? hospitalId)
+        public async Task<JsonResult> GetQuarterlyRollupData(int? year, int? quarter, int? hospitalId)
         {
             var data = await _reportsAppService.GetQuarterlyRollupReport(new QuarterlyRollupReportInput
             {
@@ -150,14 +150,14 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         // maintaining it by hand while still sharing numbers the way they already do.
 
         [HttpPost]
-        public async Task<JsonResult> ExportRateChart(int hospitalId)
+        public async Task<JsonResult> ExportRateChart(int? hospitalId)
         {
             var data = await _reportsAppService.GetRateChartReport(new RateChartReportInput { HospitalId = hospitalId });
             return Json(_excelExporter.ExportRateChart(data));
         }
 
         [HttpPost]
-        public async Task<JsonResult> ExportMonthlyRevenue(int year, int month, int? hospitalId)
+        public async Task<JsonResult> ExportMonthlyRevenue(int? year, int? month, int? hospitalId)
         {
             var data = await _reportsAppService.GetMonthlyRevenueReport(new MonthlyRevenueReportInput
             {
@@ -169,7 +169,7 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> ExportCasesByPerson(int year, int? hospitalId, int? physicianId)
+        public async Task<JsonResult> ExportCasesByPerson(int? year, int? hospitalId, int? physicianId)
         {
             var data = await _reportsAppService.GetCasesByPersonReport(new CasesByPersonReportInput
             {
@@ -181,7 +181,7 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> ExportTransactionAmount(int year, int? physicianId, int? productCategoryId)
+        public async Task<JsonResult> ExportTransactionAmount(int? year, int? physicianId, int? productCategoryId)
         {
             var data = await _reportsAppService.GetTransactionAmountReport(new TransactionAmountReportInput
             {
@@ -193,7 +193,7 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> ExportQuarterlyRollup(int year, int? quarter, int? hospitalId)
+        public async Task<JsonResult> ExportQuarterlyRollup(int? year, int? quarter, int? hospitalId)
         {
             var data = await _reportsAppService.GetQuarterlyRollupReport(new QuarterlyRollupReportInput
             {

@@ -1,5 +1,15 @@
 ﻿(function () {
     $(function () {
+        // Blank filters must post as null, not NaN: every report filter is optional.
+        function optionalInt(selector) {
+            var raw = $(selector).val();
+            if (raw === null || raw === undefined || String(raw).trim() === '') {
+                return null;
+            }
+            var parsed = parseInt(raw, 10);
+            return isNaN(parsed) ? null : parsed;
+        }
+
         var _$body = $('#QuarterlyRollupTableBody');
 
         function money(value) {
@@ -101,8 +111,6 @@
         }
 
         function run() {
-            var quarter = $('#QuarterFilter').val();
-            var hospitalId = $('#HospitalFilter').val();
 
             _$body.html('<tr><td colspan="10" class="text-center">Loading...</td></tr>');
 
@@ -110,9 +118,9 @@
                 url: abp.appPath + 'Revenue/Reports/GetQuarterlyRollupData',
                 type: 'POST',
                 data: JSON.stringify({
-                    year: parseInt($('#YearFilter').val(), 10),
-                    quarter: quarter ? parseInt(quarter, 10) : null,
-                    hospitalId: hospitalId ? parseInt(hospitalId, 10) : null
+                    year: optionalInt('#YearFilter'),
+                    quarter: optionalInt('#QuarterFilter'),
+                    hospitalId: optionalInt('#HospitalFilter')
                 }),
                 contentType: 'application/json',
                 success: function (result) {
@@ -131,17 +139,15 @@
         $('#ExportToExcelButton').click(function (e) {
             e.preventDefault();
 
-            var quarter = $('#QuarterFilter').val();
-            var hospitalId = $('#HospitalFilter').val();
 
             abp.ui.setBusy();
             $.ajax({
                 url: abp.appPath + 'Revenue/Reports/ExportQuarterlyRollup',
                 type: 'POST',
                 data: JSON.stringify({
-                    year: parseInt($('#YearFilter').val(), 10),
-                    quarter: quarter ? parseInt(quarter, 10) : null,
-                    hospitalId: hospitalId ? parseInt(hospitalId, 10) : null
+                    year: optionalInt('#YearFilter'),
+                    quarter: optionalInt('#QuarterFilter'),
+                    hospitalId: optionalInt('#HospitalFilter')
                 }),
                 contentType: 'application/json',
                 success: function (file) {

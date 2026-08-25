@@ -1,4 +1,4 @@
-namespace ATI.Revenue.Application.Reports.Dtos
+﻿namespace ATI.Revenue.Application.Reports.Dtos
 {
     /// <summary>
     /// Rate Chart: Products by ProductCategory with prices for a hospital
@@ -14,6 +14,7 @@ namespace ATI.Revenue.Application.Reports.Dtos
 
     public class RateChartReportInput
     {
-        public int HospitalId { get; set; }
+        /// <summary>Optional. Null shows every hospital's catalogue.</summary>
+        public int? HospitalId { get; set; }
     }
 }

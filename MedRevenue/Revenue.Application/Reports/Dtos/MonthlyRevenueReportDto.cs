@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace ATI.Revenue.Application.Reports.Dtos
 {
@@ -15,8 +15,11 @@ namespace ATI.Revenue.Application.Reports.Dtos
 
     public class MonthlyRevenueReportInput
     {
-        public int Year { get; set; }
-        public int Month { get; set; }
+        /// <summary>Optional. Defaults to the current year.</summary>
+        public int? Year { get; set; }
+
+        /// <summary>Optional. Defaults to the current month.</summary>
+        public int? Month { get; set; }
         public int? HospitalId { get; set; }
     }
 }

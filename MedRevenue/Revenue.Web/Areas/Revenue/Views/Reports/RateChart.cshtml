@@ -11,9 +11,9 @@
             <div class="card-body">
                 <div class="row mb-3">
                     <div class="col-md-4">
-                        <label for="HospitalFilter">Hospital *</label>
+                        <label for="HospitalFilter">Hospital</label>
                         <select id="HospitalFilter" class="form-control">
-                            <option value="">-- Select Hospital --</option>
+                            <option value="">@L("AllHospitals")</option>
                             @foreach (var hospital in ViewBag.Hospitals)
                             {
                                 <option value="@hospital.Value">@hospital.Text</option>

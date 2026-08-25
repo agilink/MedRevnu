@@ -100,11 +100,17 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
 
         // API endpoint to get physician's facility
         [HttpPost]
-        public async Task<JsonResult> GetPhysicianFacility(int physicianId)
+        public async Task<JsonResult> GetPhysicianFacility(int? physicianId)
         {
+            // Clearing the physician is a legitimate state, not an error.
+            if (!physicianId.HasValue)
+            {
+                return Json(new { success = true, facilityId = (int?)null, facilityName = "" });
+            }
+
             try
             {
-                var physician = await _personnelRepository.GetAsync(physicianId);
+                var physician = await _personnelRepository.GetAsync(physicianId.Value);
                 var facility = physician.FacilityId.HasValue
                     ? await _facilityRepository.GetAsync(physician.FacilityId.Value)
                     : null;
@@ -123,11 +129,18 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
 
         // API endpoint to get product price based on hospital and product
         [HttpPost]
-        public async Task<JsonResult> GetProductPriceByHospital(int hospitalId, int productId)
+        public async Task<JsonResult> GetProductPriceByHospital(int? hospitalId, int? productId)
         {
+            // Both are needed to resolve a contracted price; without them there is
+            // simply no price to offer yet.
+            if (!hospitalId.HasValue || !productId.HasValue)
+            {
+                return Json(new { success = true, unitPrice = (decimal?)null });
+            }
+
             try
             {
-                var price = await _procedureTransactionsAppService.GetProductPriceByHospital(hospitalId, productId);
+                var price = await _procedureTransactionsAppService.GetProductPriceByHospital(hospitalId.Value, productId.Value);
                 return Json(new { success = true, unitPrice = price });
             }
             catch (Exception ex)

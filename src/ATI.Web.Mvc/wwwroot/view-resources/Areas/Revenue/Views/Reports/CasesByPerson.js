@@ -1,10 +1,20 @@
 ﻿(function () {
     $(function () {
+        // Blank filters must post as null, not NaN: every report filter is optional.
+        function optionalInt(selector) {
+            var raw = $(selector).val();
+            if (raw === null || raw === undefined || String(raw).trim() === '') {
+                return null;
+            }
+            var parsed = parseInt(raw, 10);
+            return isNaN(parsed) ? null : parsed;
+        }
+
         var _$table = $('#CasesByPersonTable');
 
         $('#GenerateReportButton').click(function (e) {
             e.preventDefault();
-            var year = parseInt($('#YearFilter').val());
+            var year = optionalInt('#YearFilter');
             var hospitalId = $('#HospitalFilter').val();
             var physicianId = $('#PhysicianFilter').val();
 
@@ -20,8 +30,8 @@
                 contentType: 'application/json',
                 data: JSON.stringify({
                     year: year,
-                    hospitalId: hospitalId ? parseInt(hospitalId) : null,
-                    physicianId: physicianId ? parseInt(physicianId) : null
+                    hospitalId: optionalInt('#HospitalFilter'),
+                    physicianId: optionalInt('#PhysicianFilter')
                 }),
                 success: function (result) {
                     if (result.success) {
@@ -69,7 +79,7 @@
             $.ajax({
                 url: abp.appPath + 'Revenue/Reports/ExportCasesByPerson',
                 type: 'POST',
-                data: JSON.stringify({ year: parseInt($('#YearFilter').val(), 10), hospitalId: $('#HospitalFilter').val() ? parseInt($('#HospitalFilter').val(), 10) : null, physicianId: $('#PhysicianFilter').val() ? parseInt($('#PhysicianFilter').val(), 10) : null }),
+                data: JSON.stringify({ year: optionalInt('#YearFilter'), hospitalId: optionalInt('#HospitalFilter'), physicianId: optionalInt('#PhysicianFilter') }),
                 contentType: 'application/json',
                 success: function (file) {
                     app.downloadTempFile(file);

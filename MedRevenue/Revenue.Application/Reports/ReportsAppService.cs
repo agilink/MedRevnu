@@ -67,12 +67,16 @@ namespace ATI.Revenue.Application.Reports
         /// </summary>
         public async Task<List<MonthlyRevenueReportDto>> GetMonthlyRevenueReport(MonthlyRevenueReportInput input)
         {
+            // Filters are optional; fall back to the current month rather than failing.
+            var year = input.Year ?? Abp.Timing.Clock.Now.Year;
+            var month = input.Month ?? Abp.Timing.Clock.Now.Month;
+
             var query = _procedureTransactionRepository
                 .GetAll()
                 .Include(pt => pt.Product)
                     .ThenInclude(p => p.ProductCategory)
-                .Where(pt => pt.ProcedureDate.Year == input.Year &&
-                             pt.ProcedureDate.Month == input.Month);
+                .Where(pt => pt.ProcedureDate.Year == year &&
+                             pt.ProcedureDate.Month == month);
 
             if (input.HospitalId.HasValue)
             {
@@ -104,11 +108,13 @@ namespace ATI.Revenue.Application.Reports
         /// </summary>
         public async Task<List<CasesByPersonReportDto>> GetCasesByPersonReport(CasesByPersonReportInput input)
         {
+            var year = input.Year ?? Abp.Timing.Clock.Now.Year;
+
             var query = _procedureTransactionRepository
                 .GetAll()
                 .Include(pt => pt.Physician)
                     .ThenInclude(p => p.Facility)
-                .Where(pt => pt.ProcedureDate.Year == input.Year);
+                .Where(pt => pt.ProcedureDate.Year == year);
 
             if (input.HospitalId.HasValue)
             {
@@ -148,12 +154,14 @@ namespace ATI.Revenue.Application.Reports
         /// </summary>
         public async Task<List<TransactionAmountReportDto>> GetTransactionAmountReport(TransactionAmountReportInput input)
         {
+            var year = input.Year ?? Abp.Timing.Clock.Now.Year;
+
             var query = _procedureTransactionRepository
                 .GetAll()
                 .Include(pt => pt.Physician)
                 .Include(pt => pt.Product)
                     .ThenInclude(p => p.ProductCategory)
-                .Where(pt => pt.ProcedureDate.Year == input.Year);
+                .Where(pt => pt.ProcedureDate.Year == year);
 
             if (input.PhysicianId.HasValue)
             {
@@ -200,6 +208,8 @@ namespace ATI.Revenue.Application.Reports
         /// </remarks>
         public async Task<List<QuarterlyRollupReportDto>> GetQuarterlyRollupReport(QuarterlyRollupReportInput input)
         {
+            var year = input.Year ?? Abp.Timing.Clock.Now.Year;
+
             var quarters = input.Quarter.HasValue
                 ? new[] { input.Quarter.Value }
                 : new[] { 1, 2, 3, 4 };
@@ -208,7 +218,7 @@ namespace ATI.Revenue.Application.Reports
             var allMonths = months.Values.SelectMany(m => m).ToList();
 
             var plans = await _productQuotaRepository.GetAll()
-                .Where(q => q.PeriodYear == input.Year && allMonths.Contains(q.PeriodMonth))
+                .Where(q => q.PeriodYear == year && allMonths.Contains(q.PeriodMonth))
                 .WhereIf(input.HospitalId.HasValue, q => q.HospitalId == input.HospitalId.Value)
                 .Select(q => new
                 {
@@ -222,7 +232,7 @@ namespace ATI.Revenue.Application.Reports
                 .ToListAsync();
 
             var actuals = await _procedureTransactionRepository.GetAll()
-                .Where(pt => pt.ProcedureDate.Year == input.Year && allMonths.Contains(pt.ProcedureDate.Month))
+                .Where(pt => pt.ProcedureDate.Year == year && allMonths.Contains(pt.ProcedureDate.Month))
                 .WhereIf(input.HospitalId.HasValue, pt => pt.HospitalId == input.HospitalId.Value)
                 .Select(pt => new
                 {
@@ -273,7 +283,7 @@ namespace ATI.Revenue.Application.Reports
 
                     report.Add(new QuarterlyRollupReportDto
                     {
-                        Year = input.Year,
+                        Year = year,
                         Quarter = quarter,
                         QuarterName = "Q" + quarter,
                         HospitalId = key.HospitalId == 0 ? (int?)null : key.HospitalId,

@@ -43,7 +43,7 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetSubcategoriesByCategory(int categoryId)
+        public async Task<IActionResult> GetSubcategoriesByCategory(int? categoryId)
         {
             var subcategories = await _subcategoryRepository.GetAll()
                 .Where(s => s.ProductCategoryId == categoryId)

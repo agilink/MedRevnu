@@ -1,4 +1,4 @@
-using Abp.Application.Services;
+﻿using Abp.Application.Services;
 using Abp.Domain.Repositories;
 using Abp.Linq.Extensions;
 using ATI.Revenue.Application.Dashboard.Dtos;
@@ -35,10 +35,14 @@ namespace ATI.Revenue.Application.Dashboard
             _productQuotaRepository = productQuotaRepository;
         }
 
-        public async Task<DailyRevenueSummaryDto> GetDailyRevenueSummary(DateTime date, int? hospitalId = null)
+        public async Task<DailyRevenueSummaryDto> GetDailyRevenueSummary(DateTime? date = null, int? hospitalId = null)
         {
+            // Every filter is optional: the dashboard must render before anything is
+            // chosen, so an absent date means today rather than a validation error.
+            var day = (date ?? Abp.Timing.Clock.Now).Date;
+
             var rows = await QueryTransactions(hospitalId)
-                .Where(pt => pt.ProcedureDate.Date == date.Date)
+                .Where(pt => pt.ProcedureDate.Date == day)
                 .Select(pt => new
                 {
                     ProductCategoryId = pt.Product.ProductCategoryId,
@@ -50,7 +54,7 @@ namespace ATI.Revenue.Application.Dashboard
 
             return new DailyRevenueSummaryDto
             {
-                Date = date.Date,
+                Date = day,
                 TotalRevenue = rows.Sum(r => r.TotalAmount),
                 TotalCases = rows.Sum(r => r.Quantity),
                 TransactionCount = rows.Count,
@@ -69,10 +73,13 @@ namespace ATI.Revenue.Application.Dashboard
             };
         }
 
-        public async Task<List<MonthlyRevenueByCategoryDto>> GetMonthlyRevenueByCategory(int month, int year, int? hospitalId = null)
+        public async Task<List<MonthlyRevenueByCategoryDto>> GetMonthlyRevenueByCategory(int? month = null, int? year = null, int? hospitalId = null)
         {
+            var resolvedYear = year ?? Abp.Timing.Clock.Now.Year;
+            var resolvedMonth = month ?? Abp.Timing.Clock.Now.Month;
+
             var rows = await QueryTransactions(hospitalId)
-                .Where(pt => pt.ProcedureDate.Year == year && pt.ProcedureDate.Month == month)
+                .Where(pt => pt.ProcedureDate.Year == resolvedYear && pt.ProcedureDate.Month == resolvedMonth)
                 .Select(pt => new
                 {
                     ProductCategoryId = pt.Product.ProductCategoryId,
@@ -99,10 +106,13 @@ namespace ATI.Revenue.Application.Dashboard
                 .ToList();
         }
 
-        public async Task<List<RevenueVsQuotaDto>> GetRevenueVsQuota(int month, int year, int? hospitalId = null)
+        public async Task<List<RevenueVsQuotaDto>> GetRevenueVsQuota(int? month = null, int? year = null, int? hospitalId = null)
         {
+            var resolvedYear = year ?? Abp.Timing.Clock.Now.Year;
+            var resolvedMonth = month ?? Abp.Timing.Clock.Now.Month;
+
             var quotas = await _productQuotaRepository.GetAll()
-                .Where(q => q.PeriodYear == year && q.PeriodMonth == month)
+                .Where(q => q.PeriodYear == resolvedYear && q.PeriodMonth == resolvedMonth)
                 .WhereIf(hospitalId.HasValue, q => q.HospitalId == hospitalId.Value)
                 .Select(q => new
                 {
@@ -119,7 +129,7 @@ namespace ATI.Revenue.Application.Dashboard
                 .ToListAsync();
 
             var actuals = await QueryTransactions(hospitalId)
-                .Where(pt => pt.ProcedureDate.Year == year && pt.ProcedureDate.Month == month)
+                .Where(pt => pt.ProcedureDate.Year == resolvedYear && pt.ProcedureDate.Month == resolvedMonth)
                 .Select(pt => new ActualRow
                 {
                     HospitalId = pt.HospitalId ?? 0,
@@ -198,10 +208,14 @@ namespace ATI.Revenue.Application.Dashboard
                 .ToList();
         }
 
-        public async Task<List<RevenueTrendDto>> GetRevenueTrend(DateTime startDate, DateTime endDate, int? hospitalId = null)
+        public async Task<List<RevenueTrendDto>> GetRevenueTrend(DateTime? startDate = null, DateTime? endDate = null, int? hospitalId = null)
         {
+            // Absent bounds mean the current month to date.
+            var to = (endDate ?? Abp.Timing.Clock.Now).Date;
+            var from = (startDate ?? new DateTime(to.Year, to.Month, 1)).Date;
+
             var rows = await QueryTransactions(hospitalId)
-                .Where(pt => pt.ProcedureDate >= startDate.Date && pt.ProcedureDate < endDate.Date.AddDays(1))
+                .Where(pt => pt.ProcedureDate >= from && pt.ProcedureDate < to.AddDays(1))
                 .Select(pt => new { pt.ProcedureDate, pt.Quantity, pt.TotalAmount })
                 .ToListAsync();
 

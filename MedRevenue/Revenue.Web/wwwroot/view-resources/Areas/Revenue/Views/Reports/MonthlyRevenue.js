@@ -1,11 +1,21 @@
 ﻿(function () {
     $(function () {
+        // Blank filters must post as null, not NaN: every report filter is optional.
+        function optionalInt(selector) {
+            var raw = $(selector).val();
+            if (raw === null || raw === undefined || String(raw).trim() === '') {
+                return null;
+            }
+            var parsed = parseInt(raw, 10);
+            return isNaN(parsed) ? null : parsed;
+        }
+
         var _$table = $('#MonthlyRevenueTable');
 
         $('#GenerateReportButton').click(function (e) {
             e.preventDefault();
-            var year = parseInt($('#YearFilter').val());
-            var month = parseInt($('#MonthFilter').val());
+            var year = optionalInt('#YearFilter');
+            var month = optionalInt('#MonthFilter');
             var hospitalId = $('#HospitalFilter').val();
 
             if (!year || !month) {
@@ -21,7 +31,7 @@
                 data: JSON.stringify({
                     year: year,
                     month: month,
-                    hospitalId: hospitalId ? parseInt(hospitalId) : null
+                    hospitalId: optionalInt('#HospitalFilter')
                 }),
                 success: function (result) {
                     if (result.success) {
@@ -67,7 +77,7 @@
             $.ajax({
                 url: abp.appPath + 'Revenue/Reports/ExportMonthlyRevenue',
                 type: 'POST',
-                data: JSON.stringify({ year: parseInt($('#YearFilter').val(), 10), month: parseInt($('#MonthFilter').val(), 10), hospitalId: $('#HospitalFilter').val() ? parseInt($('#HospitalFilter').val(), 10) : null }),
+                data: JSON.stringify({ year: optionalInt('#YearFilter'), month: optionalInt('#MonthFilter'), hospitalId: optionalInt('#HospitalFilter') }),
                 contentType: 'application/json',
                 success: function (file) {
                     app.downloadTempFile(file);

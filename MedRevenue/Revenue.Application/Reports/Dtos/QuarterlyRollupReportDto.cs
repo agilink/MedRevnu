@@ -1,4 +1,4 @@
-namespace ATI.Revenue.Application.Reports.Dtos
+﻿namespace ATI.Revenue.Application.Reports.Dtos
 {
     /// <summary>
     /// Quarterly rollup: three months of ProductQuota targets against the revenue
@@ -41,7 +41,8 @@ namespace ATI.Revenue.Application.Reports.Dtos
 
     public class QuarterlyRollupReportInput
     {
-        public int Year { get; set; }
+        /// <summary>Optional. Defaults to the current year.</summary>
+        public int? Year { get; set; }
 
         /// <summary>Null returns all four quarters.</summary>
         public int? Quarter { get; set; }

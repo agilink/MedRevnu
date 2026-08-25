@@ -1,22 +1,27 @@
 ﻿(function () {
     $(function () {
+        // Blank filters must post as null, not NaN: every report filter is optional.
+        function optionalInt(selector) {
+            var raw = $(selector).val();
+            if (raw === null || raw === undefined || String(raw).trim() === '') {
+                return null;
+            }
+            var parsed = parseInt(raw, 10);
+            return isNaN(parsed) ? null : parsed;
+        }
+
         var _$table = $('#RateChartTable');
 
         $('#GenerateReportButton').click(function (e) {
             e.preventDefault();
-            var hospitalId = $('#HospitalFilter').val();
-
-            if (!hospitalId) {
-                abp.notify.error('Please select a hospital');
-                return;
-            }
+            var hospitalId = optionalInt('#HospitalFilter');
 
             abp.ui.setBusy();
             $.ajax({
                 url: abp.appPath + 'Revenue/Reports/GetRateChartData',
                 type: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify({ hospitalId: parseInt(hospitalId) }),
+                data: JSON.stringify({ hospitalId: hospitalId }),
                 success: function (result) {
                     if (result.success) {
                         renderTable(result.data);
@@ -62,7 +67,7 @@
             $.ajax({
                 url: abp.appPath + 'Revenue/Reports/ExportRateChart',
                 type: 'POST',
-                data: JSON.stringify({ hospitalId: parseInt($('#HospitalFilter').val(), 10) }),
+                data: JSON.stringify({ hospitalId: optionalInt('#HospitalFilter') }),
                 contentType: 'application/json',
                 success: function (file) {
                     app.downloadTempFile(file);

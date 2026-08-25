@@ -1,10 +1,20 @@
 ﻿(function () {
     $(function () {
+        // Blank filters must post as null, not NaN: every report filter is optional.
+        function optionalInt(selector) {
+            var raw = $(selector).val();
+            if (raw === null || raw === undefined || String(raw).trim() === '') {
+                return null;
+            }
+            var parsed = parseInt(raw, 10);
+            return isNaN(parsed) ? null : parsed;
+        }
+
         var _$table = $('#TransactionAmountTable');
 
         $('#GenerateReportButton').click(function (e) {
             e.preventDefault();
-            var year = parseInt($('#YearFilter').val());
+            var year = optionalInt('#YearFilter');
             var physicianId = $('#PhysicianFilter').val();
             var productCategoryId = $('#ProductCategoryFilter').val();
 
@@ -20,8 +30,8 @@
                 contentType: 'application/json',
                 data: JSON.stringify({
                     year: year,
-                    physicianId: physicianId ? parseInt(physicianId) : null,
-                    productCategoryId: productCategoryId ? parseInt(productCategoryId) : null
+                    physicianId: optionalInt('#PhysicianFilter'),
+                    productCategoryId: optionalInt('#ProductCategoryFilter')
                 }),
                 success: function (result) {
                     if (result.success) {
@@ -78,7 +88,7 @@
             $.ajax({
                 url: abp.appPath + 'Revenue/Reports/ExportTransactionAmount',
                 type: 'POST',
-                data: JSON.stringify({ year: parseInt($('#YearFilter').val(), 10), physicianId: $('#PhysicianFilter').val() ? parseInt($('#PhysicianFilter').val(), 10) : null, productCategoryId: $('#ProductCategoryFilter').val() ? parseInt($('#ProductCategoryFilter').val(), 10) : null }),
+                data: JSON.stringify({ year: optionalInt('#YearFilter'), physicianId: optionalInt('#PhysicianFilter'), productCategoryId: optionalInt('#ProductCategoryFilter') }),
                 contentType: 'application/json',
                 success: function (file) {
                     app.downloadTempFile(file);
