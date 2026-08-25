@@ -120,6 +120,27 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
             return Json(new { success = true, data = data });
         }
 
+        // Report 5: Quarterly Rollup - three months of targets against actuals
+        public async Task<IActionResult> QuarterlyRollup()
+        {
+            ViewBag.Hospitals = await GetHospitalSelectList();
+            ViewBag.CurrentYear = DateTime.Now.Year;
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> GetQuarterlyRollupData(int year, int? quarter, int? hospitalId)
+        {
+            var data = await _reportsAppService.GetQuarterlyRollupReport(new QuarterlyRollupReportInput
+            {
+                Year = year,
+                Quarter = quarter,
+                HospitalId = hospitalId
+            });
+
+            return Json(new { success = true, data = data });
+        }
+
         // Helper methods for dropdowns
         private async Task<SelectList> GetHospitalSelectList()
         {

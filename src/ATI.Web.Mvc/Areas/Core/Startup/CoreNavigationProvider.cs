@@ -265,6 +265,14 @@ namespace ATI.Web.Areas.Core.Startup
                             )
                         )
                         .AddItem(new MenuItemDefinition(
+                                "Revenue.Reports.QuarterlyRollup",
+                                L("QuarterlyRollup"),
+                                url: "Revenue/Reports/QuarterlyRollup",
+                                icon: "flaticon-calendar-2",
+                                permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_Reports)
+                            )
+                        )
+                        .AddItem(new MenuItemDefinition(
                                 "Revenue.Reports.TransactionAmount",
                                 L("TransactionAmount"),
                                 url: "Revenue/Reports/TransactionAmount",

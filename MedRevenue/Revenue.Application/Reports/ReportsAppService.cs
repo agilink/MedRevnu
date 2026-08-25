@@ -1,5 +1,6 @@
 ﻿using Abp.Application.Services;
 using Abp.Domain.Repositories;
+using Abp.Linq.Extensions;
 using ATI.Admin.Domain.Entities;
 using ATI.Revenue.Application.Reports.Dtos;
 using ATI.Revenue.Domain.Entities;
@@ -19,19 +20,22 @@ namespace ATI.Revenue.Application.Reports
         private readonly IRepository<ProcedureTransaction, int> _procedureTransactionRepository;
         private readonly IRepository<Personnel, int> _personnelRepository;
         private readonly IRepository<Facility, int> _facilityRepository;
+        private readonly IRepository<ProductQuota, int> _productQuotaRepository;
 
         public ReportsAppService(
             IRepository<Product, int> productRepository,
             IRepository<ProductCategory, int> productCategoryRepository,
             IRepository<ProcedureTransaction, int> procedureTransactionRepository,
             IRepository<Personnel, int> personnelRepository,
-            IRepository<Facility, int> facilityRepository)
+            IRepository<Facility, int> facilityRepository,
+            IRepository<ProductQuota, int> productQuotaRepository)
         {
             _productRepository = productRepository;
             _productCategoryRepository = productCategoryRepository;
             _procedureTransactionRepository = procedureTransactionRepository;
             _personnelRepository = personnelRepository;
             _facilityRepository = facilityRepository;
+            _productQuotaRepository = productQuotaRepository;
         }
 
         /// <summary>
@@ -184,6 +188,117 @@ namespace ATI.Revenue.Application.Reports
                 .ToListAsync();
 
             return report;
+        }
+        /// <summary>
+        /// Report 5: Quarterly rollup - three months of targets against actuals.
+        /// </summary>
+        /// <remarks>
+        /// The workbook's "Quarters" tab, which the client sums by hand: Total Sold,
+        /// Total Plan and Percent to Plan per product category. Categories with revenue
+        /// but no target are still listed, so revenue cannot disappear from the rollup
+        /// just because nobody set a plan for it.
+        /// </remarks>
+        public async Task<List<QuarterlyRollupReportDto>> GetQuarterlyRollupReport(QuarterlyRollupReportInput input)
+        {
+            var quarters = input.Quarter.HasValue
+                ? new[] { input.Quarter.Value }
+                : new[] { 1, 2, 3, 4 };
+
+            var months = quarters.ToDictionary(q => q, q => new[] { (q - 1) * 3 + 1, (q - 1) * 3 + 2, (q - 1) * 3 + 3 });
+            var allMonths = months.Values.SelectMany(m => m).ToList();
+
+            var plans = await _productQuotaRepository.GetAll()
+                .Where(q => q.PeriodYear == input.Year && allMonths.Contains(q.PeriodMonth))
+                .WhereIf(input.HospitalId.HasValue, q => q.HospitalId == input.HospitalId.Value)
+                .Select(q => new
+                {
+                    q.PeriodMonth,
+                    q.HospitalId,
+                    HospitalName = q.Hospital != null ? q.Hospital.FacilityName : null,
+                    q.ProductCategoryId,
+                    ProductCategoryName = q.ProductCategory != null ? q.ProductCategory.Name : null,
+                    q.TargetAmount
+                })
+                .ToListAsync();
+
+            var actuals = await _procedureTransactionRepository.GetAll()
+                .Where(pt => pt.ProcedureDate.Year == input.Year && allMonths.Contains(pt.ProcedureDate.Month))
+                .WhereIf(input.HospitalId.HasValue, pt => pt.HospitalId == input.HospitalId.Value)
+                .Select(pt => new
+                {
+                    Month = pt.ProcedureDate.Month,
+                    pt.HospitalId,
+                    HospitalName = pt.Hospital != null ? pt.Hospital.FacilityName : null,
+                    ProductCategoryId = pt.Product.ProductCategoryId,
+                    ProductCategoryName = pt.Product.ProductCategory != null ? pt.Product.ProductCategory.Name : null,
+                    pt.ImplantType,
+                    pt.Quantity,
+                    pt.TotalAmount
+                })
+                .ToListAsync();
+
+            var report = new List<QuarterlyRollupReportDto>();
+
+            foreach (var quarter in quarters)
+            {
+                var quarterMonths = months[quarter];
+
+                var quarterPlans = plans.Where(p => quarterMonths.Contains(p.PeriodMonth)).ToList();
+                var quarterActuals = actuals.Where(a => quarterMonths.Contains(a.Month)).ToList();
+
+                // Every hospital + category that has either a target or revenue this quarter.
+                var keys = quarterPlans
+                    .Select(p => new { p.HospitalId, CategoryId = p.ProductCategoryId, p.HospitalName, p.ProductCategoryName })
+                    .Concat(quarterActuals.Select(a => new
+                    {
+                        HospitalId = a.HospitalId ?? 0,
+                        CategoryId = a.ProductCategoryId ?? 0,
+                        a.HospitalName,
+                        a.ProductCategoryName
+                    }))
+                    .GroupBy(k => new { k.HospitalId, k.CategoryId })
+                    .Select(g => g.First());
+
+                foreach (var key in keys)
+                {
+                    var plan = quarterPlans
+                        .Where(p => p.HospitalId == key.HospitalId && p.ProductCategoryId == key.CategoryId)
+                        .Sum(p => p.TargetAmount);
+
+                    var rows = quarterActuals
+                        .Where(a => (a.HospitalId ?? 0) == key.HospitalId && (a.ProductCategoryId ?? 0) == key.CategoryId)
+                        .ToList();
+
+                    var sold = rows.Sum(a => a.TotalAmount);
+
+                    report.Add(new QuarterlyRollupReportDto
+                    {
+                        Year = input.Year,
+                        Quarter = quarter,
+                        QuarterName = "Q" + quarter,
+                        HospitalId = key.HospitalId == 0 ? (int?)null : key.HospitalId,
+                        HospitalName = key.HospitalName ?? "",
+                        ProductCategoryId = key.CategoryId,
+                        ProductCategoryName = string.IsNullOrWhiteSpace(key.ProductCategoryName)
+                            ? "(Uncategorised)"
+                            : key.ProductCategoryName,
+                        TotalPlan = plan,
+                        TotalSold = sold,
+                        Variance = sold - plan,
+                        PercentToPlan = plan > 0 ? (sold / plan) * 100 : 0,
+                        TotalCases = rows.Sum(a => a.Quantity),
+                        DeNovoCases = rows.Where(a => a.ImplantType == ImplantType.DeNovo).Sum(a => a.Quantity),
+                        GenChangeCases = rows.Where(a => a.ImplantType == ImplantType.GenChange).Sum(a => a.Quantity),
+                        HasPlan = plan > 0
+                    });
+                }
+            }
+
+            return report
+                .OrderBy(r => r.Quarter)
+                .ThenBy(r => r.HospitalName)
+                .ThenBy(r => r.ProductCategoryName)
+                .ToList();
         }
     }
 }

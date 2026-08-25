@@ -1444,5 +1444,11 @@
     <text name="ProductPriceCount">Prices</text>
     <text name="Company">Company</text>
     <text name="NotSet">Not set</text>
+    <text name="QuarterlyRollup">Quarterly Rollup</text>
+    <text name="Quarter">Quarter</text>
+    <text name="AllQuarters">All Quarters</text>
+    <text name="Variance">Variance</text>
+    <text name="ProductCategory">Product Category</text>
+    <text name="Show">Show</text>
   </texts>
 </localizationDictionary>
