@@ -1,4 +1,4 @@
-(function ($) {
+﻿(function ($) {
     app.modals.CreateOrEditHospitalModal = function () {
         var _hospitalsService = abp.services.app.hospitals;
         var _modalManager;
@@ -21,6 +21,10 @@
             }
 
             var hospital = _$form.serializeFormToObject();
+
+            // An unchosen company posts as '' which will not bind to int?.
+            hospital.companyId = hospital.CompanyId ? parseInt(hospital.CompanyId, 10) : null;
+            delete hospital.CompanyId;
 
             _modalManager.setBusy(true);
             _hospitalsService

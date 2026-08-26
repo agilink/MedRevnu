@@ -1,4 +1,4 @@
-using Abp.Application.Services;
+﻿using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using Abp.Domain.Repositories;
 using Abp.Linq.Extensions;
@@ -21,13 +21,15 @@ namespace ATI.Revenue.Application.Hospitals
     /// quotas, contracted prices and physicians. Like the physician roster there was no
     /// UI for them anywhere, so the list could only be changed by running a seed script.
     ///
-    /// Only the name and status are editable here. A facility's address and owning
-    /// company are separate entities in the Admin module with their own screens to come,
-    /// and inventing a partial editor for them would risk writing half a record.
+    /// Name, status and owning company are editable. Every hospital must belong to a
+    /// company - one can be picked or created inline - because a facility with no company
+    /// is invisible to anything that groups by company. A facility's address remains a
+    /// separate Admin entity with its own screen to come.
     /// </remarks>
     public class HospitalsAppService : ApplicationService, IHospitalsAppService
     {
         private readonly IRepository<Facility, int> _facilityRepository;
+        private readonly IRepository<Company, int> _companyRepository;
         private readonly IRepository<Personnel, int> _personnelRepository;
         private readonly IRepository<ProcedureTransaction, int> _procedureTransactionRepository;
         private readonly IRepository<HospitalProductPrice, int> _hospitalProductPriceRepository;
@@ -35,12 +37,14 @@ namespace ATI.Revenue.Application.Hospitals
 
         public HospitalsAppService(
             IRepository<Facility, int> facilityRepository,
+            IRepository<Company, int> companyRepository,
             IRepository<Personnel, int> personnelRepository,
             IRepository<ProcedureTransaction, int> procedureTransactionRepository,
             IRepository<HospitalProductPrice, int> hospitalProductPriceRepository,
             IRepository<ProductQuota, int> productQuotaRepository)
         {
             _facilityRepository = facilityRepository;
+            _companyRepository = companyRepository;
             _personnelRepository = personnelRepository;
             _procedureTransactionRepository = procedureTransactionRepository;
             _hospitalProductPriceRepository = hospitalProductPriceRepository;
@@ -80,7 +84,9 @@ namespace ATI.Revenue.Application.Hospitals
 
         public async Task<GetHospitalForEditOutput> GetHospitalForEdit(EntityDto<int> input)
         {
-            var entity = await _facilityRepository.GetAll().FirstOrDefaultAsync(f => f.Id == input.Id);
+            var entity = await _facilityRepository.GetAll()
+                .Include(f => f.Company)
+                .FirstOrDefaultAsync(f => f.Id == input.Id);
 
             if (entity == null)
                 throw new UserFriendlyException("Hospital not found");
@@ -91,7 +97,8 @@ namespace ATI.Revenue.Application.Hospitals
                 {
                     Id = entity.Id,
                     HospitalName = entity.FacilityName,
-                    FacilityStatusId = entity.FacilityStatusId
+                    FacilityStatusId = entity.FacilityStatusId,
+                    CompanyId = entity.Company != null ? (int?)entity.Company.Id : null
                 }
             };
         }
@@ -110,12 +117,19 @@ namespace ATI.Revenue.Application.Hospitals
                 throw new UserFriendlyException($"A hospital named \"{name}\" already exists.");
             }
 
+            var company = await ResolveCompany(input);
+
             var entity = input.Id == 0
                 ? new Facility()
-                : await _facilityRepository.GetAsync(input.Id);
+                : await _facilityRepository.GetAll().Include(f => f.Company)
+                    .FirstAsync(f => f.Id == input.Id);
 
             entity.FacilityName = name;
             entity.FacilityStatusId = input.FacilityStatusId;
+
+            // Facility's company link is an EF shadow foreign key - there is no CompanyId
+            // property on the entity - so it is set through the navigation.
+            entity.Company = company;
 
             int id;
             if (input.Id == 0)
@@ -131,6 +145,53 @@ namespace ATI.Revenue.Application.Hospitals
             await CurrentUnitOfWork.SaveChangesAsync();
 
             return await Project(_facilityRepository.GetAll().Where(f => f.Id == id)).FirstOrDefaultAsync();
+        }
+
+        /// <summary>
+        /// Returns the company this hospital belongs to, creating it when the user typed a
+        /// new name.
+        /// </summary>
+        /// <remarks>
+        /// A hospital with no company is invisible to anything that groups by company, so
+        /// one is required. Naming a company that already exists reuses it rather than
+        /// creating a duplicate.
+        /// </remarks>
+        private async Task<Company> ResolveCompany(CreateOrEditHospitalDto input)
+        {
+            var newName = input.NewCompanyName?.Trim();
+
+            if (!string.IsNullOrWhiteSpace(newName))
+            {
+                var existing = await _companyRepository.GetAll()
+                    .FirstOrDefaultAsync(c => c.CompanyName == newName);
+
+                if (existing != null)
+                {
+                    return existing;
+                }
+
+                var created = new Company { CompanyName = newName };
+                created.Id = await _companyRepository.InsertAndGetIdAsync(created);
+                await CurrentUnitOfWork.SaveChangesAsync();
+                return created;
+            }
+
+            if (input.CompanyId.HasValue)
+            {
+                var selected = await _companyRepository.GetAll()
+                    .FirstOrDefaultAsync(c => c.Id == input.CompanyId.Value);
+
+                if (selected == null)
+                {
+                    throw new UserFriendlyException("The selected company no longer exists.");
+                }
+
+                return selected;
+            }
+
+            throw new UserFriendlyException(
+                "A company is required",
+                "Choose the company this hospital belongs to, or type a new company name to create one.");
         }
 
         public async Task Delete(EntityDto<int> input)
@@ -162,6 +223,7 @@ namespace ATI.Revenue.Application.Hospitals
                 Id = f.Id,
                 HospitalName = f.FacilityName ?? "",
                 FacilityStatusId = f.FacilityStatusId,
+                CompanyId = f.Company != null ? (int?)f.Company.Id : null,
                 CompanyName = f.Company != null ? (f.Company.CompanyName ?? "") : "",
                 PhysicianCount = _personnelRepository.GetAll().Count(p => p.FacilityId == f.Id),
                 ProductPriceCount = _hospitalProductPriceRepository.GetAll().Count(p => p.HospitalId == f.Id)

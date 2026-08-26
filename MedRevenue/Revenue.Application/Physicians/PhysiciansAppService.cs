@@ -1,4 +1,4 @@
-using Abp.Application.Services;
+﻿using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using Abp.Domain.Repositories;
 using Abp.Linq.Extensions;
@@ -173,7 +173,11 @@ namespace ATI.Revenue.Application.Physicians
         {
             var query = _personnelRepository.GetAll();
 
-            if (input.HospitalIdFilter.HasValue)
+            if (input.UnassignedHospitalOnly)
+            {
+                query = query.Where(p => p.FacilityId == null);
+            }
+            else if (input.HospitalIdFilter.HasValue)
             {
                 query = query.Where(p => p.FacilityId == input.HospitalIdFilter.Value);
             }

@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
     $(function () {
         var _$physiciansTable = $('#PhysiciansTable');
         var _physiciansService = abp.services.app.physicians;
@@ -33,7 +33,11 @@
                 inputFilter: function () {
                     return {
                         filter: $('#PhysiciansTableFilter').val() || null,
-                        hospitalIdFilter: $('#HospitalFilter').val() ? parseInt($('#HospitalFilter').val()) : null,
+                        // 'none' finds physicians with no hospital at all; blank means no filter.
+                        hospitalIdFilter: $('#HospitalFilter').val() && $('#HospitalFilter').val() !== 'none'
+                            ? parseInt($('#HospitalFilter').val(), 10)
+                            : null,
+                        unassignedHospitalOnly: $('#HospitalFilter').val() === 'none',
                         employeeStatusFilter: $('#EmployeeStatusFilter').val()
                             ? parseInt($('#EmployeeStatusFilter').val())
                             : null

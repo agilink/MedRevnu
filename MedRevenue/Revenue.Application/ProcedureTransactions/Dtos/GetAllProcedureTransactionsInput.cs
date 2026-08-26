@@ -13,6 +13,7 @@ namespace ATI.Revenue.Application.ProcedureTransactions.Dtos
         public int? PhysicianIdFilter { get; set; }
         public int? ProductIdFilter { get; set; }
         public ImplantType? ImplantTypeFilter { get; set; }
+        public CaseStatus? StatusFilter { get; set; }
         public DateTime? MinProcedureDateFilter { get; set; }
         public DateTime? MaxProcedureDateFilter { get; set; }
     }

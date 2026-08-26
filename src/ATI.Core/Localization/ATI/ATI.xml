@@ -1461,5 +1461,13 @@
     <text name="TotalOverrideHint">Calculated from the devices; edit to override with a negotiated price</text>
     <text name="FailedToLoadPrice">Failed to load price</text>
     <text name="Quantity">Quantity</text>
+    <text name="NoHospitalAssigned">No hospital assigned</text>
+    <text name="CaseStatus">Status</text>
+    <text name="AllCaseStatuses">All Statuses</text>
+    <text name="NewCompanyName">Or add a new company</text>
+    <text name="Description">Description</text>
+    <text name="SelectCompany">Select a company</text>
+    <text name="NewCompanyNamePlaceholder">Leave blank to use the company selected above</text>
+    <text name="StatusDoesNotAffectReportsYet">Recorded for reference; reports currently count every case regardless of status</text>
   </texts>
 </localizationDictionary>

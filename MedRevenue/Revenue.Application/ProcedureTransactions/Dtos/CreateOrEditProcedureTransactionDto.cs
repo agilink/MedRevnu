@@ -28,6 +28,12 @@ namespace ATI.Revenue.Application.ProcedureTransactions.Dtos
         [Required]
         public ImplantType ImplantType { get; set; } = ImplantType.DeNovo;
 
+        [Required]
+        public CaseStatus Status { get; set; } = CaseStatus.Open;
+
+        [StringLength(1000)]
+        public string Description { get; set; }
+
         /// <summary>
         /// Left at zero to be calculated from the device lines; set to override it with a
         /// negotiated case price.

@@ -17,6 +17,8 @@ namespace ATI.Revenue.Application.ProcedureTransactions.Dtos
         public int PhysicianId { get; set; }
         public string PhysicianName { get; set; }
         public ImplantType ImplantType { get; set; }
+        public CaseStatus Status { get; set; }
+        public string Description { get; set; }
         public decimal TotalAmount { get; set; }
 
         /// <summary>Number of distinct devices on the case, for the grid summary.</summary>

@@ -1,4 +1,4 @@
-using Abp.Application.Services;
+﻿using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using Abp.Domain.Repositories;
 using Abp.Linq.Extensions;
@@ -73,6 +73,8 @@ namespace ATI.Revenue.Application.ProcedureTransactions
                         ? ((pt.Physician.FIRST_NAME ?? "") + " " + (pt.Physician.LAST_NAME ?? "")).Trim()
                         : "",
                     pt.ImplantType,
+                    pt.Status,
+                    pt.Description,
                     pt.TotalAmount,
                     Lines = pt.Products.Select(l => new
                     {
@@ -93,6 +95,8 @@ namespace ATI.Revenue.Application.ProcedureTransactions
                 PhysicianId = r.PhysicianId,
                 PhysicianName = r.PhysicianName,
                 ImplantType = r.ImplantType,
+                Status = r.Status,
+                Description = r.Description ?? "",
                 TotalAmount = r.TotalAmount,
                 DeviceCount = r.Lines.Count,
                 TotalUnits = r.Lines.Sum(l => l.Quantity),
@@ -125,6 +129,8 @@ namespace ATI.Revenue.Application.ProcedureTransactions
                     pt.HospitalId,
                     pt.PhysicianId,
                     pt.ImplantType,
+                    pt.Status,
+                    pt.Description,
                     pt.TotalAmount,
                     Lines = pt.Products.Select(l => new CreateOrEditProcedureTransactionProductDto
                     {
@@ -149,6 +155,8 @@ namespace ATI.Revenue.Application.ProcedureTransactions
                     HospitalId = entity.HospitalId,
                     PhysicianId = entity.PhysicianId,
                     ImplantType = entity.ImplantType,
+                    Status = entity.Status,
+                    Description = entity.Description,
                     TotalAmount = entity.TotalAmount,
                     Products = entity.Lines
                 }
@@ -184,6 +192,8 @@ namespace ATI.Revenue.Application.ProcedureTransactions
             entity.HospitalId = input.HospitalId;
             entity.PhysicianId = input.PhysicianId;
             entity.ImplantType = input.ImplantType;
+            entity.Status = input.Status;
+            entity.Description = input.Description;
 
             await ApplyLines(entity, input);
 
@@ -338,6 +348,8 @@ namespace ATI.Revenue.Application.ProcedureTransactions
             {
                 Id = pt.Id,
                 CaseNumber = pt.CaseNumber,
+                Status = pt.Status,
+                Description = pt.Description ?? "",
                 ProcedureDate = pt.ProcedureDate,
                 HospitalId = pt.HospitalId,
                 HospitalName = pt.Hospital != null ? (pt.Hospital.FacilityName ?? "") : "",

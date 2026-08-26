@@ -1,4 +1,4 @@
-@using ATI.Authorization
+﻿@using ATI.Authorization
 @{
     ViewData["Title"] = "Physicians";
 }
@@ -50,6 +50,9 @@
                             <label for="HospitalFilter" class="form-label">@L("Hospital")</label>
                             <select id="HospitalFilter" class="form-select">
                                 <option value="">@L("AllHospitals")</option>
+                                @* A physician with no hospital leaves their cases unassigned,
+                                   so they need to be findable. *@
+                                <option value="none">@L("NoHospitalAssigned")</option>
                                 @foreach (var hospital in ViewBag.Hospitals)
                                 {
                                     <option value="@hospital.Value">@hospital.Text</option>

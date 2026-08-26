@@ -2,6 +2,10 @@
     $(function () {
         var _$transactionsTable = $('#ProcedureTransactionsTable');
         var _transactionsService = abp.services.app.procedureTransactions;
+        var CASE_STATUS_LABELS = {
+            1: 'Open', 2: 'Scheduled', 3: 'Completed', 4: 'Billed', 5: 'Paid', 6: 'Closed'
+        };
+
 
         var _permissions = {
             create: abp.auth.hasPermission('Pages.Revenue.ProcedureTransactions.Create'),
@@ -12,7 +16,10 @@
         var _createOrEditModal = new app.ModalManager({
             viewUrl: abp.appPath + 'Revenue/ProcedureTransactions/CreateOrEditModal',
             scriptUrl: abp.appPath + 'view-resources/Areas/Revenue/Views/ProcedureTransactions/_CreateOrEditModal.js',
-            modalClass: 'CreateOrEditProcedureTransactionModal'
+            modalClass: 'CreateOrEditProcedureTransactionModal',
+            // The case form carries a device grid, so it needs more width than
+            // ModalManager's default modal-lg.
+            modalSize: 'modal-xl'
         });
 
         var dataTable = _$transactionsTable.DataTable({
@@ -34,7 +41,8 @@
                         monthFilter: month ? parseInt(month) : null,
                         hospitalIdFilter: hospitalId ? parseInt(hospitalId) : null,
                         physicianIdFilter: physicianId ? parseInt(physicianId) : null,
-                        implantTypeFilter: null
+                        implantTypeFilter: null,
+                        statusFilter: $('#StatusFilter').val() ? parseInt($('#StatusFilter').val(), 10) : null
                     };
                 }
             },
@@ -111,8 +119,19 @@
                     }
                 },
                 {
-                    // A case can use several devices, so the grid summarises them.
                     targets: 6,
+                    data: 'status',
+                    name: 'status',
+                    render: function (status) {
+                        // Recorded only: reports still count every case regardless of status.
+                        var label = CASE_STATUS_LABELS[status] || '-';
+                        var css = status === 5 || status === 6 ? 'badge-light-success' : 'badge-light-primary';
+                        return '<span class="badge ' + css + '">' + label + '</span>';
+                    }
+                },
+                {
+                    // A case can use several devices, so the grid summarises them.
+                    targets: 7,
                     data: 'productSummary',
                     name: 'productSummary',
                     orderable: false,
@@ -127,7 +146,7 @@
                     }
                 },
                 {
-                    targets: 7,
+                    targets: 8,
                     data: 'totalAmount',
                     name: 'totalAmount',
                     className: 'text-end',

@@ -329,6 +329,8 @@ namespace ATI.EntityFrameworkCore
                 entity.Property(e => e.ProcedureDate).IsRequired();
                 entity.Property(e => e.PhysicianId).IsRequired();
                 entity.Property(e => e.ImplantType).IsRequired();
+                entity.Property(e => e.Status).IsRequired();
+                entity.Property(e => e.Description).HasMaxLength(1000);
                 entity.Property(e => e.TotalAmount).HasPrecision(18, 2);
 
                 entity.HasIndex(e => e.ProcedureDate);
@@ -336,7 +338,7 @@ namespace ATI.EntityFrameworkCore
                 entity.HasIndex(e => e.HospitalId);
 
                 // The case number identifies a case to the client, so it must be unique.
-                entity.HasIndex(e => e.CaseNumber).IsUnique();
+                entity.HasIndex(e => e.CaseNumber).IsUnique().HasFilter("[IsDeleted] = 0");
 
                 entity.HasMany(e => e.Products)
                     .WithOne(e => e.ProcedureTransaction)

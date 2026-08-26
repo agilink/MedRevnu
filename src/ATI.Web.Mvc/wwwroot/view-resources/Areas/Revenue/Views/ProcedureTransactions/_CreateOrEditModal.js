@@ -1,4 +1,4 @@
-(function ($) {
+﻿(function ($) {
     app.modals.CreateOrEditProcedureTransactionModal = function () {
         var _transactionsService = abp.services.app.procedureTransactions;
         var _modalManager;
@@ -285,6 +285,8 @@
                 hospitalId: $('#HospitalId').val() ? parseInt($('#HospitalId').val(), 10) : null,
                 physicianId: parseInt($('#PhysicianId').val(), 10),
                 implantType: parseInt($('input[name=ImplantType]:checked').val(), 10),
+                status: parseInt($('#Status').val(), 10),
+                description: $('#Description').val() || null,
                 totalAmount: parseFloat($('#TotalAmount').val()) || 0,
                 products: lines
             };

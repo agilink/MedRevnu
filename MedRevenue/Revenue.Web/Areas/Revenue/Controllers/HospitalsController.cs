@@ -6,6 +6,11 @@ using ATI.Revenue.Application.Hospitals.Dtos;
 using ATI.Revenue.Web.PageModel.Hospitals;
 using ATI.Web.Controllers;
 using Microsoft.AspNetCore.Mvc;
+using Abp.Domain.Repositories;
+using ATI.Admin.Domain.Entities;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ATI.Revenue.Web.Areas.Revenue.Controllers
@@ -15,15 +20,29 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
     public class HospitalsController : ATIControllerBase
     {
         private readonly IHospitalsAppService _hospitalsAppService;
+        private readonly IRepository<Company, int> _companyRepository;
 
-        public HospitalsController(IHospitalsAppService hospitalsAppService)
+        public HospitalsController(
+            IHospitalsAppService hospitalsAppService,
+            IRepository<Company, int> companyRepository)
         {
             _hospitalsAppService = hospitalsAppService;
+            _companyRepository = companyRepository;
         }
 
         public IActionResult Index()
         {
             return View();
+        }
+
+        private async Task<SelectList> GetCompanySelectList()
+        {
+            var companies = await _companyRepository.GetAll()
+                .OrderBy(c => c.CompanyName)
+                .Select(c => new { c.Id, Name = c.CompanyName ?? "" })
+                .ToListAsync();
+
+            return new SelectList(companies, "Id", "Name");
         }
 
         public async Task<IActionResult> CreateOrEditModal(int? id)
@@ -47,6 +66,8 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
                     IsEditMode = false
                 };
             }
+
+            ViewBag.Companies = await GetCompanySelectList();
 
             return PartialView("_CreateOrEditModal", viewModel);
         }

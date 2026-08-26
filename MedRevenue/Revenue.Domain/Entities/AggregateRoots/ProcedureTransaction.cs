@@ -1,4 +1,4 @@
-using Abp.Domain.Entities.Auditing;
+﻿using Abp.Domain.Entities.Auditing;
 using ATI.Admin.Domain.Entities;
 using ATI.Revenue.Domain.Enums;
 using System;
@@ -46,6 +46,14 @@ namespace ATI.Revenue.Domain.Entities
         /// </summary>
         [Required]
         public ImplantType ImplantType { get; set; }
+
+        /// <summary>Where the case has reached in the billing cycle.</summary>
+        [Required]
+        public CaseStatus Status { get; set; } = CaseStatus.Open;
+
+        /// <summary>Free-text note about the case.</summary>
+        [MaxLength(1000)]
+        public string? Description { get; set; }
 
         /// <summary>
         /// Sum of the line totals, unless deliberately overridden for a negotiated case

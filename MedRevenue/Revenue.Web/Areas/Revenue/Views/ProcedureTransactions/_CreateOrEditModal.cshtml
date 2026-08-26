@@ -1,4 +1,4 @@
-@using ATI.Revenue.Domain.Enums
+﻿@using ATI.Revenue.Domain.Enums
 @using ATI.Revenue.Application.Products.Dtos
 @using System.Collections.Generic
 @using ATI.Revenue.Web.PageModel.ProcedureTransactions
@@ -76,6 +76,29 @@
                     </div>
                 </div>
                 <small class="form-text text-muted">@L("EveryDeviceMustMatchImplantType")</small>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-5">
+                <label class="form-label required" for="Status">@L("CaseStatus")</label>
+                <select class="form-control" id="Status" name="Status" required>
+                    @{
+                        var statuses = new[] { "Open", "Scheduled", "Completed", "Billed", "Paid", "Closed" };
+                        var currentStatus = (int)(Model.ProcedureTransaction?.Status ?? CaseStatus.Open);
+                    }
+                    @for (var i = 0; i < statuses.Length; i++)
+                    {
+                        var value = i + 1;
+                        <option value="@value" selected="@(currentStatus == value)">@statuses[i]</option>
+                    }
+                </select>
+                <small class="form-text text-muted">@L("StatusDoesNotAffectReportsYet")</small>
+            </div>
+            <div class="col-md-6 mb-5">
+                <label class="form-label" for="Description">@L("Description")</label>
+                <textarea class="form-control" name="Description" id="Description" rows="2"
+                          maxlength="1000">@Model.ProcedureTransaction?.Description</textarea>
             </div>
         </div>
 
