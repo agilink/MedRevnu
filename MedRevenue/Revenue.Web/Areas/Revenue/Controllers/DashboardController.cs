@@ -4,12 +4,13 @@ using System;
 using System.Threading.Tasks;
 using Abp.AspNetCore.Mvc.Authorization;
 using ATI.Authorization;
+using ATI.Web.Controllers;
 
 namespace ATI.Revenue.Web.Areas.Revenue.Controllers
 {
     [Area("Revenue")]
     [AbpMvcAuthorize(AppPermissions.Pages_Revenue_Dashboard)]
-    public class DashboardController : Controller
+    public class DashboardController : ATIControllerBase
     {
         private readonly IRevenueDashboardAppService _dashboardAppService;
 

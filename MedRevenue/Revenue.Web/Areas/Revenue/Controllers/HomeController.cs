@@ -6,12 +6,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
+using ATI.Web.Controllers;
 
 namespace ATI.Revenue.Web.Areas.Revenue.Controllers
 {
     [Area("Revenue")]
     [AbpMvcAuthorize(AppPermissions.Pages_Revenue)]
-    public class HomeController : Controller
+    public class HomeController : ATIControllerBase
     {
         private readonly IRepository<ProcedureTransaction, int> _procedureTransactionRepository;
         private readonly IRepository<Product, int> _productRepository;
