@@ -17,9 +17,9 @@
             viewUrl: abp.appPath + 'Revenue/ProcedureTransactions/CreateOrEditModal',
             scriptUrl: abp.appPath + 'view-resources/Areas/Revenue/Views/ProcedureTransactions/_CreateOrEditModal.js',
             modalClass: 'CreateOrEditProcedureTransactionModal',
-            // The case form carries a device grid, so it needs more width than
-            // ModalManager's default modal-lg.
-            modalSize: 'modal-xl'
+            // The case form carries a device grid and a dozen fields, so it takes the
+            // whole page rather than ModalManager's default modal-lg.
+            modalSize: 'modal-fullscreen'
         });
 
         var dataTable = _$transactionsTable.DataTable({
