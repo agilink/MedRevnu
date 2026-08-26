@@ -447,15 +447,18 @@ namespace ATI.Revenue.Application.ProcedureTransactions
         /// Rows with no effective date act as an undated baseline: SQL Server sorts NULLs
         /// last on a descending sort, so any dated row that has come into effect wins.
         /// </remarks>
-        public async Task<decimal> GetEffectiveUnitPrice(int? hospitalId, int productId, DateTime asOfDate)
+        public async Task<decimal> GetEffectiveUnitPrice(int? hospitalId, int productId, DateTime? asOfDate = null)
         {
+            // The form may ask before a date has been entered.
+            var asOf = asOfDate ?? Abp.Timing.Clock.Now;
+
             if (hospitalId.HasValue)
             {
                 var hospitalPrice = await _hospitalProductPriceRepository.GetAll()
                     .Where(hpp => hpp.HospitalId == hospitalId.Value
                         && hpp.ProductId == productId
                         && hpp.IsActive
-                        && (hpp.EffectiveDate == null || hpp.EffectiveDate <= asOfDate))
+                        && (hpp.EffectiveDate == null || hpp.EffectiveDate <= asOf))
                     .OrderByDescending(hpp => hpp.EffectiveDate)
                     .FirstOrDefaultAsync();
 

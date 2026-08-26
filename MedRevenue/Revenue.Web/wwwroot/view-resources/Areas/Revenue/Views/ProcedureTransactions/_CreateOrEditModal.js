@@ -171,17 +171,25 @@
         function repriceLine($row, productChanged) {
             var hospitalId = $('#HospitalId').val();
             var productId = $row.find('.device-product').val();
+            var procedureDate = $('#ProcedureDate').val();
 
             flagMismatchedLines();
 
-            if (!productId || !hospitalId) {
+            // Only the product is needed to price a line. Previously this bailed out
+            // whenever no hospital was chosen, so changing the product produced no price
+            // at all; the service falls back to the product's base price when the hospital
+            // has no contracted price, or when there is no hospital yet.
+            if (!productId) {
                 updateLineTotal($row);
                 recalculateAll();
                 return;
             }
 
             _transactionsService
-                .getProductPriceByHospital(parseInt(hospitalId, 10), parseInt(productId, 10))
+                .getEffectiveUnitPrice(
+                    hospitalId ? parseInt(hospitalId, 10) : null,
+                    parseInt(productId, 10),
+                    procedureDate || null)
                 .done(function (price) {
                     var $price = $row.find('.device-unit-price');
                     var current = parseFloat($price.val()) || 0;
@@ -255,11 +263,12 @@
         var _syncing = false;
 
         function reloadPhysicians(hospitalId, keepPhysicianId) {
+            // Query string, not a JSON body: a simple int? parameter does not bind from
+            // the body, so this always arrived null and returned every physician.
             return $.ajax({
-                url: abp.appPath + 'Revenue/ProcedureTransactions/GetPhysiciansByHospital',
-                type: 'POST',
-                data: JSON.stringify({ hospitalId: hospitalId || null }),
-                contentType: 'application/json'
+                url: abp.appPath + 'Revenue/ProcedureTransactions/GetPhysiciansByHospital'
+                     + (hospitalId ? '?hospitalId=' + encodeURIComponent(hospitalId) : ''),
+                type: 'GET'
             }).then(function (result) {
                 if (!result || !result.success) {
                     return;
@@ -290,10 +299,9 @@
             }
 
             $.ajax({
-                url: abp.appPath + 'Revenue/ProcedureTransactions/GetPhysicianFacility',
-                type: 'POST',
-                data: JSON.stringify({ physicianId: parseInt(physicianId, 10) }),
-                contentType: 'application/json',
+                url: abp.appPath + 'Revenue/ProcedureTransactions/GetPhysicianFacility'
+                     + '?physicianId=' + encodeURIComponent(physicianId),
+                type: 'GET',
                 success: function (result) {
                     if (!result || !result.success || !result.facilityId) {
                         return;

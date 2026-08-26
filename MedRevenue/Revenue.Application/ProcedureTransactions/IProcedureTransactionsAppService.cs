@@ -1,4 +1,4 @@
-using Abp.Application.Services;
+﻿using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using ATI.Revenue.Application.ProcedureTransactions.Dtos;
 using System;
@@ -14,6 +14,6 @@ namespace ATI.Revenue.Application.ProcedureTransactions
         Task<ProcedureTransactionDto> CreateOrEdit(CreateOrEditProcedureTransactionDto input);
         Task Delete(EntityDto<int> input);
         Task<decimal> GetProductPriceByHospital(int hospitalId, int productId);
-        Task<decimal> GetEffectiveUnitPrice(int? hospitalId, int productId, DateTime asOfDate);
+        Task<decimal> GetEffectiveUnitPrice(int? hospitalId, int productId, DateTime? asOfDate = null);
     }
 }

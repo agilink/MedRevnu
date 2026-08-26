@@ -104,7 +104,7 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         /// Passing no hospital returns every physician, so clearing the hospital widens the
         /// list again rather than emptying it.
         /// </remarks>
-        [HttpPost]
+        [HttpGet]
         public async Task<JsonResult> GetPhysiciansByHospital(int? hospitalId)
         {
             var physicians = await _personnelRepository.GetAll()
@@ -122,7 +122,7 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         }
 
         // API endpoint to get physician's facility
-        [HttpPost]
+        [HttpGet]
         public async Task<JsonResult> GetPhysicianFacility(int? physicianId)
         {
             // Clearing the physician is a legitimate state, not an error.
