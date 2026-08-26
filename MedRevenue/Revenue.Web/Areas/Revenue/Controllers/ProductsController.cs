@@ -73,6 +73,10 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
                     ModelNo = product.ModelNo,
                     Description = product.Description,
                     ProductCategoryId = product.ProductCategoryId,
+                    SubproductCategoryId = product.SubproductCategoryId,
+                    ProductCode = product.ProductCode,
+                    BasePrice = product.BasePrice,
+                    IsSystem = product.IsSystem,
                     Cost = product.Cost,
                     Price = product.Price,
                     IsActive = product.IsActive

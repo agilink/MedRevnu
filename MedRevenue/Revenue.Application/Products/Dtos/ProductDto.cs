@@ -28,6 +28,7 @@ namespace ATI.Revenue.Application.Products.Dtos
         public decimal BasePrice { get; set; }
         public decimal Cost { get; set; }
         public decimal Price { get; set; }
+        public bool IsSystem { get; set; }
         public bool IsActive { get; set; }
     }
 }

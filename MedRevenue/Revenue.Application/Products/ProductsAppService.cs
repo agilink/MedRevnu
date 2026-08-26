@@ -67,6 +67,7 @@ namespace ATI.Revenue.Application.Products
                     BasePrice = p.BasePrice,
                     Cost = p.Cost,
                     Price = p.Price,
+                    IsSystem = p.IsSystem,
                     IsActive = p.IsActive
                 })
                 .ToListAsync();
@@ -97,6 +98,7 @@ namespace ATI.Revenue.Application.Products
                     BasePrice = p.BasePrice,
                     Cost = p.Cost,
                     Price = p.Price,
+                    IsSystem = p.IsSystem,
                     IsActive = p.IsActive
                 })
                 .ToListAsync();

@@ -1,4 +1,4 @@
-@using ATI.Revenue.Application.Products.Dtos
+﻿@using ATI.Revenue.Application.Products.Dtos
 @model CreateOrEditProductDto
 
 <div class="modal-header">
@@ -41,6 +41,43 @@
         </div>
 
         <div class="row">
+            <div class="col-md-6 mb-4">
+                <label class="form-label">@L("ProductCode")</label>
+                <input class="form-control" type="text" name="ProductCode" id="ProductCode"
+                       value="@Model.ProductCode" maxlength="30" />
+            </div>
+            <div class="col-md-6 mb-4">
+                @* The subcategory decides De Novo vs Gen Change, which the case form
+                   validates against, so a product without one cannot be checked. *@
+                <label class="form-label">@L("Subcategory")</label>
+                <select class="form-select" name="SubproductCategoryId" id="SubproductCategoryId"
+                        data-current-subcategory-id="@(Model.SubproductCategoryId ?? 0)">
+                    <option value="">-- @L("SelectSubcategory") --</option>
+                </select>
+            </div>
+        </div>
+
+                <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="form-check form-switch mt-2">
+                    <input class="form-check-input" type="checkbox" name="IsSystem" id="IsSystem"
+                           value="true" @(Model.IsSystem ? "checked" : "") />
+                    <label class="form-check-label" for="IsSystem">@L("IsSystemProduct")</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                @* The price a case falls back to when the hospital has no contracted
+                   price. This is the figure the entry form and Rate Chart use. *@
+                <label class="form-label">@L("BasePrice")</label>
+                <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input class="form-control" type="number" name="BasePrice" id="BasePrice"
+                           value="@Model.BasePrice" step="0.01" min="0" />
+                </div>
+            </div>
             <div class="col-md-4 mb-4">
                 <label class="form-label required">@L("Cost")</label>
                 <div class="input-group">

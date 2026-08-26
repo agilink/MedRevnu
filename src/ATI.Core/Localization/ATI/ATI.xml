@@ -1469,5 +1469,8 @@
     <text name="SelectCompany">Select a company</text>
     <text name="NewCompanyNamePlaceholder">Leave blank to use the company selected above</text>
     <text name="StatusDoesNotAffectReportsYet">Recorded for reference; reports currently count every case regardless of status</text>
+    <text name="Subcategory">Subcategory</text>
+    <text name="SelectSubcategory">Select subcategory</text>
+    <text name="IsSystemProduct">Full system (not generator only)</text>
   </texts>
 </localizationDictionary>
