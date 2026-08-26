@@ -23,34 +23,7 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-md-12 mb-5">
-                @* Every hospital belongs to a company: pick one, or name a new one and it
-                   will be created and linked on save. *@
-                <label class="form-label required" for="CompanyId">@L("Company")</label>
-                <select class="form-control" id="CompanyId" name="CompanyId">
-                    <option value="">@L("SelectCompany")</option>
-                    @foreach (var company in ViewBag.Companies)
-                    {
-                        var isSelected = Model.Hospital.CompanyId.HasValue
-                            && Model.Hospital.CompanyId.Value.ToString() == company.Value;
-                        <option value="@company.Value" selected="@isSelected">@company.Text</option>
-                    }
-                </select>
-            </div>
-        </div>
 
-        <div class="row">
-            <div class="col-md-12 mb-5">
-                <label class="form-label" for="NewCompanyName">@L("NewCompanyName")</label>
-                <input class="form-control" type="text" name="NewCompanyName" id="NewCompanyName"
-                       maxlength="200" placeholder="@L("NewCompanyNamePlaceholder")" />
-                <div class="form-text">
-                    Filling this in creates the company and attaches the hospital to it. An
-                    existing company with the same name is reused rather than duplicated.
-                </div>
-            </div>
-        </div>
     </div>
 
 </form>

@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
     $(function () {
         var _$hospitalsTable = $('#HospitalsTable');
         var _hospitalsService = abp.services.app.hospitals;
@@ -58,20 +58,13 @@
                 { targets: 1, data: 'hospitalName', name: 'FacilityName' },
                 {
                     targets: 2,
-                    data: 'companyName',
-                    name: 'companyName',
-                    orderable: false,
-                    render: function (companyName) { return companyName || '-'; }
-                },
-                {
-                    targets: 3,
                     data: 'physicianCount',
                     name: 'physicianCount',
                     orderable: false,
                     className: 'text-center'
                 },
                 {
-                    targets: 4,
+                    targets: 3,
                     data: 'productPriceCount',
                     name: 'productPriceCount',
                     orderable: false,

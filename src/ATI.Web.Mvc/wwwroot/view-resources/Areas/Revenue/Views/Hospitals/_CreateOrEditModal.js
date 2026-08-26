@@ -22,10 +22,6 @@
 
             var hospital = _$form.serializeFormToObject();
 
-            // An unchosen company posts as '' which will not bind to int?.
-            hospital.companyId = hospital.CompanyId ? parseInt(hospital.CompanyId, 10) : null;
-            delete hospital.CompanyId;
-
             _modalManager.setBusy(true);
             _hospitalsService
                 .createOrEdit(hospital)
