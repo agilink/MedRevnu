@@ -1,4 +1,4 @@
-@using ATI.Authorization
+﻿@using ATI.Authorization
 @{
     ViewData["Title"] = "Hospitals";
 }
@@ -31,18 +31,13 @@
 <div class="app-container container-fluid">
     <div class="card">
         <div class="card-body">
-            <div class="form">
-                <div class="row align-items-center mb-4">
-                    <div class="col-xl-12">
-                        <div class="mb-5 align-items-center">
-                            <div class="input-group">
-                                <input type="text" id="HospitalsTableFilter" class="form-control" placeholder="@L("SearchWithThreeDot")">
-                                <button id="GetHospitalsButton" class="btn btn-primary" type="submit">
-                                    <i class="flaticon-search-1" aria-label="@L("Search")"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+            <div class="d-flex justify-content-end mb-3 search-box-compact">
+                <div class="input-group input-group-sm" style="max-width: 260px;">
+                    <input type="text" id="HospitalsTableFilter" class="form-control form-control-sm"
+                           placeholder="@L("SearchWithThreeDot")">
+                    <button id="GetHospitalsButton" class="btn btn-sm btn-primary" type="submit">
+                        <i class="flaticon-search-1" aria-label="@L("Search")"></i>
+                    </button>
                 </div>
             </div>
 

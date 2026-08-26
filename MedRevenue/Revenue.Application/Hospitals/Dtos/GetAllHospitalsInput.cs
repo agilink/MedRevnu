@@ -4,6 +4,6 @@ namespace ATI.Revenue.Application.Hospitals.Dtos
 {
     public class GetAllHospitalsInput : PagedAndSortedResultRequestDto
     {
-        public string Filter { get; set; }
+        public string? Filter { get; set; }
     }
 }

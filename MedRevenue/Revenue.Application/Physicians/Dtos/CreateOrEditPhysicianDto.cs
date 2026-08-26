@@ -11,7 +11,7 @@ namespace ATI.Revenue.Application.Physicians.Dtos
         public string FirstName { get; set; }
 
         [StringLength(100)]
-        public string MiddleName { get; set; }
+        public string? MiddleName { get; set; }
 
         [Required]
         [StringLength(100)]
@@ -24,20 +24,20 @@ namespace ATI.Revenue.Application.Physicians.Dtos
         public int? HospitalId { get; set; }
 
         [StringLength(50)]
-        public string EmployeeId { get; set; }
+        public string? EmployeeId { get; set; }
 
         [StringLength(200)]
         [EmailAddress]
-        public string EmailWork { get; set; }
+        public string? EmailWork { get; set; }
 
         [StringLength(50)]
-        public string MobileNumber { get; set; }
+        public string? MobileNumber { get; set; }
 
         public PersonnelType? PersonnelType { get; set; }
 
         public EmployeeStatus? EmployeeStatus { get; set; }
 
         [StringLength(1000)]
-        public string Notes { get; set; }
+        public string? Notes { get; set; }
     }
 }

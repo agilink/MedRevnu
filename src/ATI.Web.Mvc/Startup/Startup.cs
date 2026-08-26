@@ -77,6 +77,14 @@ namespace ATI.Web.Startup
             {
                 options.Filters.Add(new AbpAutoValidateAntiforgeryTokenAttribute());
                 options.AddAbpHtmlSanitizer();
+
+                // The MedRevenue projects compile with <Nullable>enable</Nullable>, so MVC
+                // was treating every non-nullable string on a DTO as implicitly required.
+                // That made optional list filters mandatory - a blank search box came back
+                // as "The Filter field is required." - and did the same to optional save
+                // fields. Requiredness is declared explicitly with [Required] throughout
+                // this codebase, so the implicit rule only ever produced false failures.
+                options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
             });
 
 #if DEBUG

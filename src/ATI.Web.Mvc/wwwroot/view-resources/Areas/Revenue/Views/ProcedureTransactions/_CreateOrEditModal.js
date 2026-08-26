@@ -62,11 +62,26 @@
             // The physician determines the hospital, and the hospital determines each
             // device's contracted price, so re-price every line when it changes.
             $modal.find('#PhysicianId').on('change', function () {
+                if (_syncing) {
+                    return;
+                }
                 loadPhysicianFacility($(this).val());
             });
 
-            $modal.find('#HospitalId, #ProcedureDate').on('change', function () {
+            $modal.find('#ProcedureDate').on('change', function () {
                 repriceAllLines();
+            });
+
+            $modal.find('#HospitalId').on('change', function () {
+                if (_syncing) {
+                    return;
+                }
+
+                _syncing = true;
+                reloadPhysicians($(this).val()).always(function () {
+                    _syncing = false;
+                    repriceAllLines();
+                });
             });
 
             $modal.find('input[name=ImplantType]').on('change', function () {
@@ -225,6 +240,41 @@
             }
         }
 
+        // Hospital and physician cascade. Choosing a hospital narrows the physician list
+        // to that hospital's physicians; choosing a physician fills in their hospital.
+        // _syncing stops the two handlers retriggering each other.
+        var _syncing = false;
+
+        function reloadPhysicians(hospitalId, keepPhysicianId) {
+            return $.ajax({
+                url: abp.appPath + 'Revenue/ProcedureTransactions/GetPhysiciansByHospital',
+                type: 'POST',
+                data: JSON.stringify({ hospitalId: hospitalId || null }),
+                contentType: 'application/json'
+            }).then(function (result) {
+                if (!result || !result.success) {
+                    return;
+                }
+
+                var $physician = $('#PhysicianId');
+                var previous = keepPhysicianId || $physician.val();
+
+                $physician.empty().append(
+                    $('<option></option>').attr('value', '').text(app.localize('SelectPhysician')));
+
+                var stillValid = false;
+                result.physicians.forEach(function (p) {
+                    $physician.append($('<option></option>').attr('value', p.id).text(p.name));
+                    if (String(p.id) === String(previous)) {
+                        stillValid = true;
+                    }
+                });
+
+                // Keep the chosen physician when they still work at the chosen hospital.
+                $physician.val(stillValid ? previous : '');
+            });
+        }
+
         function loadPhysicianFacility(physicianId) {
             if (!physicianId) {
                 return;
@@ -237,7 +287,12 @@
                 contentType: 'application/json',
                 success: function (result) {
                     if (result && result.success && result.facilityId) {
-                        $('#HospitalId').val(result.facilityId);
+                        // Setting the hospital would otherwise fire its change handler and
+                        // reload the physician list out from under the choice just made.
+                        _syncing = true;
+                        $('#HospitalId').val(result.facilityId).trigger('change.select2');
+                        _syncing = false;
+
                         repriceAllLines();
                     }
                 }

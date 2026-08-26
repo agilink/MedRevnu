@@ -6,6 +6,7 @@ using ATI.Revenue.Application.ProcedureTransactions.Dtos;
 using ATI.Revenue.Application.Products;
 using Abp.Application.Services.Dto;
 using Abp.Domain.Repositories;
+using Abp.Linq.Extensions;
 using System;
 using System.Collections.Generic;
 using ATI.Revenue.Application.Products.Dtos;
@@ -94,6 +95,30 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         {
             var output = await _procedureTransactionsAppService.GetProcedureTransactionForView(id);
             return View(output.ProcedureTransaction);
+        }
+
+        /// <summary>
+        /// Physicians at a hospital, for cascading the two dropdowns on the case form.
+        /// </summary>
+        /// <remarks>
+        /// Passing no hospital returns every physician, so clearing the hospital widens the
+        /// list again rather than emptying it.
+        /// </remarks>
+        [HttpPost]
+        public async Task<JsonResult> GetPhysiciansByHospital(int? hospitalId)
+        {
+            var physicians = await _personnelRepository.GetAll()
+                .WhereIf(hospitalId.HasValue, p => p.FacilityId == hospitalId.Value)
+                .OrderBy(p => p.LAST_NAME).ThenBy(p => p.FIRST_NAME)
+                .Select(p => new
+                {
+                    id = p.Id,
+                    name = ((p.FIRST_NAME ?? "") + " " + (p.LAST_NAME ?? "")).Trim(),
+                    hospitalId = p.FacilityId
+                })
+                .ToListAsync();
+
+            return Json(new { success = true, physicians });
         }
 
         // API endpoint to get physician's facility

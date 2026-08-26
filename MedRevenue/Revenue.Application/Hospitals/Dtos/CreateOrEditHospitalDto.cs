@@ -22,6 +22,6 @@ namespace ATI.Revenue.Application.Hospitals.Dtos
         /// owning company is not on file yet.
         /// </summary>
         [StringLength(200)]
-        public string NewCompanyName { get; set; }
+        public string? NewCompanyName { get; set; }
     }
 }

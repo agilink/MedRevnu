@@ -1,4 +1,4 @@
-@{
+﻿@{
     ViewData["Title"] = "Product Quotas";
 }
 
@@ -32,18 +32,6 @@
     <div class="card">
         <div class="card-body">
             <div class="form">
-                <div class="row align-items-center mb-4">
-                    <div class="col-xl-12">
-                        <div class="mb-5 align-items-center">
-                            <div class="input-group">
-                                <input type="text" id="ProductQuotasTableFilter" class="form-control" placeholder="@L("SearchWithThreeDot")">
-                                <button id="GetProductQuotasButton" class="btn btn-primary" type="submit">
-                                    <i class="flaticon-search-1" aria-label="@L("Search")"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
                 <div id="AdvancedAuditFiltersArea" style="display: none" class="row mb-4">
                     <div class="col-xl-3">
                         <div class="mb-5">
@@ -117,6 +105,16 @@
             </div>
 
             <div class="align-items-center">
+                <div class="d-flex justify-content-end mb-3 search-box-compact">
+                    <div class="input-group input-group-sm" style="max-width: 260px;">
+                        <input type="text" id="ProductQuotasTableFilter" class="form-control form-control-sm"
+                               placeholder="@L("SearchWithThreeDot")">
+                        <button id="GetProductQuotasButton" class="btn btn-sm btn-primary" type="submit">
+                            <i class="flaticon-search-1" aria-label="@L("Search")"></i>
+                        </button>
+                    </div>
+                </div>
+
                 <table id="ProductQuotasTable" class="table align-middle table-row-dashed fs-6 gy-5 dataTable dtr-inline no-footer" width="100%">
                     <thead>
                         <tr>
