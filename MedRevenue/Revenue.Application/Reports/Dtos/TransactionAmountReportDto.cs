@@ -11,6 +11,9 @@ namespace ATI.Revenue.Application.Reports.Dtos
         public string ProductCategoryName { get; set; }
         public ImplantType ImplantType { get; set; }
         public int TotalCases { get; set; }
+
+        /// <summary>Devices used across those cases.</summary>
+        public int TotalUnits { get; set; }
         public decimal TotalAmount { get; set; }
         public decimal AverageAmount { get; set; }
     }

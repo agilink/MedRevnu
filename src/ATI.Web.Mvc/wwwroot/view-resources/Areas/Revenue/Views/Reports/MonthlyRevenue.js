@@ -60,6 +60,7 @@
                     row.append('<td>' + moment(item.procedureDate).format('L') + '</td>');
                     row.append('<td>' + (item.productCategoryName || '') + '</td>');
                     row.append('<td class="text-center">' + (item.transactionCount || 0) + '</td>');
+                    row.append($('<td class="text-center"></td>').text(item.totalUnits || 0));
                     row.append('<td>$' + (item.dailyRevenue ? item.dailyRevenue.toFixed(2) : '0.00') + '</td>');
                     tbody.append(row);
                 });

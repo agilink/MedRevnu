@@ -70,6 +70,7 @@
                     row.append('<td>' + implantTypeBadge + '</td>');
 
                     row.append('<td class="text-center">' + (item.totalCases || 0) + '</td>');
+                    row.append($('<td class="text-center"></td>').text(item.totalUnits || 0));
                     row.append('<td>$' + (item.totalAmount ? item.totalAmount.toFixed(2) : '0.00') + '</td>');
                     row.append('<td>$' + (item.averageAmount ? item.averageAmount.toFixed(2) : '0.00') + '</td>');
                     tbody.append(row);

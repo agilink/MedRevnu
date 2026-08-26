@@ -12,6 +12,13 @@
 
         var _$table = $('#RateChartTable');
 
+        function money(value) {
+            return '$' + (value || 0).toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
         $('#GenerateReportButton').click(function (e) {
             e.preventDefault();
             var hospitalId = optionalInt('#HospitalFilter');
@@ -46,15 +53,27 @@
             if (data && data.length > 0) {
                 data.forEach(function (item) {
                     var row = $('<tr></tr>');
-                    row.append('<td>' + (item.productCategoryName || '') + '</td>');
-                    row.append('<td>' + (item.productCode || '') + '</td>');
-                    row.append('<td>' + (item.productName || '') + '</td>');
+                    row.append($('<td></td>').text(item.productCategoryName || ''));
+                    row.append($('<td></td>').text(item.productCode || ''));
+                    row.append($('<td></td>').text(item.productName || ''));
                     row.append('<td>' + (item.isSystem ? '<span class="badge bg-success">System</span>' : '<span class="badge bg-info">Generator</span>') + '</td>');
-                    row.append('<td>$' + (item.basePrice ? item.basePrice.toFixed(2) : '0.00') + '</td>');
+                    row.append($('<td class="text-end"></td>').text(money(item.basePrice)));
+
+                    // Blank rather than a misleading 0.00 where this hospital has no
+                    // contracted price, or where no hospital was chosen.
+                    if (item.contractedPrice === null || item.contractedPrice === undefined) {
+                        row.append('<td class="text-end text-muted">-</td>');
+                    } else {
+                        row.append($('<td class="text-end"></td>').text(money(item.contractedPrice)));
+                    }
+
+                    row.append($('<td class="text-end fw-bold"></td>').text(money(item.effectivePrice)));
+                    row.append($('<td class="text-center"></td>').text(item.unitsSoldThisYear || 0));
+                    row.append($('<td class="text-center"></td>').text(item.casesThisYear || 0));
                     tbody.append(row);
                 });
             } else {
-                tbody.append('<tr><td colspan="5" class="text-center">No data found</td></tr>');
+                tbody.append('<tr><td colspan="9" class="text-center">No data found</td></tr>');
             }
         }
 

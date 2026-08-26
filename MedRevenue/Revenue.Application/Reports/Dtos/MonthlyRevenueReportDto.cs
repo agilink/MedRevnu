@@ -11,6 +11,9 @@ namespace ATI.Revenue.Application.Reports.Dtos
         public string ProductCategoryName { get; set; }
         public decimal DailyRevenue { get; set; }
         public int TransactionCount { get; set; }
+
+        /// <summary>Devices used, which can exceed the case count on multi-device cases.</summary>
+        public int TotalUnits { get; set; }
     }
 
     public class MonthlyRevenueReportInput

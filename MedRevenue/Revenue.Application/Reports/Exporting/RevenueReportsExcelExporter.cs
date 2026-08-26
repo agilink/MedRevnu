@@ -1,4 +1,4 @@
-using ATI.DataExporting.Excel.MiniExcel;
+﻿using ATI.DataExporting.Excel.MiniExcel;
 using ATI.Dto;
 using ATI.Revenue.Application.Reports.Dtos;
 using ATI.Revenue.Domain.Enums;
@@ -37,6 +37,11 @@ namespace ATI.Revenue.Application.Reports.Exporting
                     { "Product Code", row.ProductCode },
                     { "Product", row.ProductName },
                     { "Base Price", row.BasePrice },
+                    // Blank rather than 0.00 where this hospital has no contracted price.
+                    { "Contracted Price", row.ContractedPrice.HasValue ? (object)row.ContractedPrice.Value : "" },
+                    { "Effective Price", row.EffectivePrice },
+                    { "Units (YTD)", row.UnitsSoldThisYear },
+                    { "Cases (YTD)", row.CasesThisYear },
                     { "System", row.IsSystem ? "Yes" : "No" }
                 });
             }
@@ -54,8 +59,9 @@ namespace ATI.Revenue.Application.Reports.Exporting
                 {
                     { "Date", row.ProcedureDate.ToString("yyyy-MM-dd") },
                     { "Product Category", row.ProductCategoryName },
-                    { "Daily Revenue", row.DailyRevenue },
-                    { "Transactions", row.TransactionCount }
+                    { "Cases", row.TransactionCount },
+                    { "Units", row.TotalUnits },
+                    { "Daily Revenue", row.DailyRevenue }
                 });
             }
 
@@ -94,6 +100,7 @@ namespace ATI.Revenue.Application.Reports.Exporting
                     { "Product Category", row.ProductCategoryName },
                     { "Implant Type", Describe(row.ImplantType) },
                     { "Total Cases", row.TotalCases },
+                    { "Units", row.TotalUnits },
                     { "Total Amount", row.TotalAmount },
                     { "Average Amount", row.AverageAmount }
                 });
@@ -120,6 +127,7 @@ namespace ATI.Revenue.Application.Reports.Exporting
                     { "Variance", row.Variance },
                     { "% to Plan", row.HasPlan ? (object)row.PercentToPlan : "" },
                     { "Total Cases", row.TotalCases },
+                    { "Units", row.TotalUnits },
                     { "De Novo", row.DeNovoCases },
                     { "Gen Changes", row.GenChangeCases }
                 });

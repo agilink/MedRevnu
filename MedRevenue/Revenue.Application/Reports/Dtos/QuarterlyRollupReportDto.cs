@@ -29,6 +29,9 @@
         public decimal PercentToPlan { get; set; }
 
         public int TotalCases { get; set; }
+
+        /// <summary>Devices used across those cases.</summary>
+        public int TotalUnits { get; set; }
         public int DeNovoCases { get; set; }
         public int GenChangeCases { get; set; }
 

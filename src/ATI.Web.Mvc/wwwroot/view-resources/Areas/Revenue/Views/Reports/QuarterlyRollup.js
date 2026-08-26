@@ -36,7 +36,7 @@
             _$body.empty();
 
             if (!rows || !rows.length) {
-                _$body.html('<tr><td colspan="10" class="text-center">No targets or revenue for this period</td></tr>');
+                _$body.html('<tr><td colspan="11" class="text-center">No targets or revenue for this period</td></tr>');
                 return;
             }
 
@@ -74,6 +74,7 @@
                 }
 
                 tr.append($('<td class="text-center"></td>').text(row.totalCases || 0));
+                tr.append($('<td class="text-center"></td>').text(row.totalUnits || 0));
                 tr.append($('<td class="text-center"></td>').text(row.deNovoCases || 0));
                 tr.append($('<td class="text-center"></td>').text(row.genChangeCases || 0));
 
@@ -91,6 +92,7 @@
             var plan = quarterRows.reduce(function (sum, r) { return sum + r.totalPlan; }, 0);
             var sold = quarterRows.reduce(function (sum, r) { return sum + r.totalSold; }, 0);
             var cases = quarterRows.reduce(function (sum, r) { return sum + r.totalCases; }, 0);
+            var units = quarterRows.reduce(function (sum, r) { return sum + r.totalUnits; }, 0);
             var deNovo = quarterRows.reduce(function (sum, r) { return sum + r.deNovoCases; }, 0);
             var genChange = quarterRows.reduce(function (sum, r) { return sum + r.genChangeCases; }, 0);
             var pct = plan > 0 ? (sold / plan) * 100 : 0;
@@ -104,6 +106,7 @@
                 .text(money(sold - plan)));
             tr.append($('<td class="text-end"></td>').text(plan > 0 ? pct.toFixed(1) + '%' : '-'));
             tr.append($('<td class="text-center"></td>').text(cases));
+            tr.append($('<td class="text-center"></td>').text(units));
             tr.append($('<td class="text-center"></td>').text(deNovo));
             tr.append($('<td class="text-center"></td>').text(genChange));
 
@@ -112,7 +115,7 @@
 
         function run() {
 
-            _$body.html('<tr><td colspan="10" class="text-center">Loading...</td></tr>');
+            _$body.html('<tr><td colspan="11" class="text-center">Loading...</td></tr>');
 
             $.ajax({
                 url: abp.appPath + 'Revenue/Reports/GetQuarterlyRollupData',
@@ -127,11 +130,11 @@
                     if (result && result.success) {
                         render(result.data);
                     } else {
-                        _$body.html('<tr><td colspan="10" class="text-center text-danger">Failed to load report</td></tr>');
+                        _$body.html('<tr><td colspan="11" class="text-center text-danger">Failed to load report</td></tr>');
                     }
                 },
                 error: function () {
-                    _$body.html('<tr><td colspan="10" class="text-center text-danger">Failed to load report</td></tr>');
+                    _$body.html('<tr><td colspan="11" class="text-center text-danger">Failed to load report</td></tr>');
                 }
             });
         }

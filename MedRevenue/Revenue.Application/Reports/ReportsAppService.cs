@@ -21,6 +21,7 @@ namespace ATI.Revenue.Application.Reports
         private readonly IRepository<Personnel, int> _personnelRepository;
         private readonly IRepository<Facility, int> _facilityRepository;
         private readonly IRepository<ProductQuota, int> _productQuotaRepository;
+        private readonly IRepository<HospitalProductPrice, int> _hospitalProductPriceRepository;
 
         public ReportsAppService(
             IRepository<Product, int> productRepository,
@@ -28,7 +29,8 @@ namespace ATI.Revenue.Application.Reports
             IRepository<ProcedureTransaction, int> procedureTransactionRepository,
             IRepository<Personnel, int> personnelRepository,
             IRepository<Facility, int> facilityRepository,
-            IRepository<ProductQuota, int> productQuotaRepository)
+            IRepository<ProductQuota, int> productQuotaRepository,
+            IRepository<HospitalProductPrice, int> hospitalProductPriceRepository)
         {
             _productRepository = productRepository;
             _productCategoryRepository = productCategoryRepository;
@@ -36,6 +38,7 @@ namespace ATI.Revenue.Application.Reports
             _personnelRepository = personnelRepository;
             _facilityRepository = facilityRepository;
             _productQuotaRepository = productQuotaRepository;
+            _hospitalProductPriceRepository = hospitalProductPriceRepository;
         }
 
         /// <summary>
@@ -43,23 +46,79 @@ namespace ATI.Revenue.Application.Reports
         /// </summary>
         public async Task<List<RateChartReportDto>> GetRateChartReport(RateChartReportInput input)
         {
-            var products = await _productRepository
-                .GetAll()
-                .Include(p => p.ProductCategory)
+            // The hospital filter used to be ignored entirely: the report always returned
+            // Product.BasePrice, so picking a hospital changed nothing. A hospital's
+            // contracted prices are what a case is actually billed at, so those are shown
+            // when a hospital is chosen, with the base price alongside for comparison.
+            var asOf = Abp.Timing.Clock.Now;
+            var year = asOf.Year;
+
+            var products = await _productRepository.GetAll()
                 .Where(p => p.IsActive && p.ProductCategory != null)
-                .OrderBy(p => p.ProductCategory.Name)
-                .ThenBy(p => p.Name)
-                .Select(p => new RateChartReportDto
+                .Select(p => new
                 {
+                    p.Id,
                     ProductCategoryName = p.ProductCategory.Name,
-                    ProductCode = p.ProductCode,
+                    p.ProductCode,
                     ProductName = p.Name,
-                    BasePrice = p.BasePrice,
-                    IsSystem = p.IsSystem
+                    p.BasePrice,
+                    p.IsSystem
                 })
                 .ToListAsync();
 
-            return products;
+            var contracted = input.HospitalId.HasValue
+                ? await _hospitalProductPriceRepository.GetAll()
+                    .Where(hpp => hpp.HospitalId == input.HospitalId.Value
+                                  && hpp.IsActive
+                                  && (hpp.EffectiveDate == null || hpp.EffectiveDate <= asOf))
+                    .OrderBy(hpp => hpp.ProductId)
+                    .ThenByDescending(hpp => hpp.EffectiveDate)
+                    .Select(hpp => new { hpp.ProductId, hpp.UnitPrice })
+                    .ToListAsync()
+                : new List<dynamic>().Select(x => new { ProductId = 0, UnitPrice = 0m }).ToList();
+
+            // Newest in-effect price per product, matching how a case is priced.
+            var priceByProduct = contracted
+                .GroupBy(c => c.ProductId)
+                .ToDictionary(g => g.Key, g => g.First().UnitPrice);
+
+            // Volume comes from the device lines, optionally narrowed to the hospital.
+            var volume = await _procedureTransactionRepository.GetAll()
+                .Where(pt => pt.ProcedureDate.Year == year)
+                .WhereIf(input.HospitalId.HasValue, pt => pt.HospitalId == input.HospitalId.Value)
+                .SelectMany(pt => pt.Products.Select(l => new { CaseId = pt.Id, l.ProductId, l.Quantity }))
+                .ToListAsync();
+
+            var volumeByProduct = volume
+                .GroupBy(v => v.ProductId)
+                .ToDictionary(g => g.Key, g => new
+                {
+                    Units = g.Sum(v => v.Quantity),
+                    Cases = g.Select(v => v.CaseId).Distinct().Count()
+                });
+
+            return products
+                .Select(p =>
+                {
+                    var hasContracted = priceByProduct.TryGetValue(p.Id, out var contractedPrice);
+                    volumeByProduct.TryGetValue(p.Id, out var sold);
+
+                    return new RateChartReportDto
+                    {
+                        ProductCategoryName = p.ProductCategoryName,
+                        ProductCode = p.ProductCode,
+                        ProductName = p.ProductName,
+                        BasePrice = p.BasePrice,
+                        ContractedPrice = hasContracted ? contractedPrice : (decimal?)null,
+                        EffectivePrice = hasContracted ? contractedPrice : p.BasePrice,
+                        UnitsSoldThisYear = sold?.Units ?? 0,
+                        CasesThisYear = sold?.Cases ?? 0,
+                        IsSystem = p.IsSystem
+                    };
+                })
+                .OrderBy(r => r.ProductCategoryName)
+                .ThenBy(r => r.ProductName)
+                .ToList();
         }
 
         /// <summary>
@@ -84,6 +143,7 @@ namespace ATI.Revenue.Application.Reports
                     CategoryName = l.Product != null && l.Product.ProductCategory != null
                         ? l.Product.ProductCategory.Name
                         : null,
+                    l.Quantity,
                     l.LineTotal
                 }))
                 .GroupBy(x => new { x.Date, x.CategoryName })
@@ -93,7 +153,8 @@ namespace ATI.Revenue.Application.Reports
                     ProductCategoryName = g.Key.CategoryName ?? "(Uncategorised)",
                     DailyRevenue = g.Sum(x => x.LineTotal),
                     // Cases, not device lines.
-                    TransactionCount = g.Select(x => x.CaseId).Distinct().Count()
+                    TransactionCount = g.Select(x => x.CaseId).Distinct().Count(),
+                    TotalUnits = g.Sum(x => x.Quantity)
                 })
                 .OrderBy(r => r.ProcedureDate)
                 .ThenBy(r => r.ProductCategoryName)
@@ -173,6 +234,7 @@ namespace ATI.Revenue.Application.Reports
                     CategoryName = l.Product != null && l.Product.ProductCategory != null
                         ? l.Product.ProductCategory.Name
                         : null,
+                    l.Quantity,
                     l.LineTotal
                 }))
                 .WhereIf(input.ProductCategoryId.HasValue,
@@ -198,6 +260,7 @@ namespace ATI.Revenue.Application.Reports
                         ProductCategoryName = g.Key.CategoryName ?? "(Uncategorised)",
                         ImplantType = g.Key.ImplantType,
                         TotalCases = caseCount,
+                        TotalUnits = g.Sum(x => x.Quantity),
                         TotalAmount = total,
                         AverageAmount = caseCount > 0 ? total / caseCount : 0m
                     };
@@ -318,6 +381,7 @@ namespace ATI.Revenue.Application.Reports
                                           .Select(a => a.CaseId).Distinct().Count(),
                         GenChangeCases = rows.Where(a => a.ImplantType == ImplantType.GenChange)
                                              .Select(a => a.CaseId).Distinct().Count(),
+                        TotalUnits = rows.Sum(a => a.Quantity),
                         HasPlan = plan > 0
                     });
                 }
