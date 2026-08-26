@@ -1472,5 +1472,6 @@
     <text name="Subcategory">Subcategory</text>
     <text name="SelectSubcategory">Select subcategory</text>
     <text name="IsSystemProduct">Full system (not generator only)</text>
+    <text name="HospitalDrivesPhysicianList">Choose the hospital first; the physician list narrows to that hospital</text>
   </texts>
 </localizationDictionary>

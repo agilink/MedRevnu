@@ -190,10 +190,15 @@ namespace ATI.Revenue.Application.ProcedureTransactions
         private async Task<ProcedureTransactionDto> SaveCase(CreateOrEditProcedureTransactionDto input)
         {
 
-            // The hospital comes from the physician's facility, and the case's devices are
-            // then priced against that hospital.
-            var physician = await _personnelRepository.GetAsync(input.PhysicianId);
-            input.HospitalId = physician.FacilityId;
+            // The hospital drives the case: it is chosen first, narrows the physician list,
+            // and the devices are priced against it. Only when it was left blank is it
+            // taken from the physician's facility - previously it was overwritten from the
+            // physician unconditionally, which silently discarded the hospital chosen.
+            if (!input.HospitalId.HasValue)
+            {
+                var physician = await _personnelRepository.GetAsync(input.PhysicianId);
+                input.HospitalId = physician.FacilityId;
+            }
 
             var entity = input.Id == 0
                 ? new ProcedureTransaction()

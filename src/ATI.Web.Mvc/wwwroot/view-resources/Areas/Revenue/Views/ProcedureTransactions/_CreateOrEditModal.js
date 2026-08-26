@@ -19,6 +19,15 @@
 
             bindEvents($modal);
 
+            // narrow on open: editing a case shows only its hospital's physicians, keeping
+            // the one already recorded.
+            var openingHospitalId = $('#HospitalId').val();
+            if (openingHospitalId) {
+                _syncing = true;
+                reloadPhysicians(openingHospitalId, $('#PhysicianId').val())
+                    .always(function () { _syncing = false; });
+            }
+
             // An existing case shows its devices; a new one starts with one blank row so
             // there is somewhere to type.
             if (existing.length) {
@@ -286,15 +295,20 @@
                 data: JSON.stringify({ physicianId: parseInt(physicianId, 10) }),
                 contentType: 'application/json',
                 success: function (result) {
-                    if (result && result.success && result.facilityId) {
-                        // Setting the hospital would otherwise fire its change handler and
-                        // reload the physician list out from under the choice just made.
-                        _syncing = true;
-                        $('#HospitalId').val(result.facilityId).trigger('change.select2');
-                        _syncing = false;
-
-                        repriceAllLines();
+                    if (!result || !result.success || !result.facilityId) {
+                        return;
                     }
+
+                    // The hospital leads: it is chosen first and narrows this list. Only
+                    // fill it in when it was left blank, so picking a physician never
+                    // overrides a hospital the user already chose.
+                    if (!$('#HospitalId').val()) {
+                        _syncing = true;
+                        $('#HospitalId').val(result.facilityId);
+                        _syncing = false;
+                    }
+
+                    repriceAllLines();
                 }
             });
         }

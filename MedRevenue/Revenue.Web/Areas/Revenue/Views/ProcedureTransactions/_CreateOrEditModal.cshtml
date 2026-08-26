@@ -27,16 +27,18 @@
                        value="@Model.ProcedureTransaction?.CaseNumber" required maxlength="50" />
             </div>
             <div class="col-md-4 mb-5">
-                <label class="form-label required" for="PhysicianId">@L("Physician")</label>
-                <select class="form-control" id="PhysicianId" name="PhysicianId" required>
-                    <option value="">@L("SelectPhysician")</option>
-                    @foreach (var physician in ViewBag.Physicians)
+                @* The hospital leads: it narrows the physician list below and prices the
+                   devices. *@
+                <label class="form-label" for="HospitalId">@L("Hospital")</label>
+                <select class="form-control" id="HospitalId" name="HospitalId">
+                    <option value="">@L("SelectHospital")</option>
+                    @foreach (var hospital in ViewBag.Hospitals)
                     {
-                        var isSelected = Model.ProcedureTransaction != null && physician.Value == Model.ProcedureTransaction.PhysicianId.ToString();
-                        <option value="@physician.Value" selected="@isSelected">@physician.Text</option>
+                        var isSelected = Model.ProcedureTransaction != null && hospital.Value == Model.ProcedureTransaction.HospitalId.ToString();
+                        <option value="@hospital.Value" selected="@isSelected">@hospital.Text</option>
                     }
                 </select>
-                <small class="form-text text-muted">@L("HospitalAutoPopulated")</small>
+                <small class="form-text text-muted">@L("HospitalDrivesPhysicianList")</small>
             </div>
             <div class="col-md-4 mb-5">
                 <label class="form-label required" for="ProcedureDate">@L("Date")</label>
@@ -47,13 +49,13 @@
 
         <div class="row">
             <div class="col-md-6 mb-5">
-                <label class="form-label" for="HospitalId">@L("Hospital")</label>
-                <select class="form-control" id="HospitalId" name="HospitalId">
-                    <option value="">@L("SelectHospital")</option>
-                    @foreach (var hospital in ViewBag.Hospitals)
+                <label class="form-label required" for="PhysicianId">@L("Physician")</label>
+                <select class="form-control" id="PhysicianId" name="PhysicianId" required>
+                    <option value="">@L("SelectPhysician")</option>
+                    @foreach (var physician in ViewBag.Physicians)
                     {
-                        var isSelected = Model.ProcedureTransaction != null && hospital.Value == Model.ProcedureTransaction.HospitalId.ToString();
-                        <option value="@hospital.Value" selected="@isSelected">@hospital.Text</option>
+                        var isSelected = Model.ProcedureTransaction != null && physician.Value == Model.ProcedureTransaction.PhysicianId.ToString();
+                        <option value="@physician.Value" selected="@isSelected">@physician.Text</option>
                     }
                 </select>
             </div>
