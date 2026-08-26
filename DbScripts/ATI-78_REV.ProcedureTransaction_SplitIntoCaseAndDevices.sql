@@ -13,6 +13,10 @@
 -- Data-preserving and re-runnable: the existing single device on each case is copied to a
 -- line before the old columns are dropped, and every step is guarded.
 
+SET QUOTED_IDENTIFIER ON;
+SET ANSI_NULLS ON;
+GO
+
 SET NOCOUNT ON;
 
 /* 1. Case number ---------------------------------------------------------------- */

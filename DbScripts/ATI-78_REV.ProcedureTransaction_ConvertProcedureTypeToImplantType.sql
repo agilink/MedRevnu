@@ -12,6 +12,10 @@
 -- batch up front - a guarded reference to a column that has already been dropped is
 -- still a compile-time error, so the guard alone is not enough.
 
+SET QUOTED_IDENTIFIER ON;
+SET ANSI_NULLS ON;
+GO
+
 SET NOCOUNT ON;
 
 DECLARE @Tables TABLE (TableName SYSNAME PRIMARY KEY);

@@ -7,6 +7,7 @@ using ATI.Admin.Domain.Entities;
 using ATI.Revenue.Application.ProcedureTransactions.Dtos;
 using ATI.Revenue.Domain.Entities;
 using ATI.Revenue.Domain.Enums;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -174,6 +175,21 @@ namespace ATI.Revenue.Application.ProcedureTransactions
             await EnsureCaseNumberIsUnique(input.Id, input.CaseNumber);
             await EnsureEveryDeviceMatchesImplantType(input.Products, input.ImplantType);
 
+            try
+            {
+                return await SaveCase(input);
+            }
+            catch (Exception exception) when (IsCaseNumberConflict(exception))
+            {
+                // Two saves at once: the pre-check passed for both and the index caught
+                // the loser.
+                throw new UserFriendlyException($"Case number \"{input.CaseNumber}\" is already in use.");
+            }
+        }
+
+        private async Task<ProcedureTransactionDto> SaveCase(CreateOrEditProcedureTransactionDto input)
+        {
+
             // The hospital comes from the physician's facility, and the case's devices are
             // then priced against that hospital.
             var physician = await _personnelRepository.GetAsync(input.PhysicianId);
@@ -268,6 +284,33 @@ namespace ATI.Revenue.Application.ProcedureTransactions
         {
             await _procedureTransactionRepository.DeleteAsync(input.Id);
             await CurrentUnitOfWork.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Turns the database's unique-index violation on CaseNumber into the same
+        /// friendly message the pre-check gives.
+        /// </summary>
+        /// <remarks>
+        /// EnsureCaseNumberIsUnique cannot be airtight on its own: two saves submitted at
+        /// once both pass the check and the second then trips the index, which surfaced as
+        /// a raw DbUpdateException ("An error occurred while saving the entity changes").
+        /// The index is the real guarantee, so its violation is translated rather than
+        /// leaked.
+        /// </remarks>
+        private static bool IsCaseNumberConflict(Exception exception)
+        {
+            for (var current = exception; current != null; current = current.InnerException)
+            {
+                if (current is SqlException sql
+                    && (sql.Number == 2601 || sql.Number == 2627)
+                    && sql.Message.IndexOf("IX_ProcedureTransaction_CaseNumber",
+                                           StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private async Task EnsureCaseNumberIsUnique(int id, string caseNumber)

@@ -16,6 +16,10 @@
 --
 -- Re-runnable: every step is guarded.
 
+SET QUOTED_IDENTIFIER ON;
+SET ANSI_NULLS ON;
+GO
+
 SET NOCOUNT ON;
 
 /* ---------------------------------------------------------------- Status */
