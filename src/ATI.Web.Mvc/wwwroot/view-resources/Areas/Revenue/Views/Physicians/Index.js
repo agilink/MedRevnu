@@ -63,6 +63,17 @@
                                 }
                             },
                             {
+                                text: app.localize('CreateUser'),
+                                // Hidden once they have one - a physician gets one login,
+                                // and the flag column shows which already do.
+                                visible: function (data) {
+                                    return _permissions.edit && !data.record.hasUser;
+                                },
+                                action: function (data) {
+                                    createUserForPhysician(data.record);
+                                }
+                            },
+                            {
                                 text: app.localize('Delete'),
                                 visible: function () { return _permissions.delete; },
                                 action: function (data) {
@@ -117,6 +128,19 @@
                         var css = employeeStatus === 1 ? 'badge-light-success' : 'badge-light-secondary';
                         return '<span class="badge ' + css + '">' + (STATUS_LABELS[employeeStatus] || employeeStatus) + '</span>';
                     }
+                },
+                {
+                    targets: 8,
+                    data: 'userName',
+                    name: 'UserId',
+                    orderable: false,
+                    render: function (userName, type, row) {
+                        // The username is the flag: it says both that a login exists and
+                        // what it is, which is what anyone looking at this column wants.
+                        return row.hasUser
+                            ? '<span class="badge badge-light-success">' + $('<div>').text(userName || '').html() + '</span>'
+                            : '<span class="text-muted">-</span>';
+                    }
                 }
             ]
         });
@@ -138,6 +162,48 @@
                     }
                 }
             );
+        }
+
+        function createUserForPhysician(physician) {
+            abp.message.confirm(
+                abp.utils.formatString(
+                    app.localize('CreateUserForPhysicianConfirmation'),
+                    physician.fullName,
+                    buildUserName(physician)),
+                app.localize('AreYouSure'),
+                function (isConfirmed) {
+                    if (!isConfirmed) {
+                        return;
+                    }
+
+                    _physiciansService.createUserForPhysician({ id: physician.id })
+                        .done(function (result) {
+                            reload();
+
+                            abp.notify.success(abp.utils.formatString(
+                                app.localize('PhysicianUserCreated'),
+                                result.userName,
+                                result.password));
+
+                            // A generated address cannot receive password-reset mail, so
+                            // say so now rather than let it be discovered later.
+                            if (result.usedFallbackEmail) {
+                                abp.message.warn(abp.utils.formatString(
+                                    app.localize('PhysicianUserFallbackEmailWarning'),
+                                    result.emailAddress));
+                            }
+                        });
+                }
+            );
+        }
+
+        // Mirrors the server so the confirmation can show the username before it is
+        // created. The server remains the authority, and appends a number on a clash.
+        function buildUserName(physician) {
+            var initial = (physician.firstName || '').replace(/[^a-z0-9]/gi, '').charAt(0);
+            var surname = (physician.lastName || '').replace(/[^a-z0-9]/gi, '');
+
+            return (initial + surname).toLowerCase();
         }
 
         $('#GetPhysiciansButton').click(function (e) {

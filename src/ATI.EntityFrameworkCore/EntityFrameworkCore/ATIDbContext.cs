@@ -224,6 +224,13 @@ namespace ATI.EntityFrameworkCore
                 entity.Property(e => e.PersonnelTypeID).HasConversion<int?>();
                 entity.Property(e => e.EmployeeStatusID).HasConversion<int?>();
 
+                // One login per physician. Filtered because most personnel have no login
+                // and would otherwise all collide on NULL, and so a soft-deleted record
+                // does not keep a login from being reassigned.
+                entity.HasIndex(e => e.UserId)
+                    .IsUnique()
+                    .HasFilter("[UserId] IS NOT NULL AND [IsDeleted] = 0");
+
                 // Foreign key relationships
                 entity.HasOne(e => e.Facility)
                     .WithMany()

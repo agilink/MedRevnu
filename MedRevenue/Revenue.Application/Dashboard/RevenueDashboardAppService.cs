@@ -1,6 +1,7 @@
 ﻿using Abp.Application.Services;
 using Abp.Domain.Repositories;
 using Abp.Linq.Extensions;
+using ATI.Revenue.Application.Authorization;
 using ATI.Revenue.Application.Dashboard.Dtos;
 using ATI.Revenue.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -36,13 +37,16 @@ namespace ATI.Revenue.Application.Dashboard
     {
         private readonly IRepository<ProcedureTransaction, int> _procedureTransactionRepository;
         private readonly IRepository<ProductQuota, int> _productQuotaRepository;
+        private readonly IPhysicianDataScopeProvider _physicianDataScopeProvider;
 
         public RevenueDashboardAppService(
             IRepository<ProcedureTransaction, int> procedureTransactionRepository,
-            IRepository<ProductQuota, int> productQuotaRepository)
+            IRepository<ProductQuota, int> productQuotaRepository,
+            IPhysicianDataScopeProvider physicianDataScopeProvider)
         {
             _procedureTransactionRepository = procedureTransactionRepository;
             _productQuotaRepository = productQuotaRepository;
+            _physicianDataScopeProvider = physicianDataScopeProvider;
         }
 
         public async Task<DailyRevenueSummaryDto> GetDailyRevenueSummary(DateTime? date = null, int? hospitalId = null)
@@ -221,6 +225,12 @@ namespace ATI.Revenue.Application.Dashboard
         {
             input = input ?? new RevenueDashboardInput();
 
+            // A physician sees only their own hospital, whatever the page asked for. With
+            // no hospital on their record there is nothing they may see, so the dashboard
+            // comes back empty rather than unfiltered.
+            var scope = await _physicianDataScopeProvider.GetAsync();
+            var hospitalId = scope.ApplyTo(input.HospitalId);
+
             var today = Abp.Timing.Clock.Now.Date;
             var from = (input.FromDate ?? new DateTime(today.Year, today.Month, 1)).Date;
             var to = (input.ToDate ?? today).Date;
@@ -234,29 +244,33 @@ namespace ATI.Revenue.Application.Dashboard
 
             var upperBound = to.AddDays(1);
 
-            var cases = await QueryCases(input.HospitalId)
-                .Where(pt => pt.ProcedureDate >= from && pt.ProcedureDate < upperBound)
-                .Select(pt => new
-                {
-                    pt.Id,
-                    pt.ProcedureDate,
-                    pt.HospitalId,
-                    HospitalName = pt.Hospital != null ? pt.Hospital.FacilityName : null,
-                    pt.PhysicianId,
-                    PhysicianName = pt.Physician != null
-                        ? ((pt.Physician.FIRST_NAME ?? "") + " " + (pt.Physician.LAST_NAME ?? "")).Trim()
-                        : null,
-                    PhysicianHospital = pt.Physician != null && pt.Physician.Facility != null
-                        ? pt.Physician.Facility.FacilityName
-                        : null,
-                    pt.TotalAmount,
-                    Units = pt.Products.Sum(l => (int?)l.Quantity) ?? 0
-                })
-                .ToListAsync();
+            var cases = scope.SeesNothing
+                ? new List<CaseRow>()
+                : await QueryCases(hospitalId)
+                    .Where(pt => pt.ProcedureDate >= from && pt.ProcedureDate < upperBound)
+                    .Select(pt => new CaseRow
+                    {
+                        Id = pt.Id,
+                        ProcedureDate = pt.ProcedureDate,
+                        HospitalId = pt.HospitalId,
+                        HospitalName = pt.Hospital != null ? pt.Hospital.FacilityName : null,
+                        PhysicianId = pt.PhysicianId,
+                        PhysicianName = pt.Physician != null
+                            ? ((pt.Physician.FIRST_NAME ?? "") + " " + (pt.Physician.LAST_NAME ?? "")).Trim()
+                            : null,
+                        PhysicianHospital = pt.Physician != null && pt.Physician.Facility != null
+                            ? pt.Physician.Facility.FacilityName
+                            : null,
+                        TotalAmount = pt.TotalAmount,
+                        Units = pt.Products.Sum(l => (int?)l.Quantity) ?? 0
+                    })
+                    .ToListAsync();
 
-            var lines = await QueryLines(input.HospitalId)
-                .Where(l => l.ProcedureDate >= from && l.ProcedureDate < upperBound)
-                .ToListAsync();
+            var lines = scope.SeesNothing
+                ? new List<LineRow>()
+                : await QueryLines(hospitalId)
+                    .Where(l => l.ProcedureDate >= from && l.ProcedureDate < upperBound)
+                    .ToListAsync();
 
             // Every month the range touches, so a target counts once even when the range
             // starts or ends mid-month.
@@ -268,16 +282,18 @@ namespace ATI.Revenue.Application.Dashboard
 
             var monthKeys = months.Select(m => m.Year * 100 + m.Month).ToList();
 
-            var quotas = await _productQuotaRepository.GetAll()
-                .WhereIf(input.HospitalId.HasValue, q => q.HospitalId == input.HospitalId.Value)
-                .Where(q => monthKeys.Contains(q.PeriodYear * 100 + q.PeriodMonth))
-                .Select(q => new
-                {
-                    q.ProductCategoryId,
-                    ProductCategoryName = q.ProductCategory != null ? q.ProductCategory.Name : null,
-                    q.TargetAmount
-                })
-                .ToListAsync();
+            var quotas = scope.SeesNothing
+                ? new List<QuotaRow>()
+                : await _productQuotaRepository.GetAll()
+                    .WhereIf(hospitalId.HasValue, q => q.HospitalId == hospitalId.Value)
+                    .Where(q => monthKeys.Contains(q.PeriodYear * 100 + q.PeriodMonth))
+                    .Select(q => new QuotaRow
+                    {
+                        ProductCategoryId = q.ProductCategoryId,
+                        ProductCategoryName = q.ProductCategory != null ? q.ProductCategory.Name : null,
+                        TargetAmount = q.TargetAmount
+                    })
+                    .ToListAsync();
 
             var totalSold = cases.Sum(c => c.TotalAmount);
             var totalPlanned = quotas.Sum(q => q.TargetAmount);
@@ -400,6 +416,26 @@ namespace ATI.Revenue.Application.Dashboard
             dto.DailyRevenue = daily;
 
             return dto;
+        }
+
+        private class CaseRow
+        {
+            public int Id { get; set; }
+            public DateTime ProcedureDate { get; set; }
+            public int? HospitalId { get; set; }
+            public string HospitalName { get; set; }
+            public int PhysicianId { get; set; }
+            public string PhysicianName { get; set; }
+            public string PhysicianHospital { get; set; }
+            public decimal TotalAmount { get; set; }
+            public int Units { get; set; }
+        }
+
+        private class QuotaRow
+        {
+            public int ProductCategoryId { get; set; }
+            public string ProductCategoryName { get; set; }
+            public decimal TargetAmount { get; set; }
         }
 
         private class CategorySold

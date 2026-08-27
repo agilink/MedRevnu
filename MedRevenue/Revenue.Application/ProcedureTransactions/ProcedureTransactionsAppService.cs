@@ -4,6 +4,7 @@ using Abp.Domain.Repositories;
 using Abp.Linq.Extensions;
 using Abp.UI;
 using ATI.Admin.Domain.Entities;
+using ATI.Revenue.Application.Authorization;
 using ATI.Revenue.Application.ProcedureTransactions.Dtos;
 using ATI.Revenue.Domain.Entities;
 using ATI.Revenue.Domain.Enums;
@@ -33,6 +34,7 @@ namespace ATI.Revenue.Application.ProcedureTransactions
         private readonly IRepository<Product, int> _productRepository;
         private readonly IRepository<Facility, int> _facilityRepository;
         private readonly IRepository<HospitalProductPrice, int> _hospitalProductPriceRepository;
+        private readonly IPhysicianDataScopeProvider _physicianDataScopeProvider;
 
         public ProcedureTransactionsAppService(
             IRepository<ProcedureTransaction, int> procedureTransactionRepository,
@@ -40,7 +42,8 @@ namespace ATI.Revenue.Application.ProcedureTransactions
             IRepository<Personnel, int> personnelRepository,
             IRepository<Product, int> productRepository,
             IRepository<Facility, int> facilityRepository,
-            IRepository<HospitalProductPrice, int> hospitalProductPriceRepository)
+            IRepository<HospitalProductPrice, int> hospitalProductPriceRepository,
+            IPhysicianDataScopeProvider physicianDataScopeProvider)
         {
             _procedureTransactionRepository = procedureTransactionRepository;
             _transactionProductRepository = transactionProductRepository;
@@ -48,10 +51,25 @@ namespace ATI.Revenue.Application.ProcedureTransactions
             _productRepository = productRepository;
             _facilityRepository = facilityRepository;
             _hospitalProductPriceRepository = hospitalProductPriceRepository;
+            _physicianDataScopeProvider = physicianDataScopeProvider;
         }
 
         public async Task<PagedResultDto<ProcedureTransactionDto>> GetAll(GetAllProcedureTransactionsInput input)
         {
+            // A physician sees only their own hospital's cases, whatever hospital the page
+            // asked for, and nothing at all until a hospital is assigned to them.
+            var scope = await _physicianDataScopeProvider.GetAsync();
+
+            if (scope.SeesNothing)
+            {
+                return new PagedResultDto<ProcedureTransactionDto>(0, new List<ProcedureTransactionDto>());
+            }
+
+            if (scope.IsRestricted)
+            {
+                input.HospitalIdFilter = scope.HospitalId;
+            }
+
             var query = CreateFilteredQuery(input);
 
             var totalCount = await query.CountAsync();
@@ -108,8 +126,67 @@ namespace ATI.Revenue.Application.ProcedureTransactions
             return new PagedResultDto<ProcedureTransactionDto>(totalCount, dtos);
         }
 
+        /// <summary>
+        /// Stops a physician reaching a case that belongs to another hospital.
+        /// </summary>
+        /// <remarks>
+        /// Filtering the list is not enough on its own: view, edit and delete all take a
+        /// case id, so without this a physician could reach any case by guessing an id.
+        /// </remarks>
+        private async Task EnsureCaseIsInScope(int caseId)
+        {
+            var scope = await _physicianDataScopeProvider.GetAsync();
+
+            if (!scope.IsRestricted)
+            {
+                return;
+            }
+
+            var hospitalId = await _procedureTransactionRepository.GetAll()
+                .Where(pt => pt.Id == caseId)
+                .Select(pt => pt.HospitalId)
+                .FirstOrDefaultAsync();
+
+            if (!scope.HospitalId.HasValue || hospitalId != scope.HospitalId.Value)
+            {
+                throw new UserFriendlyException(L("CaseBelongsToAnotherHospital"));
+            }
+        }
+
+        /// <summary>
+        /// Forces a physician's case onto their own hospital rather than trusting the form.
+        /// </summary>
+        private async Task<CreateOrEditProcedureTransactionDto> ApplyScopeToInput(
+            CreateOrEditProcedureTransactionDto input)
+        {
+            var scope = await _physicianDataScopeProvider.GetAsync();
+
+            if (!scope.IsRestricted)
+            {
+                return input;
+            }
+
+            if (!scope.HospitalId.HasValue)
+            {
+                throw new UserFriendlyException(L("NoHospitalAssignedToPhysicianUser"));
+            }
+
+            // Id 0 means a new case; an existing one has to belong to their hospital
+            // before they are allowed to move it.
+            if (input.Id != 0)
+            {
+                await EnsureCaseIsInScope(input.Id);
+            }
+
+            input.HospitalId = scope.HospitalId;
+
+            return input;
+        }
+
         public async Task<GetProcedureTransactionForViewDto> GetProcedureTransactionForView(int id)
         {
+            await EnsureCaseIsInScope(id);
+
             var dto = await ProjectWithLines(_procedureTransactionRepository.GetAll().Where(pt => pt.Id == id));
 
             if (dto == null)
@@ -120,6 +197,8 @@ namespace ATI.Revenue.Application.ProcedureTransactions
 
         public async Task<GetProcedureTransactionForEditOutput> GetProcedureTransactionForEdit(EntityDto<int> input)
         {
+            await EnsureCaseIsInScope(input.Id);
+
             var entity = await _procedureTransactionRepository.GetAll()
                 .Where(pt => pt.Id == input.Id)
                 .Select(pt => new
@@ -170,6 +249,8 @@ namespace ATI.Revenue.Application.ProcedureTransactions
             {
                 throw new UserFriendlyException("A case needs at least one device.");
             }
+
+            input = await ApplyScopeToInput(input);
 
             input.CaseNumber = input.CaseNumber?.Trim();
             await EnsureCaseNumberIsUnique(input.Id, input.CaseNumber);
@@ -287,6 +368,8 @@ namespace ATI.Revenue.Application.ProcedureTransactions
 
         public async Task Delete(EntityDto<int> input)
         {
+            await EnsureCaseIsInScope(input.Id);
+
             await _procedureTransactionRepository.DeleteAsync(input.Id);
             await CurrentUnitOfWork.SaveChangesAsync();
         }

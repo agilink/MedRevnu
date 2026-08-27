@@ -1,4 +1,4 @@
-using Abp.Domain.Entities.Auditing;
+﻿using Abp.Domain.Entities.Auditing;
 using ATI.Admin.Domain.Enums;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -25,6 +25,16 @@ namespace ATI.Admin.Domain.Entities
         /// Associated facility ID
         /// </summary>
         public int? FacilityId { get; set; }
+
+        /// <summary>
+        /// The application login created for this person, if one has been created.
+        /// </summary>
+        /// <remarks>
+        /// AbpUsers.Id is a long, so this is a long. Deliberately not a foreign key:
+        /// users are soft-deleted and managed by the framework, and a personnel record
+        /// should outlive its login rather than be cascaded away with it.
+        /// </remarks>
+        public long? UserId { get; set; }
 
         /// <summary>
         /// Navigation property to Facility

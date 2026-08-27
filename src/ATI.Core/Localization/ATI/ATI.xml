@@ -1500,5 +1500,17 @@
     <text name="DeviceTypeTotalsUseLineAmounts">Device type figures come from the device lines; a negotiated case total can make them differ from Total Sold</text>
     <text name="RelativeToBusiestDay">Bars are relative to the busiest day in the period</text>
     <text name="Configuration">Configuration</text>
+    <text name="PhysicianNotFound">Physician not found</text>
+    <text name="PhysicianAlreadyHasUser">This physician already has a login</text>
+    <text name="PhysicianNeedsNameForUser">A surname is needed before a login can be created</text>
+    <text name="PhysicianRoleMissing">The Physician role does not exist yet, so a physician login cannot be assigned to it</text>
+    <text name="CreateUser">Create User</text>
+    <text name="IsAUser">Has login</text>
+    <text name="Login">Login</text>
+    <text name="CreateUserForPhysicianConfirmation">Create a login for {0}? The username will be {1} and the password will be Welcome01.</text>
+    <text name="PhysicianUserCreated">Login created. Username: {0} - Password: {1}</text>
+    <text name="PhysicianUserFallbackEmailWarning">No email address was on file, so {0} was generated. Password reset will not reach it until a real address is set.</text>
+    <text name="CaseBelongsToAnotherHospital">This case belongs to another hospital</text>
+    <text name="NoHospitalAssignedToPhysicianUser">No hospital is assigned to your physician record, so there is nothing you can work on yet. Ask an administrator to assign one.</text>
   </texts>
 </localizationDictionary>

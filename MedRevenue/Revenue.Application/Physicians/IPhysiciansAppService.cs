@@ -12,5 +12,6 @@ namespace ATI.Revenue.Application.Physicians
         Task<GetPhysicianForEditOutput> GetPhysicianForEdit(EntityDto<int> input);
         Task<PhysicianDto> CreateOrEdit(CreateOrEditPhysicianDto input);
         Task Delete(EntityDto<int> input);
+        Task<CreatePhysicianUserOutput> CreateUserForPhysician(EntityDto<int> input);
     }
 }

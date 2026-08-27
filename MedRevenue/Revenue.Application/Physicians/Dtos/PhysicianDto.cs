@@ -20,5 +20,13 @@ namespace ATI.Revenue.Application.Physicians.Dtos
         public PersonnelType? PersonnelType { get; set; }
         public EmployeeStatus? EmployeeStatus { get; set; }
         public string Notes { get; set; }
+
+        /// <summary>The login created for this physician, if any.</summary>
+        public long? UserId { get; set; }
+
+        public string UserName { get; set; }
+
+        /// <summary>Drives the "is a user" flag in the grid.</summary>
+        public bool HasUser => UserId.HasValue;
     }
 }
