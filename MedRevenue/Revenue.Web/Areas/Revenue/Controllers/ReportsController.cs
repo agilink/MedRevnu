@@ -80,12 +80,12 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
             return Json(new { success = true, data = data });
         }
 
-        // Report 3: Cases by Person - Cases per physician for last year
+        // Report 3: Cases by Person - Cases per physician for the selected year
         public async Task<IActionResult> CasesByPerson()
         {
             ViewBag.Hospitals = await GetHospitalSelectList();
             ViewBag.Physicians = await GetPhysicianSelectList();
-            ViewBag.LastYear = DateTime.Now.Year - 1;
+            ViewBag.CurrentYear = DateTime.Now.Year;
             return View();
         }
 
@@ -102,12 +102,12 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
             return Json(new { success = true, data = data });
         }
 
-        // Report 4: Transaction Amount - By physician per product type for last year
+        // Report 4: Transaction Amount - By physician per product type for the selected year
         public async Task<IActionResult> TransactionAmount()
         {
             ViewBag.Physicians = await GetPhysicianSelectList();
             ViewBag.ProductCategories = await GetProductCategorySelectList();
-            ViewBag.LastYear = DateTime.Now.Year - 1;
+            ViewBag.CurrentYear = DateTime.Now.Year;
             return View();
         }
 

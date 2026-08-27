@@ -109,5 +109,10 @@
             });
         });
 
+        // Run once on arrival with the defaults, so the page opens with the
+        // current period already loaded instead of an empty table. Triggering the
+        // button reuses its validation, busy indicator and error handling.
+        $('#GenerateReportButton').click();
+
     });
 })();
