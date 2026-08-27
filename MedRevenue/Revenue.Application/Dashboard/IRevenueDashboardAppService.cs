@@ -8,6 +8,7 @@ namespace ATI.Revenue.Application.Dashboard
 {
     public interface IRevenueDashboardAppService : IApplicationService
     {
+        Task<RevenueDashboardDto> GetRevenueDashboard(RevenueDashboardInput input);
         Task<DailyRevenueSummaryDto> GetDailyRevenueSummary(DateTime? date = null, int? hospitalId = null);
         Task<List<MonthlyRevenueByCategoryDto>> GetMonthlyRevenueByCategory(int? month = null, int? year = null, int? hospitalId = null);
         Task<List<RevenueVsQuotaDto>> GetRevenueVsQuota(int? month = null, int? year = null, int? hospitalId = null);

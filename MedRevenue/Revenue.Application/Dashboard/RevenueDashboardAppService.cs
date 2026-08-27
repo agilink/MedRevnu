@@ -1,4 +1,4 @@
-using Abp.Application.Services;
+﻿using Abp.Application.Services;
 using Abp.Domain.Repositories;
 using Abp.Linq.Extensions;
 using ATI.Revenue.Application.Dashboard.Dtos;
@@ -206,6 +206,214 @@ namespace ATI.Revenue.Application.Dashboard
                 })
                 .OrderBy(t => t.Date)
                 .ToList();
+        }
+
+        /// <summary>
+        /// The whole dashboard for one date range, in a single round trip.
+        /// </summary>
+        /// <remarks>
+        /// Targets are monthly, so the planned figure sums the target of every month the
+        /// range touches; a partial month still contributes its whole target, because a
+        /// monthly target has no defensible per-day split. PlannedMonths reports which
+        /// months were counted, so the page can say so rather than leave it to be guessed.
+        /// </remarks>
+        public async Task<RevenueDashboardDto> GetRevenueDashboard(RevenueDashboardInput input)
+        {
+            input = input ?? new RevenueDashboardInput();
+
+            var today = Abp.Timing.Clock.Now.Date;
+            var from = (input.FromDate ?? new DateTime(today.Year, today.Month, 1)).Date;
+            var to = (input.ToDate ?? today).Date;
+
+            if (to < from)
+            {
+                var swap = from;
+                from = to;
+                to = swap;
+            }
+
+            var upperBound = to.AddDays(1);
+
+            var cases = await QueryCases(input.HospitalId)
+                .Where(pt => pt.ProcedureDate >= from && pt.ProcedureDate < upperBound)
+                .Select(pt => new
+                {
+                    pt.Id,
+                    pt.ProcedureDate,
+                    pt.HospitalId,
+                    HospitalName = pt.Hospital != null ? pt.Hospital.FacilityName : null,
+                    pt.PhysicianId,
+                    PhysicianName = pt.Physician != null
+                        ? ((pt.Physician.FIRST_NAME ?? "") + " " + (pt.Physician.LAST_NAME ?? "")).Trim()
+                        : null,
+                    PhysicianHospital = pt.Physician != null && pt.Physician.Facility != null
+                        ? pt.Physician.Facility.FacilityName
+                        : null,
+                    pt.TotalAmount,
+                    Units = pt.Products.Sum(l => (int?)l.Quantity) ?? 0
+                })
+                .ToListAsync();
+
+            var lines = await QueryLines(input.HospitalId)
+                .Where(l => l.ProcedureDate >= from && l.ProcedureDate < upperBound)
+                .ToListAsync();
+
+            // Every month the range touches, so a target counts once even when the range
+            // starts or ends mid-month.
+            var months = new List<DateTime>();
+            for (var cursor = new DateTime(from.Year, from.Month, 1); cursor <= to; cursor = cursor.AddMonths(1))
+            {
+                months.Add(cursor);
+            }
+
+            var monthKeys = months.Select(m => m.Year * 100 + m.Month).ToList();
+
+            var quotas = await _productQuotaRepository.GetAll()
+                .WhereIf(input.HospitalId.HasValue, q => q.HospitalId == input.HospitalId.Value)
+                .Where(q => monthKeys.Contains(q.PeriodYear * 100 + q.PeriodMonth))
+                .Select(q => new
+                {
+                    q.ProductCategoryId,
+                    ProductCategoryName = q.ProductCategory != null ? q.ProductCategory.Name : null,
+                    q.TargetAmount
+                })
+                .ToListAsync();
+
+            var totalSold = cases.Sum(c => c.TotalAmount);
+            var totalPlanned = quotas.Sum(q => q.TargetAmount);
+
+            var dto = new RevenueDashboardDto
+            {
+                FromDate = from,
+                ToDate = to,
+                TotalCases = cases.Count,
+                TotalUnits = cases.Sum(c => c.Units),
+                TotalSold = totalSold,
+                TotalPlanned = totalPlanned,
+                Variance = totalSold - totalPlanned,
+                PercentAchieved = totalPlanned > 0 ? (totalSold / totalPlanned) * 100 : 0,
+                HasPlan = totalPlanned > 0,
+                PlannedMonths = months.Select(m => m.ToString("MMM yyyy")).ToList()
+            };
+
+            // Device type is the product category, which is the grain quotas are set at.
+            // Sold comes from the device lines, because one case can span categories.
+            var soldByCategory = lines
+                .GroupBy(l => new { Id = l.ProductCategoryId ?? 0, Name = l.ProductCategoryName })
+                .ToDictionary(g => g.Key.Id, g => new CategorySold
+                {
+                    Name = CategoryLabel(g.Key.Name),
+                    Sold = g.Sum(l => l.LineTotal),
+                    Cases = g.Select(l => l.CaseId).Distinct().Count(),
+                    Units = g.Sum(l => l.Quantity)
+                });
+
+            var plannedByCategory = quotas
+                .GroupBy(q => new { q.ProductCategoryId, q.ProductCategoryName })
+                .ToDictionary(g => g.Key.ProductCategoryId, g => new CategoryPlanned
+                {
+                    Name = CategoryLabel(g.Key.ProductCategoryName),
+                    Planned = g.Sum(q => q.TargetAmount)
+                });
+
+            var categoryIds = soldByCategory.Keys.Concat(plannedByCategory.Keys).Distinct().ToList();
+
+            foreach (var categoryId in categoryIds)
+            {
+                soldByCategory.TryGetValue(categoryId, out var sold);
+                plannedByCategory.TryGetValue(categoryId, out var planned);
+
+                var soldAmount = sold != null ? sold.Sold : 0m;
+                var plannedAmount = planned != null ? planned.Planned : 0m;
+
+                dto.DeviceTypes.Add(new DeviceTypePerformanceDto
+                {
+                    ProductCategoryId = categoryId,
+                    DeviceType = sold != null ? sold.Name : (planned != null ? planned.Name : "(Uncategorised)"),
+                    Sold = soldAmount,
+                    Planned = plannedAmount,
+                    Variance = soldAmount - plannedAmount,
+                    PercentAchieved = plannedAmount > 0 ? (soldAmount / plannedAmount) * 100 : 0,
+                    Cases = sold != null ? sold.Cases : 0,
+                    Units = sold != null ? sold.Units : 0,
+                    HasPlan = plannedAmount > 0
+                });
+            }
+
+            dto.DeviceTypes = dto.DeviceTypes
+                .OrderByDescending(d => d.Sold)
+                .ThenBy(d => d.DeviceType)
+                .ToList();
+
+            dto.TopPhysicians = cases
+                .GroupBy(c => new { c.PhysicianId, c.PhysicianName, c.PhysicianHospital })
+                .Select(g => new CollectionRowDto
+                {
+                    Id = g.Key.PhysicianId,
+                    Name = string.IsNullOrWhiteSpace(g.Key.PhysicianName) ? "(Unnamed)" : g.Key.PhysicianName,
+                    SecondaryName = g.Key.PhysicianHospital ?? "",
+                    Cases = g.Count(),
+                    Units = g.Sum(c => c.Units),
+                    Collection = g.Sum(c => c.TotalAmount),
+                    SharePercent = totalSold > 0 ? (g.Sum(c => c.TotalAmount) / totalSold) * 100 : 0
+                })
+                .OrderByDescending(r => r.Collection)
+                .Take(10)
+                .ToList();
+
+            dto.TopHospitals = cases
+                .GroupBy(c => new { c.HospitalId, c.HospitalName })
+                .Select(g => new CollectionRowDto
+                {
+                    Id = g.Key.HospitalId ?? 0,
+                    Name = string.IsNullOrWhiteSpace(g.Key.HospitalName) ? "(No hospital)" : g.Key.HospitalName,
+                    SecondaryName = "",
+                    Cases = g.Count(),
+                    Units = g.Sum(c => c.Units),
+                    Collection = g.Sum(c => c.TotalAmount),
+                    SharePercent = totalSold > 0 ? (g.Sum(c => c.TotalAmount) / totalSold) * 100 : 0
+                })
+                .OrderByDescending(r => r.Collection)
+                .Take(10)
+                .ToList();
+
+            var daily = cases
+                .GroupBy(c => c.ProcedureDate.Date)
+                .Select(g => new DailyRevenueRowDto
+                {
+                    Date = g.Key,
+                    Cases = g.Count(),
+                    Units = g.Sum(c => c.Units),
+                    Revenue = g.Sum(c => c.TotalAmount)
+                })
+                .OrderBy(d => d.Date)
+                .ToList();
+
+            // Bars are relative to the busiest day, so a quiet day still reads as small
+            // rather than empty.
+            var busiestDay = daily.Count > 0 ? daily.Max(d => d.Revenue) : 0m;
+            foreach (var day in daily)
+            {
+                day.SharePercent = busiestDay > 0 ? (day.Revenue / busiestDay) * 100 : 0;
+            }
+
+            dto.DailyRevenue = daily;
+
+            return dto;
+        }
+
+        private class CategorySold
+        {
+            public string Name { get; set; }
+            public decimal Sold { get; set; }
+            public int Cases { get; set; }
+            public int Units { get; set; }
+        }
+
+        private class CategoryPlanned
+        {
+            public string Name { get; set; }
+            public decimal Planned { get; set; }
         }
 
         private IQueryable<ProcedureTransaction> QueryCases(int? hospitalId)

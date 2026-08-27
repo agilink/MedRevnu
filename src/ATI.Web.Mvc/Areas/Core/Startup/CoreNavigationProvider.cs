@@ -41,12 +41,14 @@ namespace ATI.Web.Areas.Core.Startup
                         )
                     )
                 )
+                // Points at the Revenue dashboard, and is gated on that page's own
+                // permission so the menu never offers a link that 403s.
                 .AddItem(new MenuItemDefinition(
                         CorePageNames.Tenant.Dashboard,
                         L("Dashboard"),
-                        url: "Core/TenantDashboard",
+                        url: "Revenue/Dashboard",
                         icon: "flaticon-line-graph",
-                        permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Tenant_Dashboard)
+                        permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_Dashboard)
                     )
                 ).AddItem(new MenuItemDefinition(
                         CorePageNames.Common.Administration,
@@ -177,14 +179,6 @@ namespace ATI.Web.Areas.Core.Startup
                         L("Revenue"),
                         icon: "flaticon-line-graph",
                         permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue)
-                    )
-                    .AddItem(new MenuItemDefinition(
-                            "Revenue.Dashboard",
-                            L("RevenueDashboard"),
-                            url: "Revenue/Dashboard",
-                            icon: "flaticon-pie-chart",
-                            permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_Dashboard)
-                        )
                     )
                     .AddItem(new MenuItemDefinition(
                             "Revenue.ProcedureTransactions",

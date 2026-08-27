@@ -1473,5 +1473,31 @@
     <text name="SelectSubcategory">Select subcategory</text>
     <text name="IsSystemProduct">Full system (not generator only)</text>
     <text name="HospitalDrivesPhysicianList">Choose the hospital first; the physician list narrows to that hospital</text>
+    <text name="RevenueDashboardHeaderInfo">Sold against plan for the selected period</text>
+    <text name="FromDate">From</text>
+    <text name="ToDate">To</text>
+    <text name="ThisQuarter">This quarter</text>
+    <text name="ThisYear">This year</text>
+    <text name="TotalCases">Total Cases</text>
+    <text name="TotalSold">Total Sold</text>
+    <text name="TotalPlanned">Total Planned</text>
+    <text name="PercentageAchieved">Percentage Achieved</text>
+    <text name="TotalUnits">Total Units</text>
+    <text name="DeviceType">Device Type</text>
+    <text name="SoldVsPlannedByDeviceType">Total Sold vs Total Planned by device type</text>
+    <text name="Sold">Sold</text>
+    <text name="Planned">Planned</text>
+    <text name="Units">Units</text>
+    <text name="Collection">Collection</text>
+    <text name="ShareOfTotal">Share</text>
+    <text name="TopPhysicianCollection">Top 10 Physician Collection</text>
+    <text name="TopHospitalCollection">Top 10 Hospital Collection</text>
+    <text name="DailyRevenue">Daily Revenue</text>
+    <text name="NoTargetSet">No target set</text>
+    <text name="NoDataForPeriod">Nothing recorded in this period</text>
+    <text name="PlannedTakenFromMonths">Targets are monthly. Planned covers: {0}</text>
+    <text name="NoTargetsForPeriod">No targets are set for this period, so there is nothing to measure against</text>
+    <text name="DeviceTypeTotalsUseLineAmounts">Device type figures come from the device lines; a negotiated case total can make them differ from Total Sold</text>
+    <text name="RelativeToBusiestDay">Bars are relative to the busiest day in the period</text>
   </texts>
 </localizationDictionary>

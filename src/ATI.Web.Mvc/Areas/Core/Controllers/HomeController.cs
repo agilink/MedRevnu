@@ -27,6 +27,13 @@ namespace ATI.Web.Areas.Core.Controllers
             }
             else
             {
+                // The Revenue dashboard is the tenant dashboard now, so go straight
+                // there rather than bouncing through TenantDashboard's redirect.
+                if (await IsGrantedAsync(AppPermissions.Pages_Revenue_Dashboard))
+                {
+                    return RedirectToAction("Index", "Dashboard", new { area = "Revenue" });
+                }
+
                 if (await IsGrantedAsync(AppPermissions.Pages_Tenant_Dashboard))
                 {
                     return RedirectToAction("Index", "TenantDashboard");

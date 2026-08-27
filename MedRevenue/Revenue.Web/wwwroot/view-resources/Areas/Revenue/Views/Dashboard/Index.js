@@ -1,176 +1,297 @@
 (function () {
     $(function () {
 
+        // Deliberately dependency-free. Chart.js is listed in package.json but is not
+        // deployed to wwwroot, and Metronic's ApexCharts is not loaded on this page, so a
+        // chart library here would leave the page blank. Bars are plain CSS, which cannot
+        // fail to render.
+
         function money(value) {
-            return '$' + (value || 0).toLocaleString('en-US', {
+            return '$' + (Number(value) || 0).toLocaleString('en-US', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             });
         }
 
-        var dashboardService = {
+        function count(value) {
+            return (Number(value) || 0).toLocaleString('en-US');
+        }
+
+        function percent(value) {
+            return (Number(value) || 0).toFixed(1) + '%';
+        }
+
+        function shortDate(iso) {
+            if (!iso) {
+                return '-';
+            }
+            // Dates arrive as local dates with no offset; take the date part so no time
+            // zone shift can move a case to the previous day.
+            return moment(String(iso).substring(0, 10), 'YYYY-MM-DD').format('ddd, DD MMM YYYY');
+        }
+
+        function toInputDate(date) {
+            return moment(date).format('YYYY-MM-DD');
+        }
+
+        // Green once the target is met, amber when close, red when not - and grey where
+        // there is no target, because 0% would read as failure rather than "not measured".
+        function achievementClass(percentAchieved, hasPlan) {
+            if (!hasPlan) {
+                return 'text-muted';
+            }
+            if (percentAchieved >= 100) {
+                return 'text-success';
+            }
+            if (percentAchieved >= 80) {
+                return 'text-warning';
+            }
+            return 'text-danger';
+        }
+
+        function bar(widthPercent, cssClass) {
+            var width = Math.max(0, Math.min(100, Number(widthPercent) || 0));
+            return $('<div class="progress h-6px bg-light"></div>')
+                .append($('<div class="progress-bar ' + cssClass + '"></div>')
+                    .css('width', width + '%'));
+        }
+
+        function emptyRow(columns) {
+            return $('<tr></tr>').append(
+                $('<td class="text-center text-muted"></td>')
+                    .attr('colspan', columns)
+                    .text(app.localize('NoDataForPeriod')));
+        }
+
+        var dashboard = {
+
             init: function () {
-                this.loadDailySummary();
-                this.loadMonthlyQuota();
                 this.bindEvents();
+                this.load();
             },
 
             bindEvents: function () {
                 var self = this;
-                $('#DashboardDate').on('change', function () {
-                    self.loadDailySummary();
+
+                $('#ApplyFilters').on('click', function () {
+                    self.load();
+                });
+
+                $('#HospitalFilter').on('change', function () {
+                    self.load();
+                });
+
+                $('.period-preset').on('click', function () {
+                    self.applyPreset($(this).data('preset'));
+                    self.load();
+                });
+
+                $('#FromDate, #ToDate').on('change', function () {
+                    self.load();
                 });
             },
 
-            loadDailySummary: function () {
-                var date = $('#DashboardDate').val();
+            applyPreset: function (preset) {
+                var from;
+                var to;
+
+                switch (preset) {
+                    case 'lastMonth':
+                        from = moment().subtract(1, 'month').startOf('month');
+                        to = moment().subtract(1, 'month').endOf('month');
+                        break;
+                    case 'thisQuarter':
+                        from = moment().startOf('quarter');
+                        to = moment();
+                        break;
+                    case 'thisYear':
+                        from = moment().startOf('year');
+                        to = moment();
+                        break;
+                    default:
+                        from = moment().startOf('month');
+                        to = moment();
+                        break;
+                }
+
+                $('#FromDate').val(toInputDate(from));
+                $('#ToDate').val(toInputDate(to));
+            },
+
+            load: function () {
                 var self = this;
+                var hospitalId = $('#HospitalFilter').val();
+
+                // Every filter is optional. An empty box means "no restriction", not a
+                // validation error, so the page always has something to show.
+                var input = {
+                    fromDate: $('#FromDate').val() || null,
+                    toDate: $('#ToDate').val() || null,
+                    hospitalId: hospitalId ? parseInt(hospitalId, 10) : null
+                };
+
+                abp.ui.setBusy($('#kt_app_content, .app-container'));
 
                 $.ajax({
-                    url: '/Revenue/Dashboard/GetDailyRevenueSummary',
+                    url: abp.appPath + 'Revenue/Dashboard/GetDashboard',
                     type: 'POST',
-                    data: JSON.stringify({ date: date }),
+                    data: JSON.stringify(input),
                     contentType: 'application/json',
                     success: function (data) {
-                        self.updateDailySummary(data);
+                        self.render(data || {});
                     },
                     error: function () {
-                        abp.message.error('Failed to load daily summary');
+                        abp.message.error(app.localize('AnErrorOccurred'));
+                    },
+                    complete: function () {
+                        abp.ui.clearBusy($('#kt_app_content, .app-container'));
                     }
                 });
             },
 
-            updateDailySummary: function (data) {
-                $('#TotalRevenue').text(money(data.totalRevenue));
-                $('#TotalCases').text(data.totalCases || 0);
-
-                this.renderCategoryCards(data.revenueByCategory || []);
-                this.renderCategoryBreakdown(data.revenueByCategory || []);
+            render: function (data) {
+                this.renderKpis(data);
+                this.renderDeviceTypes(data.deviceTypes || []);
+                this.renderCollection($('#TopPhysiciansBody'), data.topPhysicians || [], true);
+                this.renderCollection($('#TopHospitalsBody'), data.topHospitals || [], false);
+                this.renderDailyRevenue(data.dailyRevenue || []);
             },
 
-            // Cards are built from whatever categories actually have revenue, so adding
-            // or renaming a product category does not need a change here.
-            renderCategoryCards: function (categories) {
-                var container = $('#CategoryCards');
-                container.empty();
+            renderKpis: function (data) {
+                $('#KpiTotalCases').text(count(data.totalCases));
+                $('#KpiTotalUnits').text(app.localize('TotalUnits') + ': ' + count(data.totalUnits));
+                $('#KpiTotalSold').text(money(data.totalSold));
+                $('#KpiTotalPlanned').text(money(data.totalPlanned));
 
-                if (!categories.length) {
-                    container.html('<div class="text-muted">No category revenue on this date.</div>');
+                $('#KpiPeriodLabel').text(
+                    moment(String(data.fromDate).substring(0, 10)).format('DD MMM') +
+                    ' - ' +
+                    moment(String(data.toDate).substring(0, 10)).format('DD MMM YYYY'));
+
+                // Say which months the target came from: a range that starts mid-month
+                // still counts that month's whole target, and the caption is the only
+                // place that admits it.
+                var months = data.plannedMonths || [];
+                $('#KpiPlannedMonths').text(
+                    months.length
+                        ? abp.utils.formatString(app.localize('PlannedTakenFromMonths'), months.join(', '))
+                        : '');
+
+                var percentClass = achievementClass(data.percentAchieved, data.hasPlan);
+
+                $('#KpiPercentAchieved')
+                    .removeClass('text-success text-warning text-danger text-muted text-dark')
+                    .addClass(percentClass)
+                    .text(data.hasPlan ? percent(data.percentAchieved) : '-');
+
+                $('#KpiVariance')
+                    .removeClass('text-success text-danger text-muted')
+                    .addClass(data.hasPlan ? (data.variance >= 0 ? 'text-success' : 'text-danger') : 'text-muted')
+                    .text(data.hasPlan
+                        ? app.localize('Variance') + ': ' + money(data.variance)
+                        : app.localize('NoTargetsForPeriod'));
+            },
+
+            renderDeviceTypes: function (rows) {
+                var tbody = $('#DeviceTypeBody').empty();
+
+                if (!rows.length) {
+                    tbody.append(emptyRow(8));
                     return;
                 }
 
-                var palette = ['bg-warning', 'bg-danger', 'bg-info', 'bg-secondary'];
-                var row = $('<div class="row"></div>');
-
-                categories.slice(0, 4).forEach(function (cat, i) {
-                    var card = ''
-                        + '<div class="col-6 mb-2">'
-                        + '  <div class="info-box">'
-                        + '    <span class="info-box-icon ' + palette[i % palette.length] + '"><i class="fas fa-heartbeat"></i></span>'
-                        + '    <div class="info-box-content">'
-                        + '      <span class="info-box-text"></span>'
-                        + '      <span class="info-box-number"></span>'
-                        + '    </div>'
-                        + '  </div>'
-                        + '</div>';
-
-                    var $card = $(card);
-                    $card.find('.info-box-text').text(cat.productCategoryName);
-                    $card.find('.info-box-number').text(money(cat.revenue));
-                    row.append($card);
-                });
-
-                container.append(row);
-            },
-
-            renderCategoryBreakdown: function (categories) {
-                var table = $('<table class="table table-sm"></table>');
-                table.append('<thead><tr><th>Category</th><th>Revenue</th><th>Cases</th></tr></thead>');
-                var tbody = $('<tbody></tbody>');
-
-                if (!categories.length) {
-                    tbody.append('<tr><td colspan="3" class="text-center">No revenue recorded on this date</td></tr>');
-                }
-
-                categories.forEach(function (cat) {
+                rows.forEach(function (row) {
                     var tr = $('<tr></tr>');
-                    tr.append($('<td></td>').text(cat.productCategoryName));
-                    tr.append($('<td></td>').text(money(cat.revenue)));
-                    tr.append($('<td></td>').text(cat.caseCount || 0));
+
+                    tr.append($('<td class="fw-semibold"></td>').text(row.deviceType || '-'));
+
+                    // Two stacked bars rather than a number alone: the gap between sold
+                    // and planned is the point of this table.
+                    var barCell = $('<td></td>');
+                    var soldWidth = row.planned > 0
+                        ? (row.sold / row.planned) * 100
+                        : (row.sold > 0 ? 100 : 0);
+
+                    barCell.append(bar(soldWidth, row.percentAchieved >= 100 || !row.hasPlan ? 'bg-success' : 'bg-primary'));
+                    barCell.append(bar(row.planned > 0 ? 100 : 0, 'bg-secondary').addClass('mt-1'));
+                    tr.append(barCell);
+
+                    tr.append($('<td class="text-end"></td>').text(money(row.sold)));
+
+                    if (row.hasPlan) {
+                        tr.append($('<td class="text-end"></td>').text(money(row.planned)));
+                        tr.append($('<td class="text-end"></td>')
+                            .addClass(row.variance >= 0 ? 'text-success' : 'text-danger')
+                            .text(money(row.variance)));
+                        tr.append($('<td class="text-end"></td>')
+                            .addClass(achievementClass(row.percentAchieved, true))
+                            .text(percent(row.percentAchieved)));
+                    } else {
+                        // Revenue with no target behind it is still listed, so it cannot
+                        // go unnoticed - but it has nothing to be measured against.
+                        tr.append($('<td class="text-end text-muted"></td>').text(app.localize('NoTargetSet')));
+                        tr.append($('<td class="text-end text-muted"></td>').text('-'));
+                        tr.append($('<td class="text-end text-muted"></td>').text('-'));
+                    }
+
+                    tr.append($('<td class="text-end"></td>').text(count(row.cases)));
+                    tr.append($('<td class="text-end"></td>').text(count(row.units)));
+
                     tbody.append(tr);
                 });
-
-                table.append(tbody);
-                $('#CategoryBreakdown').empty().append(table);
             },
 
-            loadMonthlyQuota: function () {
-                var now = new Date();
-
-                $.ajax({
-                    url: '/Revenue/Dashboard/GetRevenueVsQuota',
-                    type: 'POST',
-                    data: JSON.stringify({ month: now.getMonth() + 1, year: now.getFullYear() }),
-                    contentType: 'application/json',
-                    success: function (data) {
-                        dashboardService.updateQuotaTable(data);
-                    },
-                    error: function () {
-                        $('#QuotaTableBody').html('<tr><td colspan="8" class="text-center text-danger">Failed to load quota data</td></tr>');
-                    }
-                });
-            },
-
-            updateQuotaTable: function (data) {
-                var tbody = $('#QuotaTableBody');
+            renderCollection: function (tbody, rows, showSecondary) {
                 tbody.empty();
 
-                if (!data || data.length === 0) {
-                    tbody.html('<tr><td colspan="8" class="text-center">No quota or revenue data for this month</td></tr>');
+                if (!rows.length) {
+                    tbody.append(emptyRow(4));
                     return;
                 }
 
-                data.forEach(function (item) {
-                    var percentClass;
-                    if (!item.hasQuota) {
-                        percentClass = 'text-muted';
-                    } else if (item.percentageAchieved >= 100) {
-                        percentClass = 'text-success';
-                    } else if (item.percentageAchieved >= 80) {
-                        percentClass = 'text-warning';
-                    } else {
-                        percentClass = 'text-danger';
-                    }
-
+                rows.forEach(function (row) {
                     var tr = $('<tr></tr>');
-                    tr.append($('<td></td>').text(item.hospitalName || '-'));
-                    tr.append($('<td></td>').text(item.productCategoryName || '-'));
-                    tr.append($('<td></td>').text(item.productName || 'All devices'));
 
-                    // Revenue with no quota behind it is listed so it cannot go
-                    // unnoticed, but it has no target to compare against.
-                    if (item.hasQuota) {
-                        tr.append($('<td></td>').text(money(item.targetAmount)));
-                        tr.append($('<td></td>').text(money(item.actualRevenue)));
-                        tr.append($('<td></td>')
-                            .addClass(item.variance >= 0 ? 'text-success' : 'text-danger')
-                            .text(money(item.variance)));
-                        tr.append($('<td></td>')
-                            .addClass(percentClass)
-                            .text(item.percentageAchieved.toFixed(1) + '%'));
-                    } else {
-                        tr.append($('<td class="text-muted">No target set</td>'));
-                        tr.append($('<td></td>').text(money(item.actualRevenue)));
-                        tr.append($('<td class="text-muted">-</td>'));
-                        tr.append($('<td class="text-muted">-</td>'));
+                    var nameCell = $('<td></td>');
+                    nameCell.append($('<div class="fw-semibold"></div>').text(row.name || '-'));
+
+                    if (showSecondary && row.secondaryName) {
+                        nameCell.append($('<div class="text-muted fs-8"></div>').text(row.secondaryName));
                     }
 
-                    tr.append($('<td></td>').text(item.actualUnits || 0));
+                    tr.append(nameCell);
+                    tr.append($('<td class="text-end"></td>').text(count(row.cases)));
+                    tr.append($('<td class="text-end fw-semibold"></td>').text(money(row.collection)));
+
+                    var shareCell = $('<td></td>');
+                    shareCell.append(bar(row.sharePercent, 'bg-primary'));
+                    shareCell.append($('<div class="text-muted fs-8"></div>').text(percent(row.sharePercent)));
+                    tr.append(shareCell);
+
+                    tbody.append(tr);
+                });
+            },
+
+            renderDailyRevenue: function (rows) {
+                var tbody = $('#DailyRevenueBody').empty();
+
+                if (!rows.length) {
+                    tbody.append(emptyRow(5));
+                    return;
+                }
+
+                rows.forEach(function (row) {
+                    var tr = $('<tr></tr>');
+                    tr.append($('<td></td>').text(shortDate(row.date)));
+                    tr.append($('<td class="text-end"></td>').text(count(row.cases)));
+                    tr.append($('<td class="text-end"></td>').text(count(row.units)));
+                    tr.append($('<td class="text-end fw-semibold"></td>').text(money(row.revenue)));
+                    tr.append($('<td></td>').append(bar(row.sharePercent, 'bg-primary')));
                     tbody.append(tr);
                 });
             }
         };
 
-        dashboardService.init();
+        dashboard.init();
     });
 })();
