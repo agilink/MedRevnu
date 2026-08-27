@@ -130,7 +130,10 @@
                     hospitalId: hospitalId ? parseInt(hospitalId, 10) : null
                 };
 
-                abp.ui.setBusy($('#kt_app_content, .app-container'));
+                // One element, not a selector that matches several. The layout has an
+                // .app-container in the header and another in the toolbar, and setBusy
+                // blocks every match - which put four spinners on the page at once.
+                abp.ui.setBusy($('#RevenueDashboardContent'));
 
                 // abp.ajax, not $.ajax. The controller derives from an ABP controller, so
                 // ABP wraps every JsonResult in an AjaxResponse envelope
@@ -146,7 +149,7 @@
                 }).done(function (data) {
                     self.render(data || {});
                 }).always(function () {
-                    abp.ui.clearBusy($('#kt_app_content, .app-container'));
+                    abp.ui.clearBusy($('#RevenueDashboardContent'));
                 });
             },
 
