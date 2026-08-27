@@ -24,16 +24,16 @@
          anything is chosen. -->
     <div class="card mb-5">
         <div class="card-body py-4">
-            <div class="row align-items-end">
-                <div class="col-md-3 mb-3 mb-md-0">
+            <div class="row align-items-end g-3">
+                <div class="col-sm-6 col-lg-3">
                     <label for="FromDate" class="form-label">@L("FromDate")</label>
                     <input type="date" id="FromDate" class="form-control" value="@ViewBag.DefaultFromDate" />
                 </div>
-                <div class="col-md-3 mb-3 mb-md-0">
+                <div class="col-sm-6 col-lg-3">
                     <label for="ToDate" class="form-label">@L("ToDate")</label>
                     <input type="date" id="ToDate" class="form-control" value="@ViewBag.DefaultToDate" />
                 </div>
-                <div class="col-md-3 mb-3 mb-md-0">
+                <div class="col-sm-8 col-lg-4">
                     <label for="HospitalFilter" class="form-label">@L("Hospital")</label>
                     <select id="HospitalFilter" class="form-select">
                         <option value="">@L("AllHospitals")</option>
@@ -43,17 +43,24 @@
                         }
                     </select>
                 </div>
-                <div class="col-md-3 d-flex align-items-end justify-content-md-end">
-                    <div class="btn-group me-2" role="group">
-                        <button type="button" class="btn btn-light btn-sm period-preset" data-preset="thisMonth">@L("ThisMonth")</button>
-                        <button type="button" class="btn btn-light btn-sm period-preset" data-preset="lastMonth">@L("LastMonth")</button>
-                        <button type="button" class="btn btn-light btn-sm period-preset" data-preset="thisQuarter">@L("ThisQuarter")</button>
-                        <button type="button" class="btn btn-light btn-sm period-preset" data-preset="thisYear">@L("ThisYear")</button>
-                    </div>
-                    <button type="button" id="ApplyFilters" class="btn btn-primary">
-                        <i class="fa fa-search btn-md-icon"></i>
-                        <span class="d-none d-md-inline-block">@L("Apply")</span>
+                <div class="col-sm-4 col-lg-2">
+                    @* w-100 so the button matches the column, and no size class so its
+                       height matches the inputs beside it. *@
+                    <button type="button" id="ApplyFilters" class="btn btn-primary w-100">
+                        <i class="fa fa-search btn-md-icon"></i>@L("Apply")
                     </button>
+                </div>
+            </div>
+
+            @* The presets are shortcuts, not primary controls, so they sit on their own
+               line where there is room for all four on one row - crammed into a quarter
+               column their labels wrapped to two lines and doubled the row height. *@
+            <div class="d-flex justify-content-end mt-3">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-sm btn-light text-nowrap period-preset" data-preset="thisMonth">@L("ThisMonth")</button>
+                    <button type="button" class="btn btn-sm btn-light text-nowrap period-preset" data-preset="lastMonth">@L("LastMonth")</button>
+                    <button type="button" class="btn btn-sm btn-light text-nowrap period-preset" data-preset="thisQuarter">@L("ThisQuarter")</button>
+                    <button type="button" class="btn btn-sm btn-light text-nowrap period-preset" data-preset="thisYear">@L("ThisYear")</button>
                 </div>
             </div>
         </div>
