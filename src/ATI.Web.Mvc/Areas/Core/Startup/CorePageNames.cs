@@ -5,6 +5,9 @@
         public static class MedRevnuPages
         {
             public const string Revenue = "Revenue";
+            public const string RevenueTransactions = "Revenue.ProcedureTransactions";
+            public const string Reports = "Reports";
+            public const string Configuration = "Configuration";
         }
         public static class Common
         {

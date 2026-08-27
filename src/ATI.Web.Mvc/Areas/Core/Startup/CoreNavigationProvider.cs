@@ -174,22 +174,72 @@ namespace ATI.Web.Areas.Core.Startup
                                 .Pages_Administration_Tenant_Settings)
                         )
                     )
+                // Revenue Transaction is the day-to-day screen, so it sits at the top
+                // level on its own rather than behind a Revenue group.
                 ).AddItem(new MenuItemDefinition(
-                        CorePageNames.MedRevnuPages.Revenue,
-                        L("Revenue"),
+                        CorePageNames.MedRevnuPages.RevenueTransactions,
+                        L("RevenueTransactions"),
+                        url: "Revenue/ProcedureTransactions",
                         icon: "flaticon-line-graph",
-                        permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue)
+                        permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_ProcedureTransactions)
+                    )
+                ).AddItem(new MenuItemDefinition(
+                        CorePageNames.MedRevnuPages.Reports,
+                        L("Reports"),
+                        icon: "flaticon-list-3",
+                        permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_Reports)
                     )
                     .AddItem(new MenuItemDefinition(
-                            "Revenue.ProcedureTransactions",
-                            L("RevenueTransactions"),
-                            url: "Revenue/ProcedureTransactions",
-                            icon: "flaticon-line-graph",
-                            permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_ProcedureTransactions)
+                            "Reports.RateChart",
+                            L("RateChart"),
+                            url: "Revenue/Reports/RateChart",
+                            icon: "flaticon-price-tag",
+                            permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_Reports)
                         )
                     )
                     .AddItem(new MenuItemDefinition(
-                            "Revenue.Physicians",
+                            "Reports.MonthlyRevenue",
+                            L("MonthlyRevenue"),
+                            url: "Revenue/Reports/MonthlyRevenue",
+                            icon: "flaticon-calendar-3",
+                            permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_Reports)
+                        )
+                    )
+                    .AddItem(new MenuItemDefinition(
+                            "Reports.CasesByPerson",
+                            L("CasesByPerson"),
+                            url: "Revenue/Reports/CasesByPerson",
+                            icon: "flaticon-user",
+                            permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_Reports)
+                        )
+                    )
+                    .AddItem(new MenuItemDefinition(
+                            "Reports.QuarterlyRollup",
+                            L("QuarterlyRollup"),
+                            url: "Revenue/Reports/QuarterlyRollup",
+                            icon: "flaticon-calendar-2",
+                            permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_Reports)
+                        )
+                    )
+                    .AddItem(new MenuItemDefinition(
+                            "Reports.TransactionAmount",
+                            L("TransactionAmount"),
+                            url: "Revenue/Reports/TransactionAmount",
+                            icon: "flaticon-coins",
+                            permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_Reports)
+                        )
+                    )
+                // Reference data - the things set up once and then left alone. Gated on
+                // the Revenue root permission so it disappears for a role that has only
+                // the dashboard and the transaction screen.
+                ).AddItem(new MenuItemDefinition(
+                        CorePageNames.MedRevnuPages.Configuration,
+                        L("Configuration"),
+                        icon: "flaticon-cogwheel-2",
+                        permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue)
+                    )
+                    .AddItem(new MenuItemDefinition(
+                            "Configuration.Physicians",
                             L("Physicians"),
                             url: "Revenue/Physicians",
                             icon: "flaticon-user",
@@ -197,7 +247,7 @@ namespace ATI.Web.Areas.Core.Startup
                         )
                     )
                     .AddItem(new MenuItemDefinition(
-                            "Revenue.Hospitals",
+                            "Configuration.Hospitals",
                             L("Hospitals"),
                             url: "Revenue/Hospitals",
                             icon: "flaticon-home-2",
@@ -205,7 +255,7 @@ namespace ATI.Web.Areas.Core.Startup
                         )
                     )
                     .AddItem(new MenuItemDefinition(
-                            "Revenue.Products",
+                            "Configuration.Products",
                             L("Products"),
                             url: "Revenue/Products",
                             icon: "flaticon-medical",
@@ -213,7 +263,7 @@ namespace ATI.Web.Areas.Core.Startup
                         )
                     )
                     .AddItem(new MenuItemDefinition(
-                            "Revenue.ProductQuotas",
+                            "Configuration.ProductQuotas",
                             L("ProductQuotas"),
                             url: "Revenue/ProductQuotas",
                             icon: "flaticon-stopwatch",
@@ -221,58 +271,11 @@ namespace ATI.Web.Areas.Core.Startup
                         )
                     )
                     .AddItem(new MenuItemDefinition(
-                            "Revenue.HospitalProductPrices",
+                            "Configuration.HospitalProductPrices",
                             L("HospitalProductPrices"),
                             url: "Revenue/HospitalProductPrices",
                             icon: "flaticon-price-tag",
                             permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_HospitalProductPrices)
-                        )
-                    )
-                    .AddItem(new MenuItemDefinition(
-                            "Revenue.Reports",
-                            L("Reports"),
-                            icon: "flaticon-list-3",
-                            permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_Reports)
-                        )
-                        .AddItem(new MenuItemDefinition(
-                                "Revenue.Reports.RateChart",
-                                L("RateChart"),
-                                url: "Revenue/Reports/RateChart",
-                                icon: "flaticon-price-tag",
-                                permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_Reports)
-                            )
-                        )
-                        .AddItem(new MenuItemDefinition(
-                                "Revenue.Reports.MonthlyRevenue",
-                                L("MonthlyRevenue"),
-                                url: "Revenue/Reports/MonthlyRevenue",
-                                icon: "flaticon-calendar-3",
-                                permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_Reports)
-                            )
-                        )
-                        .AddItem(new MenuItemDefinition(
-                                "Revenue.Reports.CasesByPerson",
-                                L("CasesByPerson"),
-                                url: "Revenue/Reports/CasesByPerson",
-                                icon: "flaticon-user",
-                                permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_Reports)
-                            )
-                        )
-                        .AddItem(new MenuItemDefinition(
-                                "Revenue.Reports.QuarterlyRollup",
-                                L("QuarterlyRollup"),
-                                url: "Revenue/Reports/QuarterlyRollup",
-                                icon: "flaticon-calendar-2",
-                                permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_Reports)
-                            )
-                        )
-                        .AddItem(new MenuItemDefinition(
-                                "Revenue.Reports.TransactionAmount",
-                                L("TransactionAmount"),
-                                url: "Revenue/Reports/TransactionAmount",
-                                icon: "flaticon-coins",
-                                permissionDependency: new SimplePermissionDependency(AppPermissions.Pages_Revenue_Reports)
-                            )
                         )
                     )
                 );

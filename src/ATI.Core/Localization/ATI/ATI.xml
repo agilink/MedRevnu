@@ -1499,5 +1499,6 @@
     <text name="NoTargetsForPeriod">No targets are set for this period, so there is nothing to measure against</text>
     <text name="DeviceTypeTotalsUseLineAmounts">Device type figures come from the device lines; a negotiated case total can make them differ from Total Sold</text>
     <text name="RelativeToBusiestDay">Bars are relative to the busiest day in the period</text>
+    <text name="Configuration">Configuration</text>
   </texts>
 </localizationDictionary>
