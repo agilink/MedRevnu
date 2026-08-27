@@ -33,7 +33,12 @@
                     month: month,
                     hospitalId: optionalInt('#HospitalFilter')
                 }),
-                success: function (result) {
+                // ABP wraps a JsonResult from an ABP controller in an AjaxResponse
+                // envelope ({result, success, error, __abp}). Unwrap it: read raw,
+                // the payload sat one level down and every field was undefined, so
+                // the report rendered empty over good data.
+                success: function (response) {
+                    var result = (response && response.__abp) ? response.result : response;
                     if (result.success) {
                         renderTable(result.data);
                         $('#reportContainer').show();
@@ -80,7 +85,8 @@
                 type: 'POST',
                 data: JSON.stringify({ year: optionalInt('#YearFilter'), month: optionalInt('#MonthFilter'), hospitalId: optionalInt('#HospitalFilter') }),
                 contentType: 'application/json',
-                success: function (file) {
+                success: function (response) {
+                    var file = (response && response.__abp) ? response.result : response;
                     app.downloadTempFile(file);
                 },
                 error: function () {

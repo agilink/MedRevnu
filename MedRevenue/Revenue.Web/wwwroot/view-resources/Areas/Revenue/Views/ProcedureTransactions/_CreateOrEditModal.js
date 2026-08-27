@@ -265,7 +265,10 @@
         function reloadPhysicians(hospitalId, keepPhysicianId) {
             // Query string, not a JSON body: a simple int? parameter does not bind from
             // the body, so this always arrived null and returned every physician.
-            return $.ajax({
+            // abp.ajax, not $.ajax: ABP wraps a JsonResult in an AjaxResponse envelope,
+            // so read raw the payload sits at result.result and result.physicians was
+            // undefined - the list never narrowed even once the parameter bound.
+            return abp.ajax({
                 url: abp.appPath + 'Revenue/ProcedureTransactions/GetPhysiciansByHospital'
                      + (hospitalId ? '?hospitalId=' + encodeURIComponent(hospitalId) : ''),
                 type: 'GET'
@@ -298,11 +301,11 @@
                 return;
             }
 
-            $.ajax({
+            abp.ajax({
                 url: abp.appPath + 'Revenue/ProcedureTransactions/GetPhysicianFacility'
                      + '?physicianId=' + encodeURIComponent(physicianId),
-                type: 'GET',
-                success: function (result) {
+                type: 'GET'
+            }).done(function (result) {
                     if (!result || !result.success || !result.facilityId) {
                         return;
                     }
@@ -317,7 +320,6 @@
                     }
 
                     repriceAllLines();
-                }
             });
         }
 

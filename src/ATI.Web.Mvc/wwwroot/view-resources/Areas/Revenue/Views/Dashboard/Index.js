@@ -132,20 +132,21 @@
 
                 abp.ui.setBusy($('#kt_app_content, .app-container'));
 
-                $.ajax({
+                // abp.ajax, not $.ajax. The controller derives from an ABP controller, so
+                // ABP wraps every JsonResult in an AjaxResponse envelope
+                // ({result, success, error, __abp}). Read with $.ajax the payload sits one
+                // level down at data.result, so every field came back undefined and the
+                // page rendered zeros and empty tables over perfectly good data.
+                // abp.ajax unwraps the envelope, adds the anti-forgery header and reports
+                // ABP errors itself.
+                abp.ajax({
                     url: abp.appPath + 'Revenue/Dashboard/GetDashboard',
                     type: 'POST',
-                    data: JSON.stringify(input),
-                    contentType: 'application/json',
-                    success: function (data) {
-                        self.render(data || {});
-                    },
-                    error: function () {
-                        abp.message.error(app.localize('AnErrorOccurred'));
-                    },
-                    complete: function () {
-                        abp.ui.clearBusy($('#kt_app_content, .app-container'));
-                    }
+                    data: JSON.stringify(input)
+                }).done(function (data) {
+                    self.render(data || {});
+                }).always(function () {
+                    abp.ui.clearBusy($('#kt_app_content, .app-container'));
                 });
             },
 
