@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Green accents on the things that separate one region of a page from another.
  *
  * The client's note was that the application is "way too white w/ no header colors
@@ -19,8 +19,45 @@
     --ati-accent: #50cd89;          /* Metronic success - matches existing buttons */
     --ati-accent-strong: #47be7d;   /* solid fills, e.g. modal headers */
     --ati-accent-deep: #2d8f61;     /* text on a light background, keeps contrast */
-    --ati-accent-soft: #e8fff3;     /* Metronic light-success - header tint */
+    --ati-accent-soft: #e8fff3;     /* Metronic light-success - card and grid headers */
+    --ati-accent-chrome: #d2f2e1;   /* header and footer - a step darker than the content */
     --ati-accent-border: #b9e9cf;
+}
+
+/* ---------------------------------------------------------------------------------
+ * Application header and footer
+ *
+ * Both naming conventions are covered: Theme11 (the active theme) uses #kt_header and
+ * #kt_footer, while other themes in this solution use the app-header / app-footer
+ * classes. Whichever theme is selected, the bar gets the same treatment.
+ *
+ * Tinted rather than filled. The header carries the main menu, and a solid green would
+ * mean overriding link colour in every state - default, hover, active, open dropdown -
+ * to keep it readable. A tint leaves the existing dark text alone and still reads as a
+ * distinct band.
+ * ------------------------------------------------------------------------------- */
+
+#kt_header,
+#kt_app_header,
+.app-header {
+    background-color: var(--ati-accent-chrome) !important;
+    border-bottom: 1px solid var(--ati-accent-border);
+}
+
+/* Theme11's header is sticky and Metronic repaints its background when it engages, so
+   the sticky state has to be stated too or the colour vanishes on scroll. */
+#kt_header[data-kt-sticky="on"],
+#kt_app_header[data-kt-sticky="on"],
+.app-header[data-kt-sticky="on"],
+.header-fixed .header {
+    background-color: var(--ati-accent-chrome) !important;
+}
+
+#kt_footer,
+#kt_app_footer,
+.app-footer {
+    background-color: var(--ati-accent-chrome) !important;
+    border-top: 1px solid var(--ati-accent-border);
 }
 
 /* ---------------------------------------------------------------------------------
@@ -101,6 +138,15 @@ table.dataTable > thead > tr > th {
     color: #ffffff;
 }
 
+/* The footer holds Cancel and Save. Tinted, not filled: a solid green here would put
+   the green Save button on a green ground and flatten it. */
+.modal-content > .modal-footer {
+    background-color: var(--ati-accent-soft);
+    border-top: 1px solid var(--ati-accent-border);
+    border-bottom-left-radius: inherit;
+    border-bottom-right-radius: inherit;
+}
+
 /* The close button is a dark SVG by default and disappears on the green. */
 .modal-content > .modal-header .btn-close {
     filter: brightness(0) invert(1);
@@ -120,10 +166,21 @@ table.dataTable > thead > tr > th {
 
 [data-bs-theme="dark"] {
     --ati-accent-soft: rgba(80, 205, 137, 0.12);
+    --ati-accent-chrome: rgba(80, 205, 137, 0.20);
     --ati-accent-border: rgba(80, 205, 137, 0.35);
     --ati-accent-deep: #6fd9a1;
 }
 
+[data-bs-theme="dark"] #kt_header,
+[data-bs-theme="dark"] #kt_app_header,
+[data-bs-theme="dark"] .app-header,
+[data-bs-theme="dark"] #kt_footer,
+[data-bs-theme="dark"] #kt_app_footer,
+[data-bs-theme="dark"] .app-footer {
+    background-color: var(--ati-accent-chrome);
+}
+
+[data-bs-theme="dark"] .modal-content > .modal-footer,
 [data-bs-theme="dark"] .table > thead > tr > th,
 [data-bs-theme="dark"] .table > thead th,
 [data-bs-theme="dark"] table.dataTable > thead > tr > th,
