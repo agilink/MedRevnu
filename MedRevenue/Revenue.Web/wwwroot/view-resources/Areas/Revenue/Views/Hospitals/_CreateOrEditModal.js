@@ -9,10 +9,9 @@
             _$form = _modalManager.getModal().find('form[name=HospitalCreateOrEditForm]');
             _$form.validate();
 
-            _modalManager.getModal().find('.save-button').click(function (e) {
-                e.preventDefault();
-                save();
-            });
+            // No .save-button binding here on purpose. ModalManager already binds that
+            // button to this script's save(), so binding it again made one click submit
+            // twice - the first call saved and the second came back "already in use".
         };
 
         function save() {
