@@ -303,7 +303,6 @@ namespace ATI.EntityFrameworkCore
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.ProductCategoryId).IsRequired();
                 entity.Property(e => e.SubcategoryName).IsRequired().HasMaxLength(50);
-                entity.Property(e => e.ImplantType).IsRequired();
                 entity.Property(e => e.Description).HasMaxLength(500);
 
                 entity.HasOne(e => e.ProductCategory)

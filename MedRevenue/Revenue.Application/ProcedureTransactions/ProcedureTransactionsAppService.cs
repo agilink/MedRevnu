@@ -434,8 +434,11 @@ namespace ATI.Revenue.Application.ProcedureTransactions
             var productIds = lines.Select(l => l.ProductId).Distinct().ToList();
 
             var mismatches = await _productRepository.GetAll()
+                // A subcategory with no implant type - leads and accessories - belongs
+                // on either kind of case, so it is never a mismatch.
                 .Where(p => productIds.Contains(p.Id)
                             && p.ProductSubcategory != null
+                            && p.ProductSubcategory.ImplantType != null
                             && p.ProductSubcategory.ImplantType != implantType)
                 .Select(p => new
                 {
@@ -451,7 +454,7 @@ namespace ATI.Revenue.Application.ProcedureTransactions
             }
 
             var detail = string.Join("; ", mismatches.Select(m =>
-                $"{m.Name} is in \"{m.SubcategoryName}\", which is {Describe(m.ImplantType)}"));
+                $"{m.Name} is in \"{m.SubcategoryName}\", which is {Describe(m.ImplantType.Value)}"));
 
             throw new UserFriendlyException(
                 $"Every device on a {Describe(implantType)} case must be {Describe(implantType)}",
