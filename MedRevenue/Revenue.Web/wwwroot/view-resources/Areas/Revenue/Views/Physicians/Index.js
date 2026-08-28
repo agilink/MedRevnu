@@ -137,9 +137,13 @@
                     render: function (userName, type, row) {
                         // The username is the flag: it says both that a login exists and
                         // what it is, which is what anyone looking at this column wants.
-                        return row.hasUser
+                        // The wrapper carries the physician id so creating a login can put
+                        // a spinner in this exact cell without depending on row internals.
+                        var content = row.hasUser
                             ? '<span class="badge badge-light-success">' + $('<div>').text(userName || '').html() + '</span>'
                             : '<span class="text-muted">-</span>';
+
+                        return '<span class="login-cell" data-physician-id="' + row.id + '">' + content + '</span>';
                     }
                 }
             ]
@@ -164,7 +168,27 @@
             );
         }
 
+        // Physicians whose login is being created right now. Creating one takes a
+        // noticeable moment - it writes a user, assigns a role and updates the physician -
+        // so the row has to say something is happening, and a second click on the same
+        // physician has to be ignored while it does.
+        var _creatingUserFor = {};
+
+        function $loginCell(physicianId) {
+            return _$physiciansTable.find('.login-cell[data-physician-id="' + physicianId + '"]');
+        }
+
+        function showCreatingUser(physicianId) {
+            $loginCell(physicianId).html(
+                '<span class="spinner-border spinner-border-sm align-middle text-primary" role="status"></span>'
+                + '<span class="text-muted fs-8 ms-2">' + app.localize('CreatingLogin') + '</span>');
+        }
+
         function createUserForPhysician(physician) {
+            if (_creatingUserFor[physician.id]) {
+                return;
+            }
+
             abp.message.confirm(
                 abp.utils.formatString(
                     app.localize('CreateUserForPhysicianConfirmation'),
@@ -176,8 +200,12 @@
                         return;
                     }
 
+                    _creatingUserFor[physician.id] = true;
+                    showCreatingUser(physician.id);
+
                     _physiciansService.createUserForPhysician({ id: physician.id })
                         .done(function (result) {
+                            // The reload replaces the spinner with the new username.
                             reload();
 
                             abp.notify.success(abp.utils.formatString(
@@ -192,6 +220,14 @@
                                     app.localize('PhysicianUserFallbackEmailWarning'),
                                     result.emailAddress));
                             }
+                        })
+                        .fail(function () {
+                            // Put the cell back; leaving a spinner spinning forever would
+                            // read as still working.
+                            $loginCell(physician.id).html('<span class="text-muted">-</span>');
+                        })
+                        .always(function () {
+                            delete _creatingUserFor[physician.id];
                         });
                 }
             );
