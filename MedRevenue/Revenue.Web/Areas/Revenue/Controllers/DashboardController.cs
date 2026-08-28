@@ -1,3 +1,4 @@
+﻿using ATI.Revenue.Application.Authorization;
 using ATI.Revenue.Application.Dashboard;
 using ATI.Revenue.Application.Dashboard.Dtos;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Abp.AspNetCore.Mvc.Authorization;
 using Abp.Domain.Repositories;
+using Abp.Linq.Extensions;
 using ATI.Admin.Domain.Entities;
 using ATI.Authorization;
 using ATI.Web.Controllers;
@@ -20,20 +22,28 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
     {
         private readonly IRevenueDashboardAppService _dashboardAppService;
         private readonly IRepository<Facility, int> _facilityRepository;
+        private readonly IPhysicianDataScopeProvider _scopeProvider;
 
         public DashboardController(
             IRevenueDashboardAppService dashboardAppService,
-            IRepository<Facility, int> facilityRepository)
+            IRepository<Facility, int> facilityRepository,
+            IPhysicianDataScopeProvider scopeProvider)
         {
             _dashboardAppService = dashboardAppService;
             _facilityRepository = facilityRepository;
+            _scopeProvider = scopeProvider;
         }
 
         public async Task<IActionResult> Index()
         {
             var today = Abp.Timing.Clock.Now.Date;
+            var scope = await _scopeProvider.GetAsync();
 
-            ViewBag.Hospitals = await GetHospitalSelectList();
+            // A physician sees one hospital's figures, so offering the full list - and an
+            // "All Hospitals" option they can never actually have - would be misleading.
+            ViewBag.Hospitals = await GetHospitalSelectList(scope.IsRestricted ? scope.HospitalId : null);
+            ViewBag.IsHospitalLocked = scope.IsRestricted;
+            ViewBag.HasNoHospital = scope.SeesNothing;
             ViewBag.DefaultFromDate = new DateTime(today.Year, today.Month, 1).ToString("yyyy-MM-dd");
             ViewBag.DefaultToDate = today.ToString("yyyy-MM-dd");
 
@@ -85,14 +95,18 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
             return Json(trend);
         }
 
-        private async Task<SelectList> GetHospitalSelectList()
+        /// <summary>
+        /// Every hospital, or just the one a restricted user is confined to.
+        /// </summary>
+        private async Task<SelectList> GetHospitalSelectList(int? onlyHospitalId)
         {
             var hospitals = await _facilityRepository.GetAll()
+                .WhereIf(onlyHospitalId.HasValue, h => h.Id == onlyHospitalId.Value)
                 .Select(h => new { h.Id, FacilityName = h.FacilityName ?? "" })
                 .OrderBy(h => h.FacilityName)
                 .ToListAsync();
 
-            return new SelectList(hospitals, "Id", "FacilityName");
+            return new SelectList(hospitals, "Id", "FacilityName", onlyHospitalId);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using ATI.Revenue.Application.Authorization;
 using ATI.Revenue.Application.ProcedureTransactions;
 using ATI.Revenue.Application.ProcedureTransactions.Dtos;
 using ATI.Revenue.Application.Products;
@@ -29,25 +30,35 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         private readonly IRepository<Personnel, int> _personnelRepository;
         private readonly IRepository<Facility, int> _facilityRepository;
         private readonly IProductsAppService _productsAppService;
+        private readonly IPhysicianDataScopeProvider _scopeProvider;
 
         public ProcedureTransactionsController(
             IProcedureTransactionsAppService procedureTransactionsAppService,
             IRepository<Personnel, int> personnelRepository,
             IRepository<Facility, int> facilityRepository,
-            IProductsAppService productsAppService)
+            IProductsAppService productsAppService,
+            IPhysicianDataScopeProvider scopeProvider)
         {
             _procedureTransactionsAppService = procedureTransactionsAppService;
             _personnelRepository = personnelRepository;
             _facilityRepository = facilityRepository;
             _productsAppService = productsAppService;
+            _scopeProvider = scopeProvider;
         }
 
         // View for listing procedure transactions
         public async Task<IActionResult> Index()
         {
-            // Populate filter dropdowns
-            ViewBag.Hospitals = await GetHospitalSelectList();
-            ViewBag.Physicians = await GetPhysicianSelectList();
+            // Filter dropdowns, narrowed to what this user is allowed to ask about. The
+            // list itself is already scoped server-side; offering other hospitals and
+            // physicians here would only advertise names they cannot reach.
+            var scope = await _scopeProvider.GetAsync();
+
+            ViewBag.Hospitals = await GetHospitalSelectList(scope.IsRestricted ? scope.HospitalId : null);
+            ViewBag.Physicians = await GetPhysicianSelectList(
+                scope.IsRestricted ? scope.PhysicianId : null,
+                scope.IsRestricted ? scope.HospitalId : null);
+            ViewBag.IsPhysicianRestricted = scope.IsRestricted;
             ViewBag.CurrentYear = DateTime.Now.Year;
             ViewBag.CurrentMonth = DateTime.Now.Month;
 
@@ -82,9 +93,15 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
                 };
             }
 
-            // Populate dropdowns
-            ViewBag.Hospitals = await GetHospitalSelectList();
-            ViewBag.Physicians = await GetPhysicianSelectList();
+            // A physician gets one hospital and themselves, both preselected, so the case
+            // can only be recorded against what they are actually allowed to record.
+            var scope = await _scopeProvider.GetAsync();
+
+            ViewBag.Hospitals = await GetHospitalSelectList(scope.IsRestricted ? scope.HospitalId : null);
+            ViewBag.Physicians = await GetPhysicianSelectList(
+                scope.IsRestricted ? scope.PhysicianId : null,
+                scope.IsRestricted ? scope.HospitalId : null);
+            ViewBag.IsPhysicianRestricted = scope.IsRestricted;
             ViewBag.Products = await GetProductSelectList();
 
             return PartialView("_CreateOrEditModal", viewModel);
@@ -107,7 +124,19 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         [HttpGet]
         public async Task<JsonResult> GetPhysiciansByHospital(int? hospitalId)
         {
+            // A restricted user's own scope wins over whatever the page asked for,
+            // otherwise this endpoint would happily list any hospital's physicians to
+            // anyone who called it with a different id.
+            var scope = await _scopeProvider.GetAsync();
+
+            if (scope.IsRestricted)
+            {
+                hospitalId = scope.HospitalId;
+            }
+
             var physicians = await _personnelRepository.GetAll()
+                .WhereIf(scope.SeesNothing, p => false)
+                .WhereIf(scope.IsRestricted && scope.PhysicianId.HasValue, p => p.Id == scope.PhysicianId.Value)
                 .WhereIf(hospitalId.HasValue, p => p.FacilityId == hospitalId.Value)
                 .OrderBy(p => p.LAST_NAME).ThenBy(p => p.FIRST_NAME)
                 .Select(p => new
@@ -173,19 +202,35 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         }
 
         // Helper methods for dropdowns
-        private async Task<SelectList> GetHospitalSelectList()
+        /// <summary>
+        /// Every hospital, or just the one a restricted user is confined to. The single
+        /// entry is preselected, so a physician never has to choose it.
+        /// </summary>
+        private async Task<SelectList> GetHospitalSelectList(int? onlyHospitalId)
         {
             var hospitals = await _facilityRepository.GetAll()
+                .WhereIf(onlyHospitalId.HasValue, h => h.Id == onlyHospitalId.Value)
                 .Select(h => new { h.Id, FacilityName = h.FacilityName ?? "" })
                 .OrderBy(h => h.FacilityName)
                 .ToListAsync();
-            return new SelectList(hospitals, "Id", "FacilityName");
+
+            return new SelectList(hospitals, "Id", "FacilityName", onlyHospitalId);
         }
 
-        private async Task<SelectList> GetPhysicianSelectList()
+        /// <summary>
+        /// The whole roster, or just the signed-in physician. Narrowing this is not only
+        /// convenience: the roster carries the names of every physician at every hospital,
+        /// which is not a physician user's to browse.
+        /// </summary>
+        private async Task<SelectList> GetPhysicianSelectList(int? onlyPhysicianId, int? onlyHospitalId)
         {
             var physicianList = await _personnelRepository.GetAll()
                 .Where(p => p.FIRST_NAME != null || p.LAST_NAME != null)
+                .WhereIf(onlyPhysicianId.HasValue, p => p.Id == onlyPhysicianId.Value)
+                // A restricted user with no personnel record of their own still must not
+                // see other hospitals' physicians.
+                .WhereIf(!onlyPhysicianId.HasValue && onlyHospitalId.HasValue,
+                    p => p.FacilityId == onlyHospitalId.Value)
                 .Select(p => new
                 {
                     p.Id,
@@ -199,7 +244,7 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
                 .OrderBy(p => p.Name)
                 .ToList();
 
-            return new SelectList(namedList, "Id", "Name");
+            return new SelectList(namedList, "Id", "Name", onlyPhysicianId);
         }
 
         /// <summary>

@@ -30,11 +30,17 @@
                 @* The hospital leads: it narrows the physician list below and prices the
                    devices. *@
                 <label class="form-label" for="HospitalId">@L("Hospital")</label>
+                @* Locked users get their one hospital with no blank option, so it is
+                   genuinely preselected rather than merely offered. *@
                 <select class="form-control" id="HospitalId" name="HospitalId">
-                    <option value="">@L("SelectHospital")</option>
+                    @if (!(bool)ViewBag.IsPhysicianRestricted)
+                    {
+                        <option value="">@L("SelectHospital")</option>
+                    }
                     @foreach (var hospital in ViewBag.Hospitals)
                     {
-                        var isSelected = Model.ProcedureTransaction != null && hospital.Value == Model.ProcedureTransaction.HospitalId.ToString();
+                        var isSelected = (bool)ViewBag.IsPhysicianRestricted
+                            || (Model.ProcedureTransaction != null && hospital.Value == Model.ProcedureTransaction.HospitalId.ToString());
                         <option value="@hospital.Value" selected="@isSelected">@hospital.Text</option>
                     }
                 </select>
@@ -51,10 +57,14 @@
             <div class="col-md-6 mb-5">
                 <label class="form-label required" for="PhysicianId">@L("Physician")</label>
                 <select class="form-control" id="PhysicianId" name="PhysicianId" required>
-                    <option value="">@L("SelectPhysician")</option>
+                    @if (!(bool)ViewBag.IsPhysicianRestricted)
+                    {
+                        <option value="">@L("SelectPhysician")</option>
+                    }
                     @foreach (var physician in ViewBag.Physicians)
                     {
-                        var isSelected = Model.ProcedureTransaction != null && physician.Value == Model.ProcedureTransaction.PhysicianId.ToString();
+                        var isSelected = (bool)ViewBag.IsPhysicianRestricted
+                            || (Model.ProcedureTransaction != null && physician.Value == Model.ProcedureTransaction.PhysicianId.ToString());
                         <option value="@physician.Value" selected="@isSelected">@physician.Text</option>
                     }
                 </select>

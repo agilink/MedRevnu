@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Abp.Dependency;
 using Abp.Domain.Repositories;
 using Abp.Runtime.Session;
@@ -25,6 +25,13 @@ namespace ATI.Revenue.Application.Authorization
         /// means they may see nothing at all, which is not the same as no filter.
         /// </summary>
         public int? HospitalId { get; set; }
+
+        /// <summary>
+        /// The personnel record behind this login, when there is one. Lets a screen
+        /// preselect the signed-in physician instead of offering the whole roster.
+        /// Null for a user holding the Physician role with no personnel record.
+        /// </summary>
+        public int? PhysicianId { get; set; }
 
         /// <summary>
         /// Restricted, but with no hospital on their physician record - so there is
@@ -100,7 +107,7 @@ namespace ATI.Revenue.Application.Authorization
 
             var physician = await _personnelRepository.GetAll()
                 .Where(p => p.UserId == userId.Value)
-                .Select(p => new { p.FacilityId })
+                .Select(p => new { p.Id, p.FacilityId })
                 .FirstOrDefaultAsync();
 
             if (physician != null)
@@ -108,7 +115,8 @@ namespace ATI.Revenue.Application.Authorization
                 return new PhysicianDataScope
                 {
                     IsRestricted = true,
-                    HospitalId = physician.FacilityId
+                    HospitalId = physician.FacilityId,
+                    PhysicianId = physician.Id
                 };
             }
 

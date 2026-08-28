@@ -35,11 +35,21 @@
                 </div>
                 <div class="col-sm-8 col-lg-4">
                     <label for="HospitalFilter" class="form-label">@L("Hospital")</label>
+                    @* A physician is confined to one hospital, so "All Hospitals" is not
+                       on offer - it would suggest a view they can never have. Their own
+                       hospital is the only entry and comes preselected. *@
                     <select id="HospitalFilter" class="form-select">
-                        <option value="">@L("AllHospitals")</option>
+                        @if (!(bool)ViewBag.IsHospitalLocked)
+                        {
+                            <option value="">@L("AllHospitals")</option>
+                        }
+                        else if ((bool)ViewBag.HasNoHospital)
+                        {
+                            <option value="">@L("NoHospitalAssigned")</option>
+                        }
                         @foreach (var hospital in ViewBag.Hospitals)
                         {
-                            <option value="@hospital.Value">@hospital.Text</option>
+                            <option value="@hospital.Value" selected="@hospital.Selected">@hospital.Text</option>
                         }
                     </select>
                 </div>
