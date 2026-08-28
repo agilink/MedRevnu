@@ -41,8 +41,7 @@
                         monthFilter: month ? parseInt(month) : null,
                         hospitalIdFilter: hospitalId ? parseInt(hospitalId) : null,
                         physicianIdFilter: physicianId ? parseInt(physicianId) : null,
-                        implantTypeFilter: null,
-                        statusFilter: $('#StatusFilter').val() ? parseInt($('#StatusFilter').val(), 10) : null
+                        implantTypeFilter: null
                     };
                 }
             },
