@@ -1,0 +1,133 @@
+/*
+ * Green accents on the things that separate one region of a page from another.
+ *
+ * The client's note was that the application is "way too white w/ no header colors
+ * (page, grid, modal, etc) so everything looks unorganized". The problem is not a lack
+ * of colour for its own sake - it is that a card header, a table header and the page
+ * heading are all the same white as the content beneath them, so nothing reads as a
+ * boundary. Colouring exactly those boundaries is what makes the structure visible.
+ *
+ * Content areas stay white on purpose. Tinting those as well would reduce contrast on
+ * the figures, which are the point of these screens.
+ *
+ * The palette is Metronic's own success family, so the accents match the buttons the
+ * application already uses rather than introducing a second green. To change the shade,
+ * change these four values and nothing else.
+ */
+
+:root {
+    --ati-accent: #50cd89;          /* Metronic success - matches existing buttons */
+    --ati-accent-strong: #47be7d;   /* solid fills, e.g. modal headers */
+    --ati-accent-deep: #2d8f61;     /* text on a light background, keeps contrast */
+    --ati-accent-soft: #e8fff3;     /* Metronic light-success - header tint */
+    --ati-accent-border: #b9e9cf;
+}
+
+/* ---------------------------------------------------------------------------------
+ * Page heading
+ * ------------------------------------------------------------------------------- */
+
+.app-toolbar {
+    background-color: var(--ati-accent-soft);
+    border-bottom: 1px solid var(--ati-accent-border);
+}
+
+/* A bar down the left of the title, so the page announces itself without a heavy band. */
+.app-toolbar .page-title {
+    border-left: 4px solid var(--ati-accent);
+    padding-left: 0.85rem;
+}
+
+.app-toolbar .page-heading {
+    color: var(--ati-accent-deep) !important;
+}
+
+/* ---------------------------------------------------------------------------------
+ * Card headers
+ * ------------------------------------------------------------------------------- */
+
+.card > .card-header {
+    background-color: var(--ati-accent-soft);
+    border-bottom: 1px solid var(--ati-accent-border);
+    border-top-left-radius: inherit;
+    border-top-right-radius: inherit;
+}
+
+.card > .card-header .card-title,
+.card > .card-header .card-title .card-label {
+    color: var(--ati-accent-deep);
+}
+
+/* ---------------------------------------------------------------------------------
+ * Grid headers
+ *
+ * Both plain tables and DataTables, which wraps its own markup around the same thead.
+ * ------------------------------------------------------------------------------- */
+
+.table > thead > tr > th,
+.table > thead th,
+table.dataTable > thead > tr > th {
+    background-color: var(--ati-accent-soft);
+    color: var(--ati-accent-deep) !important;
+    border-bottom: 2px solid var(--ati-accent-border) !important;
+}
+
+/* The header row often carries text-muted, which greys out the colour above. */
+.table > thead > tr.fw-bold.text-muted > th {
+    color: var(--ati-accent-deep) !important;
+}
+
+/* Keep rows legible: tint the header, not the body. */
+.table > tbody > tr > td {
+    background-color: transparent;
+}
+
+/* ---------------------------------------------------------------------------------
+ * Modal headers
+ *
+ * Solid rather than tinted. A modal sits on top of the page and needs a harder edge to
+ * read as a separate thing, and this is the case the client called out by name.
+ * ------------------------------------------------------------------------------- */
+
+.modal-content > .modal-header {
+    background-color: var(--ati-accent-strong);
+    border-bottom: none;
+}
+
+.modal-content > .modal-header,
+.modal-content > .modal-header .modal-title,
+.modal-content > .modal-header h5,
+.modal-content > .modal-header .fw-bold {
+    color: #ffffff;
+}
+
+/* The close button is a dark SVG by default and disappears on the green. */
+.modal-content > .modal-header .btn-close {
+    filter: brightness(0) invert(1);
+    opacity: 0.85;
+}
+
+.modal-content > .modal-header .btn-close:hover {
+    opacity: 1;
+}
+
+/* ---------------------------------------------------------------------------------
+ * Dark mode
+ *
+ * The tints above are light-on-light and would glare against a dark surface, so under
+ * dark mode the accent becomes a border and a text colour only.
+ * ------------------------------------------------------------------------------- */
+
+[data-bs-theme="dark"] {
+    --ati-accent-soft: rgba(80, 205, 137, 0.12);
+    --ati-accent-border: rgba(80, 205, 137, 0.35);
+    --ati-accent-deep: #6fd9a1;
+}
+
+[data-bs-theme="dark"] .table > thead > tr > th,
+[data-bs-theme="dark"] .table > thead th,
+[data-bs-theme="dark"] table.dataTable > thead > tr > th,
+[data-bs-theme="dark"] .card > .card-header,
+[data-bs-theme="dark"] .app-toolbar {
+    background-color: var(--ati-accent-soft);
+}
