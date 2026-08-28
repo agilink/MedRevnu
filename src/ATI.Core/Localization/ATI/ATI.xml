@@ -1512,5 +1512,6 @@
     <text name="PhysicianUserFallbackEmailWarning">No email address was on file, so {0} was generated. Password reset will not reach it until a real address is set.</text>
     <text name="CaseBelongsToAnotherHospital">This case belongs to another hospital</text>
     <text name="NoHospitalAssignedToPhysicianUser">No hospital is assigned to your physician record, so there is nothing you can work on yet. Ask an administrator to assign one.</text>
+    <text name="DevicesClearedForImplantType">{0} device(s) were cleared because they do not belong on this implant type</text>
   </texts>
 </localizationDictionary>

@@ -94,7 +94,7 @@
             });
 
             $modal.find('input[name=ImplantType]').on('change', function () {
-                flagMismatchedLines();
+                refilterProductLists();
             });
 
             $modal.find('#TotalAmount').on('input', function () {
@@ -118,19 +118,89 @@
             });
         }
 
-        function addLine(line) {
-            var options = ['<option value=""></option>'];
+        function currentImplantType() {
+            return parseInt($('input[name=ImplantType]:checked').val(), 10);
+        }
 
-            _products.forEach(function (p) {
-                var selected = line && line.productId === p.id ? ' selected' : '';
+        // The devices offered for a case are the ones that belong on it.
+        //
+        // Products with no subcategory carry no implant type, so there is nothing to judge
+        // them against - they are always offered rather than being made unusable on every
+        // case. keepProductId keeps a device that is already saved on the line, so opening
+        // an older case whose device no longer matches cannot silently swap it out; that
+        // one is flagged instead.
+        function productsForImplantType(caseType, keepProductId) {
+            return _products.filter(function (p) {
+                if (keepProductId && p.id === keepProductId) {
+                    return true;
+                }
+
+                if (p.implantType === null || p.implantType === undefined) {
+                    return true;
+                }
+
+                return isNaN(caseType) || p.implantType === caseType;
+            });
+        }
+
+        function fillProductSelect($select, list, selectedId) {
+            $select.empty().append(
+                $('<option></option>').val('').text(app.localize('SelectProduct')));
+
+            list.forEach(function (p) {
                 var implant = (p.implantType === null || p.implantType === undefined) ? '' : p.implantType;
-                options.push('<option value="' + p.id + '" data-implant-type="' + implant + '"' + selected + '></option>');
+
+                // text(), so a product name cannot inject markup.
+                var $option = $('<option></option>')
+                    .val(p.id)
+                    .attr('data-implant-type', implant)
+                    .text(p.name);
+
+                if (selectedId && p.id === selectedId) {
+                    $option.prop('selected', true);
+                }
+
+                $select.append($option);
+            });
+        }
+
+        // Re-offer every row's devices after the case's implant type changes. A device
+        // that no longer belongs is cleared rather than left sitting behind a warning,
+        // and the user is told how many went.
+        function refilterProductLists() {
+            var caseType = currentImplantType();
+            var list = productsForImplantType(caseType, null);
+            var cleared = 0;
+
+            _$linesBody.find('tr').each(function () {
+                var $row = $(this);
+                var $select = $row.find('.device-product');
+                var selectedId = parseInt($select.val(), 10);
+                var stillValid = !isNaN(selectedId) && list.some(function (p) { return p.id === selectedId; });
+
+                fillProductSelect($select, list, stillValid ? selectedId : null);
+
+                if (!isNaN(selectedId) && !stillValid) {
+                    cleared++;
+                    $row.find('.device-unit-price').val('0.00');
+                    updateLineTotal($row);
+                }
             });
 
+            if (cleared > 0) {
+                abp.notify.info(abp.utils.formatString(
+                    app.localize('DevicesClearedForImplantType'), cleared));
+            }
+
+            flagMismatchedLines();
+            recalculateAll();
+        }
+
+        function addLine(line) {
             var html = '<tr>'
                 + '<td>'
                 + '<input type="hidden" class="device-line-id" value="' + (line && line.id ? line.id : 0) + '" />'
-                + '<select class="form-select form-select-sm device-product">' + options.join('') + '</select>'
+                + '<select class="form-select form-select-sm device-product"></select>'
                 + '<div class="text-danger small device-warning" style="display:none;"></div>'
                 + '</td>'
                 + '<td><input type="number" class="form-control form-control-sm device-quantity" min="1" value="'
@@ -143,11 +213,12 @@
                 + '</tr>';
 
             var $row = $(html);
+            var selectedId = line && line.productId ? line.productId : null;
 
-            // Option labels are set with text() so a product name cannot inject markup.
-            $row.find('.device-product option').each(function (i) {
-                $(this).text(i === 0 ? app.localize('SelectProduct') : _products[i - 1].name);
-            });
+            fillProductSelect(
+                $row.find('.device-product'),
+                productsForImplantType(currentImplantType(), selectedId),
+                selectedId);
 
             _$linesBody.append($row);
 
@@ -206,8 +277,10 @@
                 });
         }
 
-        // Every device on a case must match the case's implant type. The server enforces
-        // it; this shows why before the user tries to save.
+        // The dropdown no longer offers a mismatched device, so this fires only for a
+        // device already saved on an older case that no longer matches - that one is kept
+        // in the list so it cannot be silently swapped, and flagged so it is dealt with.
+        // The server enforces the rule regardless.
         function flagMismatchedLines() {
             var caseType = parseInt($('input[name=ImplantType]:checked').val(), 10);
 
