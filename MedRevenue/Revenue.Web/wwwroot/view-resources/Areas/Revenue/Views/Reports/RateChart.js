@@ -77,6 +77,17 @@
                     }
 
                     row.append($('<td class="text-end fw-bold"></td>').text(money(item.effectivePrice)));
+
+                    // Where the effective price came from. A hospital that has never been
+                    // priced for a product silently inherits the base price, and without
+                    // this the row looks like a negotiated rate.
+                    if (item.contractedPrice === null || item.contractedPrice === undefined) {
+                        row.append('<td><span class="badge badge-light-warning">'
+                            + app.localize('PriceBaseFallback') + '</span></td>');
+                    } else {
+                        row.append('<td><span class="badge badge-light-primary">'
+                            + app.localize('PriceContracted') + '</span></td>');
+                    }
                     row.append($('<td class="text-center"></td>').text(item.unitsSoldThisYear || 0));
                     row.append($('<td class="text-center"></td>').text(item.casesThisYear || 0));
                     tbody.append(row);

@@ -43,6 +43,10 @@ namespace ATI.Revenue.Application.Reports.Exporting
                     // Blank rather than 0.00 where this hospital has no contracted price.
                     { "Contracted Price", row.ContractedPrice.HasValue ? (object)row.ContractedPrice.Value : "" },
                     { "Effective Price", row.EffectivePrice },
+                    // Says which of the two the effective price actually came from. The
+                    // blank contracted-price cell implies it, but only if the reader
+                    // notices; an exported sheet gets read without that context.
+                    { "Price Source", row.ContractedPrice.HasValue ? "Contracted" : "Base price" },
                     { "Units (YTD)", row.UnitsSoldThisYear },
                     { "Cases (YTD)", row.CasesThisYear },
                     { "System", row.IsSystem ? "Yes" : "No" }

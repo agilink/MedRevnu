@@ -1516,5 +1516,8 @@
     <text name="CreatingLogin">Creating login...</text>
     <text name="CaseDetails">Case Details</text>
     <text name="AllProductCodes">All Product Codes</text>
+    <text name="PriceSource">Price Source</text>
+    <text name="PriceContracted">Contracted</text>
+    <text name="PriceBaseFallback">Base price</text>
   </texts>
 </localizationDictionary>

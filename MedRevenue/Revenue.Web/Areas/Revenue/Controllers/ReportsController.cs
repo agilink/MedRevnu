@@ -92,13 +92,12 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> GetRateChartData(int? hospitalId, string productCode)
+        public async Task<JsonResult> GetRateChartData([FromBody] RateChartReportInput input)
         {
-            var data = await _reportsAppService.GetRateChartReport(new RateChartReportInput
-            {
-                HospitalId = hospitalId,
-                ProductCode = productCode
-            });
+            // [FromBody] and a single input, not loose parameters. The page posts a
+            // JSON body and simple types never bind from one, so every filter on this
+            // report used to arrive null and the report ran on its defaults.
+            var data = await _reportsAppService.GetRateChartReport(input ?? new RateChartReportInput());
 
             return Json(new { success = true, data = data });
         }
@@ -115,14 +114,12 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> GetMonthlyRevenueData(int? year, int? month, int? hospitalId)
+        public async Task<JsonResult> GetMonthlyRevenueData([FromBody] MonthlyRevenueReportInput input)
         {
-            var data = await _reportsAppService.GetMonthlyRevenueReport(new MonthlyRevenueReportInput
-            {
-                Year = year,
-                Month = month,
-                HospitalId = hospitalId
-            });
+            // [FromBody] and a single input, not loose parameters. The page posts a
+            // JSON body and simple types never bind from one, so every filter on this
+            // report used to arrive null and the report ran on its defaults.
+            var data = await _reportsAppService.GetMonthlyRevenueReport(input ?? new MonthlyRevenueReportInput());
 
             return Json(new { success = true, data = data });
         }
@@ -137,14 +134,12 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> GetCasesByPersonData(int? year, int? hospitalId, int? physicianId)
+        public async Task<JsonResult> GetCasesByPersonData([FromBody] CasesByPersonReportInput input)
         {
-            var data = await _reportsAppService.GetCasesByPersonReport(new CasesByPersonReportInput
-            {
-                Year = year,
-                HospitalId = hospitalId,
-                PhysicianId = physicianId
-            });
+            // [FromBody] and a single input, not loose parameters. The page posts a
+            // JSON body and simple types never bind from one, so every filter on this
+            // report used to arrive null and the report ran on its defaults.
+            var data = await _reportsAppService.GetCasesByPersonReport(input ?? new CasesByPersonReportInput());
 
             return Json(new { success = true, data = data });
         }
@@ -159,14 +154,12 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> GetTransactionAmountData(int? year, int? physicianId, int? productCategoryId)
+        public async Task<JsonResult> GetTransactionAmountData([FromBody] TransactionAmountReportInput input)
         {
-            var data = await _reportsAppService.GetTransactionAmountReport(new TransactionAmountReportInput
-            {
-                Year = year,
-                PhysicianId = physicianId,
-                ProductCategoryId = productCategoryId
-            });
+            // [FromBody] and a single input, not loose parameters. The page posts a
+            // JSON body and simple types never bind from one, so every filter on this
+            // report used to arrive null and the report ran on its defaults.
+            var data = await _reportsAppService.GetTransactionAmountReport(input ?? new TransactionAmountReportInput());
 
             return Json(new { success = true, data = data });
         }
@@ -180,14 +173,12 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> GetQuarterlyRollupData(int? year, int? quarter, int? hospitalId)
+        public async Task<JsonResult> GetQuarterlyRollupData([FromBody] QuarterlyRollupReportInput input)
         {
-            var data = await _reportsAppService.GetQuarterlyRollupReport(new QuarterlyRollupReportInput
-            {
-                Year = year,
-                Quarter = quarter,
-                HospitalId = hospitalId
-            });
+            // [FromBody] and a single input, not loose parameters. The page posts a
+            // JSON body and simple types never bind from one, so every filter on this
+            // report used to arrive null and the report ran on its defaults.
+            var data = await _reportsAppService.GetQuarterlyRollupReport(input ?? new QuarterlyRollupReportInput());
 
             return Json(new { success = true, data = data });
         }
@@ -197,57 +188,57 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         // maintaining it by hand while still sharing numbers the way they already do.
 
         [HttpPost]
-        public async Task<JsonResult> ExportRateChart(int? hospitalId)
+        public async Task<JsonResult> ExportRateChart([FromBody] RateChartReportInput input)
         {
-            var data = await _reportsAppService.GetRateChartReport(new RateChartReportInput { HospitalId = hospitalId });
+            // [FromBody] and a single input, not loose parameters. The page posts a
+            // JSON body and simple types never bind from one, so every filter on this
+            // report used to arrive null and the report ran on its defaults.
+            var data = await _reportsAppService.GetRateChartReport(input ?? new RateChartReportInput());
+
             return Json(_excelExporter.ExportRateChart(data));
         }
 
         [HttpPost]
-        public async Task<JsonResult> ExportMonthlyRevenue(int? year, int? month, int? hospitalId)
+        public async Task<JsonResult> ExportMonthlyRevenue([FromBody] MonthlyRevenueReportInput input)
         {
-            var data = await _reportsAppService.GetMonthlyRevenueReport(new MonthlyRevenueReportInput
-            {
-                Year = year,
-                Month = month,
-                HospitalId = hospitalId
-            });
+            // [FromBody] and a single input, not loose parameters. The page posts a
+            // JSON body and simple types never bind from one, so every filter on this
+            // report used to arrive null and the report ran on its defaults.
+            var data = await _reportsAppService.GetMonthlyRevenueReport(input ?? new MonthlyRevenueReportInput());
+
             return Json(_excelExporter.ExportMonthlyRevenue(data));
         }
 
         [HttpPost]
-        public async Task<JsonResult> ExportCasesByPerson(int? year, int? hospitalId, int? physicianId)
+        public async Task<JsonResult> ExportCasesByPerson([FromBody] CasesByPersonReportInput input)
         {
-            var data = await _reportsAppService.GetCasesByPersonReport(new CasesByPersonReportInput
-            {
-                Year = year,
-                HospitalId = hospitalId,
-                PhysicianId = physicianId
-            });
+            // [FromBody] and a single input, not loose parameters. The page posts a
+            // JSON body and simple types never bind from one, so every filter on this
+            // report used to arrive null and the report ran on its defaults.
+            var data = await _reportsAppService.GetCasesByPersonReport(input ?? new CasesByPersonReportInput());
+
             return Json(_excelExporter.ExportCasesByPerson(data));
         }
 
         [HttpPost]
-        public async Task<JsonResult> ExportTransactionAmount(int? year, int? physicianId, int? productCategoryId)
+        public async Task<JsonResult> ExportTransactionAmount([FromBody] TransactionAmountReportInput input)
         {
-            var data = await _reportsAppService.GetTransactionAmountReport(new TransactionAmountReportInput
-            {
-                Year = year,
-                PhysicianId = physicianId,
-                ProductCategoryId = productCategoryId
-            });
+            // [FromBody] and a single input, not loose parameters. The page posts a
+            // JSON body and simple types never bind from one, so every filter on this
+            // report used to arrive null and the report ran on its defaults.
+            var data = await _reportsAppService.GetTransactionAmountReport(input ?? new TransactionAmountReportInput());
+
             return Json(_excelExporter.ExportTransactionAmount(data));
         }
 
         [HttpPost]
-        public async Task<JsonResult> ExportQuarterlyRollup(int? year, int? quarter, int? hospitalId)
+        public async Task<JsonResult> ExportQuarterlyRollup([FromBody] QuarterlyRollupReportInput input)
         {
-            var data = await _reportsAppService.GetQuarterlyRollupReport(new QuarterlyRollupReportInput
-            {
-                Year = year,
-                Quarter = quarter,
-                HospitalId = hospitalId
-            });
+            // [FromBody] and a single input, not loose parameters. The page posts a
+            // JSON body and simple types never bind from one, so every filter on this
+            // report used to arrive null and the report ran on its defaults.
+            var data = await _reportsAppService.GetQuarterlyRollupReport(input ?? new QuarterlyRollupReportInput());
+
             return Json(_excelExporter.ExportQuarterlyRollup(data));
         }
 
