@@ -624,9 +624,16 @@ a:not(.btn):not(.menu-link):not(.page-link),
    These deliberately do not use --ati-tint: that one tracks the theme and is reused for
    hovers and card headers, and these need to stay distinct from each other. */
 .ati-kpi {
-    border-left: 5px solid var(--ati-primary);
+    border-left: 6px solid var(--ati-primary);
     position: relative;
-    overflow: hidden;
+
+    /* Square the left corners. The card's 9px radius curved the accent away at both
+       ends, leaving a short tapered sliver in the middle that read as no border at all -
+       which is exactly how it looked on screen. Flat corners give a full-height bar.
+       overflow:hidden went with the gradient wash it was there to clip; kept off so
+       nothing trims the bar. */
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
 }
 
 .ati-kpi--cases {
