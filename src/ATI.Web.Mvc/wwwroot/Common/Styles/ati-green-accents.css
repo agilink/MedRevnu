@@ -46,6 +46,11 @@
     --ati-row-alt: #f7f9fc;          /* every other grid row */
     --ati-ink: #12213b;
 
+    /* The green underline under every header. Green went out of the chrome when the
+       theme turned navy, and this is the one place it earns its keep: it marks the
+       bottom edge of a header without competing with the fill above it. */
+    --ati-underline: #50cd89;
+
     /* Dashboard tile accents. Four distinct hues, none of them the navy of the chrome,
        so a tile's colour identifies the measure rather than repeating the brand. */
     --ati-info: #0ea5e9;
@@ -166,7 +171,7 @@ body,
    rather than letting it float. */
 .app-toolbar {
     background-color: var(--ati-primary) !important;
-    border-bottom: 3px solid var(--ati-accent);
+    border-bottom: 3px solid var(--ati-underline);
     margin-bottom: 1.5rem;
 }
 
@@ -203,7 +208,7 @@ body,
 
 .card > .card-header {
     background-color: var(--ati-tint);
-    border-bottom: 1px solid var(--ati-line);
+    border-bottom: 3px solid var(--ati-underline);
     border-top-left-radius: 0.7rem;
     border-top-right-radius: 0.7rem;
     min-height: 56px;
@@ -230,7 +235,7 @@ body,
 table.dataTable > thead > tr > th {
     background-color: var(--ati-primary) !important;
     color: #ffffff !important;
-    border-bottom: none !important;
+    border-bottom: 3px solid var(--ati-underline) !important;
     font-size: 0.78rem;
     font-weight: 700;
     letter-spacing: 0.04em;
@@ -333,7 +338,7 @@ table.dataTable > tbody > tr:hover > td {
 .ati-section-header {
     background-color: transparent;
     border-left: none;
-    border-bottom: 2px solid var(--ati-primary);
+    border-bottom: 3px solid var(--ati-underline);
     border-radius: 0;
     padding: 0 0 0.6rem 0;
 
@@ -429,7 +434,7 @@ h1, h2, h3, h4, h5, h6,
 
 .modal-content > .modal-header {
     background-color: var(--ati-primary);
-    border-bottom: none;
+    border-bottom: 3px solid var(--ati-underline);
     border-top-left-radius: 0.75rem;
     border-top-right-radius: 0.75rem;
 }

@@ -1,4 +1,5 @@
-﻿using Abp.Application.Services;
+﻿using ATI;
+using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using Abp.Authorization;
 using Abp.Domain.Repositories;
@@ -49,6 +50,10 @@ namespace ATI.Revenue.Application.Physicians
             UserManager userManager,
             RoleManager roleManager)
         {
+            // ABP's L() throws unless the source is named, so every localised message in
+            // this service would have been an exception instead of a message.
+            LocalizationSourceName = ATIConsts.LocalizationSourceName;
+
             _personnelRepository = personnelRepository;
             _facilityRepository = facilityRepository;
             _userRepository = userRepository;

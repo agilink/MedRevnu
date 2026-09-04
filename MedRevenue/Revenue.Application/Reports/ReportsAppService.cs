@@ -1,4 +1,5 @@
-﻿using Abp.Application.Services;
+﻿using ATI;
+using Abp.Application.Services;
 using Abp.Domain.Repositories;
 using Abp.Linq.Extensions;
 using ATI.Admin.Domain.Entities;
@@ -32,6 +33,10 @@ namespace ATI.Revenue.Application.Reports
             IRepository<ProductQuota, int> productQuotaRepository,
             IRepository<HospitalProductPrice, int> hospitalProductPriceRepository)
         {
+            // ABP's L() throws unless the source is named, so every localised message in
+            // this service would have been an exception instead of a message.
+            LocalizationSourceName = ATIConsts.LocalizationSourceName;
+
             _productRepository = productRepository;
             _productCategoryRepository = productCategoryRepository;
             _procedureTransactionRepository = procedureTransactionRepository;
