@@ -20,6 +20,14 @@
     <form name="ProcedureTransactionCreateOrEditForm" role="form" novalidate class="form-validation">
         <input type="hidden" name="Id" value="@(Model.ProcedureTransaction?.Id ?? 0)" />
 
+        @* A heading for the case's own fields, so the form opens with a named section
+           rather than a bare row of inputs. *@
+        <div class="ati-section-header d-flex align-items-center mb-4" style="margin-top:0">
+            <h5 class="ati-section-title mb-0">
+                <i class="fa fa-folder-open me-2"></i>@L("CaseDetails")
+            </h5>
+        </div>
+
         @* Row one is the case's identity: what it is called, when it happened, and who
            and where. Row two is everything descriptive. Grouping them this way puts the
            four facts that identify a case on one line. *@

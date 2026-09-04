@@ -49,7 +49,10 @@
                 {
                     targets: 0,
                     data: 'caseNumber',
-                    name: 'caseNumber'
+                    name: 'caseNumber',
+                    // DataTables detects an all-numeric column and right-aligns it. A case
+                    // number is a label, not a quantity, so it is put back to the left.
+                    className: 'text-start'
                 },
                 {
                     targets: 1,

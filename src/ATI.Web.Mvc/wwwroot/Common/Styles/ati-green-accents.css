@@ -30,13 +30,13 @@
 
 :root {
     /* Frame */
-    --ati-primary: #1b365d;          /* navy - header rule, page band, grid header, modal */
-    --ati-primary-dark: #12243d;     /* footer, hover states */
-    --ati-primary-light: #2f5c95;
+    --ati-primary: #2c5aa0;          /* navy - header rule, page band, grid header, modal */
+    --ati-primary-dark: #21467d;     /* footer, hover states */
+    --ati-primary-light: #4a7ab8;
 
     /* Action colour. Navy too, deliberately: the brand and the action were both green
        before, so a green Save button sat on green furniture and stopped standing out. */
-    --ati-accent: #2f5c95;
+    --ati-accent: #4a7ab8;
 
     /* Content */
     --ati-tint: #eef2f7;             /* card headers, hover */
@@ -236,6 +236,26 @@ table.dataTable > thead > tr > th {
     letter-spacing: 0.04em;
     text-transform: uppercase;
     vertical-align: middle;
+
+}
+
+/* Labels were running into the cell edges, which is what made the filled header look
+   cramped rather than deliberate.
+   The first and last cells are named explicitly and forced: the theme zeroes the outer
+   padding with a :first-child rule so content lines up flush with the card edge, which
+   outranks a plain rule here and, against a filled header, just looks tight. The body
+   cells get the same treatment so the columns stay aligned with their labels. */
+.table > thead > tr > th,
+.table > thead > tr > th:first-child,
+.table > thead > tr > th:last-child,
+.table > tbody > tr > td,
+.table > tbody > tr > td:first-child,
+.table > tbody > tr > td:last-child,
+table.dataTable > thead > tr > th,
+table.dataTable > thead > tr > th:first-child,
+table.dataTable > tbody > tr > td:first-child {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
 }
 
 /* The header row usually carries text-muted, which would grey out the white above. */
@@ -284,7 +304,8 @@ table.dataTable > tbody > tr:hover > td {
 
 .ati-row-actions {
     white-space: nowrap;
-    width: 1%;
+    width: 120px;
+    min-width: 120px;
 }
 
 .ati-row-actions .btn.btn-icon {
@@ -369,15 +390,27 @@ h1, h2, h3, h4, h5, h6,
  * ------------------------------------------------------------------------------- */
 
 #DeviceLinesTable {
-    width: 90%;
-    margin-left: 10px;
+    width: 100%;
+    margin-left: 0;
+
+    /* Separated rather than collapsed, with a vertical gap. Collapsed, the rows sit
+       flush and their left borders join into one continuous line down the table - which
+       reads as a single bar for the whole grid instead of one bar per device. The gap is
+       what makes each line its own. */
+    border-collapse: separate;
+    border-spacing: 0 6px;
 }
 
-/* The edge goes on the first cell, not the row: a tr border does not paint under
-   border-collapse, which is what Bootstrap tables use. */
 #DeviceLinesTable > tbody > tr > td:first-child {
     border-left: 4px solid var(--ati-accent);
-    padding-left: 0.75rem;
+    padding-left: 0.75rem !important;
+}
+
+/* With separated borders the row bottom rules would double up, so they come off and the
+   gap does the separating. */
+#DeviceLinesTable > tbody > tr > td {
+    border-bottom: none;
+    border-top: none;
 }
 
 #DeviceLinesTable > tbody > tr:hover > td {
@@ -579,19 +612,40 @@ a:not(.btn):not(.menu-link):not(.page-link),
  * and the figure is large - the arrangement an executive summary is expected to have.
  * ------------------------------------------------------------------------------- */
 
+/* Each tile is tinted, and each tint is a different hue from one cool family - sky,
+   royal, indigo, teal. Four pale washes of the same family read as one set of related
+   measures; four saturated or unrelated colours would read as a warning panel. The left
+   edge is the same hue at full strength, so the border and the fill agree.
+   These deliberately do not use --ati-tint: that one tracks the theme and is reused for
+   hovers and card headers, and these need to stay distinct from each other. */
 .ati-kpi {
     border-left: 5px solid var(--ati-primary);
     position: relative;
     overflow: hidden;
 }
 
-.ati-kpi--cases { border-left-color: var(--ati-info); }
-.ati-kpi--sold { border-left-color: #12b76a; }
-.ati-kpi--planned { border-left-color: var(--ati-violet); }
-.ati-kpi--achieved { border-left-color: var(--ati-warn); }
+.ati-kpi--cases {
+    border-left-color: #3b9ae1;
+    background-color: #eef6fd !important;
+}
+
+.ati-kpi--sold {
+    border-left-color: #2c5aa0;
+    background-color: #eaf1fb !important;
+}
+
+.ati-kpi--planned {
+    border-left-color: #6b5bd2;
+    background-color: #f0eefc !important;
+}
+
+.ati-kpi--achieved {
+    border-left-color: #2f8f9d;
+    background-color: #e9f4f6 !important;
+}
 
 .ati-kpi-label {
-    color: #7a8b95;
+    color: #5b6b7a;
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.08em;
@@ -607,20 +661,13 @@ a:not(.btn):not(.menu-link):not(.page-link),
 }
 
 .ati-kpi-note {
-    color: #93a2ab;
+    color: #6f8090;
     font-size: 0.75rem;
 }
 
-/* A faint wash of the tile's own accent, so the colour is present without a block of it. */
-.ati-kpi::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 90px;
-    height: 100%;
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, var(--ati-tint) 100%);
-    pointer-events: none;
+/* The card body must not paint white over the tile's tint. */
+.ati-kpi > .card-body {
+    background-color: transparent;
 }
 
 /* ---------------------------------------------------------------------------------
@@ -637,7 +684,7 @@ a:not(.btn):not(.menu-link):not(.page-link),
     --ati-canvas: #131a20;
     --ati-row-alt: rgba(255, 255, 255, 0.03);
     --ati-ink: #e6eaef;
-    --ati-primary: #4a7ab8;
+    --ati-primary: #6d9bd1;
 }
 
 [data-bs-theme="dark"] .form-control,
@@ -661,3 +708,8 @@ a:not(.btn):not(.menu-link):not(.page-link),
 [data-bs-theme="dark"] .card {
     box-shadow: none;
 }
+
+[data-bs-theme="dark"] .ati-kpi--cases { background-color: rgba(59, 154, 225, 0.12) !important; }
+[data-bs-theme="dark"] .ati-kpi--sold { background-color: rgba(74, 122, 184, 0.12) !important; }
+[data-bs-theme="dark"] .ati-kpi--planned { background-color: rgba(107, 91, 210, 0.12) !important; }
+[data-bs-theme="dark"] .ati-kpi--achieved { background-color: rgba(47, 143, 157, 0.12) !important; }

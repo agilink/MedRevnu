@@ -1514,5 +1514,6 @@
     <text name="NoHospitalAssignedToPhysicianUser">No hospital is assigned to your physician record, so there is nothing you can work on yet. Ask an administrator to assign one.</text>
     <text name="DevicesClearedForImplantType">{0} device(s) were cleared because they do not belong on this implant type</text>
     <text name="CreatingLogin">Creating login...</text>
+    <text name="CaseDetails">Case Details</text>
   </texts>
 </localizationDictionary>

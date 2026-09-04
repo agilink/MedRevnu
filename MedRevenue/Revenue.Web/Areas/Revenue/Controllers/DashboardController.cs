@@ -44,7 +44,13 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
             ViewBag.Hospitals = await GetHospitalSelectList(scope.IsRestricted ? scope.HospitalId : null);
             ViewBag.IsHospitalLocked = scope.IsRestricted;
             ViewBag.HasNoHospital = scope.SeesNothing;
-            ViewBag.DefaultFromDate = new DateTime(today.Year, today.Month, 1).ToString("yyyy-MM-dd");
+            // Twelve whole months ending today, rather than the current month. A month-long
+            // default showed an empty dashboard for most of any month - and because
+            // targets are monthly, starting on the first of a month means the planned
+            // figure sums twelve whole targets rather than a part-month.
+            var from = new DateTime(today.Year, today.Month, 1).AddMonths(-11);
+
+            ViewBag.DefaultFromDate = from.ToString("yyyy-MM-dd");
             ViewBag.DefaultToDate = today.ToString("yyyy-MM-dd");
 
             return View();
