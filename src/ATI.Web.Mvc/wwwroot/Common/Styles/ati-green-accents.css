@@ -178,6 +178,17 @@ body,
     display: none !important;
 }
 
+/* The brand mark was small enough to read as an afterthought. The active theme's own
+   component is sized directly; this covers the other themes, which each size their own,
+   and only on wide screens so the mobile header is left alone. */
+@media (min-width: 992px) {
+    .brand-logo img,
+    #kt_header .brand-logo img,
+    .app-header .app-sidebar-logo img {
+        height: 45px !important;
+    }
+}
+
 /* ---------------------------------------------------------------------------------
  * Application footer
  * ------------------------------------------------------------------------------- */

@@ -54,6 +54,7 @@
     }
 
     <link rel="stylesheet" abp-href="/view-resources/Views/Account/_Layout@(CultureHelper.IsRtl ? "-rtl" : "").css" asp-append-version="true" />
+    <link rel="stylesheet" abp-href="/Common/Styles/ati-green-accents.css" asp-append-version="true" />
 
     @await RenderSectionAsync("Styles", false)
 
@@ -66,8 +67,11 @@
 </head>
 <body class="header-fixed header-mobile-fixed subheader-fixed subheader-enabled subheader-solid aside-enabled aside-fixed">
     <div class="d-flex flex-column flex-root">
-        <div class="d-flex flex-column flex-column-fluid bgi-position-y-bottom position-x-center bgi-no-repeat bgi-size-contain bgi-attachment-fixed"
-             style="background-image: url(@(ApplicationPath)metronic/assets/media/svg/illustrations/login@(theme.BaseSettings.Layout.DarkMode ? "-dark": "").png)">
+        @* The stock Metronic illustration is gone: cartoon cyclists do not belong on the
+           way in to a revenue system. A quiet wash of the brand colour takes its place,
+           so the page still reads as designed rather than as a failed image. *@
+        <div class="d-flex flex-column flex-column-fluid"
+             style="background: linear-gradient(160deg, var(--ati-tint, #eef7f3) 0%, var(--ati-canvas, #f4f7f6) 55%, var(--ati-tint-strong, #ddeee7) 100%);">
             <div class="d-flex flex-center flex-column flex-column-fluid p-10 pb-lg-20">
                 <vc:account-logo skin="light"></vc:account-logo>
                 <div class="w-lg-500px bg-body rounded shadow-sm p-10 p-lg-15 mx-auto">
@@ -78,11 +82,6 @@
                         </div>
                     }
                     @RenderBody()
-                </div>
-            </div>
-            <div class="d-flex flex-center flex-column-auto p-10">
-                <div class="d-flex align-items-center fw-bold fs-6">
-                    <vc:account-languages></vc:account-languages>
                 </div>
             </div>
         </div>
