@@ -1,4 +1,4 @@
-/*
+﻿/*
  * ATI green theme.
  *
  * The client's first note was that the application was "way too white w/ no header
@@ -49,6 +49,29 @@
     --ati-warn: #f6c000;
     --ati-violet: #7239ea;
 }
+
+/* ---------------------------------------------------------------------------------
+ * Alternative: navy chrome, green accents
+ *
+ * Uncomment this block to reshade the whole application. Only the frame changes -
+ * header, footer, modal header, titles and tints go navy, while the buttons and the
+ * dashboard tile accents stay green, so the action colour and the brand colour stay
+ * distinct from each other.
+ *
+ * Nothing else in this file needs touching, and nothing outside it does either.
+ * ------------------------------------------------------------------------------- */
+
+/*
+:root {
+    --ati-primary: #1b365d;
+    --ati-primary-dark: #12243d;
+    --ati-primary-light: #2f5c95;
+    --ati-tint: #eef2f7;
+    --ati-tint-strong: #dde5ef;
+    --ati-line: #dce3ec;
+    --ati-canvas: #f4f6f9;
+}
+*/
 
 /* ---------------------------------------------------------------------------------
  * Canvas
@@ -130,6 +153,29 @@ body,
 #kt_header .menu-sub .menu-link:hover .menu-title,
 #kt_header .menu-sub .menu-item.here > .menu-link .menu-title {
     color: var(--ati-primary);
+}
+
+/* The icon buttons carry a border that boxed each one on the green, and the theme puts
+   a rule between the logo row and the menu row. Both were drawing lines across a bar
+   that is already one solid block, so both go. */
+#kt_header .btn-icon,
+#kt_header .btn.btn-icon,
+#kt_app_header .btn-icon,
+.app-header .btn-icon {
+    border: none !important;
+    background-color: transparent !important;
+}
+
+#kt_header .btn-icon:hover,
+#kt_app_header .btn-icon:hover,
+.app-header .btn-icon:hover {
+    background-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+#kt_header .separator,
+#kt_app_header .separator,
+.app-header .separator {
+    display: none !important;
 }
 
 /* ---------------------------------------------------------------------------------
@@ -247,6 +293,10 @@ table.dataTable > thead > tr > th {
     border-left: 4px solid var(--ati-primary);
     border-radius: 0.5rem;
     padding: 0.7rem 1rem;
+
+    /* Clear air above, so the band reads as the start of a new part of the form rather
+       than the last line of the one before it. */
+    margin-top: 40px;
 }
 
 .ati-section-title {
@@ -255,6 +305,30 @@ table.dataTable > thead > tr > th {
     font-size: 0.95rem;
     letter-spacing: 0.02em;
     text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------------------------------
+ * Device lines on the case modal
+ *
+ * Inset under the section band so the lines read as belonging to it, and each row
+ * carries the same green edge as the band - which is what ties a row to its section
+ * once there are three or four of them.
+ * ------------------------------------------------------------------------------- */
+
+#DeviceLinesTable {
+    width: 90%;
+    margin-left: 10px;
+}
+
+/* The edge goes on the first cell, not the row: a tr border does not paint under
+   border-collapse, which is what Bootstrap tables use. */
+#DeviceLinesTable > tbody > tr > td:first-child {
+    border-left: 4px solid var(--ati-accent);
+    padding-left: 0.75rem;
+}
+
+#DeviceLinesTable > tbody > tr:hover > td {
+    background-color: var(--ati-tint);
 }
 
 /* ---------------------------------------------------------------------------------
@@ -309,9 +383,17 @@ table.dataTable > thead > tr > th {
 
 .form-control,
 .form-select,
+select,
 select.form-control,
+select.form-select,
 .form-control-solid,
-.form-select-solid {
+.form-select-solid,
+.form select,
+.form .form-control,
+.card-body select,
+.card-body .form-control,
+.modal-body select,
+.modal-body .form-control {
     background-color: #ffffff !important;
     border: 1px solid var(--ati-line) !important;
     color: var(--ati-ink) !important;
@@ -327,7 +409,11 @@ select.form-control:focus {
 /* Disabled has to keep looking disabled, which is the whole point of the change. */
 .form-control:disabled,
 .form-select:disabled,
+select:disabled,
 select.form-control:disabled,
+.form select:disabled,
+.card-body select:disabled,
+.modal-body select:disabled,
 .form-control[readonly] {
     background-color: #eef1f0 !important;
     color: #7a8b85 !important;
