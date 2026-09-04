@@ -26,6 +26,7 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         private readonly IRepository<Personnel, int> _personnelRepository;
         private readonly IRevenueReportsExcelExporter _excelExporter;
         private readonly IRepository<ProcedureTransaction, int> _procedureTransactionRepository;
+        private readonly IRepository<Product, int> _productRepository;
 
         public ReportsController(
             IReportsAppService reportsAppService,
@@ -33,7 +34,8 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
             IRepository<ProductCategory, int> productCategoryRepository,
             IRepository<Personnel, int> personnelRepository,
             IRevenueReportsExcelExporter excelExporter,
-            IRepository<ProcedureTransaction, int> procedureTransactionRepository)
+            IRepository<ProcedureTransaction, int> procedureTransactionRepository,
+            IRepository<Product, int> productRepository)
         {
             _reportsAppService = reportsAppService;
             _facilityRepository = facilityRepository;
@@ -41,6 +43,7 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
             _personnelRepository = personnelRepository;
             _excelExporter = excelExporter;
             _procedureTransactionRepository = procedureTransactionRepository;
+            _productRepository = productRepository;
         }
 
         /// <summary>
@@ -69,15 +72,32 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         public async Task<IActionResult> RateChart()
         {
             ViewBag.Hospitals = await GetHospitalSelectList();
+            ViewBag.ProductCodes = await GetProductCodeSelectList();
             return View();
         }
 
+        /// <summary>
+        /// Distinct product codes actually in use, for the rate chart's code filter.
+        /// </summary>
+        private async Task<SelectList> GetProductCodeSelectList()
+        {
+            var codes = await _productRepository.GetAll()
+                .Where(p => p.IsActive && p.ProductCode != null && p.ProductCode != "")
+                .Select(p => p.ProductCode)
+                .Distinct()
+                .OrderBy(c => c)
+                .ToListAsync();
+
+            return new SelectList(codes.Select(c => new { Value = c, Text = c }), "Value", "Text");
+        }
+
         [HttpPost]
-        public async Task<JsonResult> GetRateChartData(int? hospitalId)
+        public async Task<JsonResult> GetRateChartData(int? hospitalId, string productCode)
         {
             var data = await _reportsAppService.GetRateChartReport(new RateChartReportInput
             {
-                HospitalId = hospitalId
+                HospitalId = hospitalId,
+                ProductCode = productCode
             });
 
             return Json(new { success = true, data = data });

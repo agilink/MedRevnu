@@ -33,6 +33,9 @@ namespace ATI.Revenue.Application.Reports.Exporting
             {
                 items.Add(new Dictionary<string, object>
                 {
+                    // First column: an exported price list is worthless if you cannot tell
+                    // which hospital it is for.
+                    { "Hospital", row.HospitalName },
                     { "Product Category", row.ProductCategoryName },
                     { "Product Code", row.ProductCode },
                     { "Product", row.ProductName },

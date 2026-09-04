@@ -28,6 +28,16 @@
                             }
                         </select>
                     </div>
+                    <div class="col-md-3">
+                        <label for="ProductCodeFilter">@L("ProductCode")</label>
+                        <select id="ProductCodeFilter" class="form-control">
+                            <option value="">@L("AllProductCodes")</option>
+                            @foreach (var code in ViewBag.ProductCodes)
+                            {
+                                <option value="@code.Value">@code.Text</option>
+                            }
+                        </select>
+                    </div>
                     <div class="col-md-auto d-flex align-items-end">
                         <button id="GenerateReportButton" class="btn btn-primary text-nowrap">
                             <i class="fas fa-chart-bar"></i> Generate Report
@@ -42,6 +52,7 @@
                     <table id="RateChartTable" class="table table-striped table-bordered">
                         <thead>
                             <tr>
+                                <th>@L("Hospital")</th>
                                 <th>Product Category</th>
                                 <th>Product Code</th>
                                 <th>Product Name</th>

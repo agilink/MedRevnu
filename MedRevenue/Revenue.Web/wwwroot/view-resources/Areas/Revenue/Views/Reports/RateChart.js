@@ -28,7 +28,10 @@
                 url: abp.appPath + 'Revenue/Reports/GetRateChartData',
                 type: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify({ hospitalId: hospitalId }),
+                data: JSON.stringify({
+                    hospitalId: hospitalId,
+                    productCode: $('#ProductCodeFilter').val() || null
+                }),
                 // ABP wraps a JsonResult from an ABP controller in an AjaxResponse
                 // envelope ({result, success, error, __abp}). Unwrap it: read raw,
                 // the payload sat one level down and every field was undefined, so
@@ -58,6 +61,7 @@
             if (data && data.length > 0) {
                 data.forEach(function (item) {
                     var row = $('<tr></tr>');
+                    row.append($('<td></td>').text(item.hospitalName || ''));
                     row.append($('<td></td>').text(item.productCategoryName || ''));
                     row.append($('<td></td>').text(item.productCode || ''));
                     row.append($('<td></td>').text(item.productName || ''));
@@ -91,7 +95,10 @@
             $.ajax({
                 url: abp.appPath + 'Revenue/Reports/ExportRateChart',
                 type: 'POST',
-                data: JSON.stringify({ hospitalId: optionalInt('#HospitalFilter') }),
+                data: JSON.stringify({
+                    hospitalId: optionalInt('#HospitalFilter'),
+                    productCode: $('#ProductCodeFilter').val() || null
+                }),
                 contentType: 'application/json',
                 success: function (response) {
                     var file = (response && response.__abp) ? response.result : response;

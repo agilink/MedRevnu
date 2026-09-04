@@ -1515,5 +1515,6 @@
     <text name="DevicesClearedForImplantType">{0} device(s) were cleared because they do not belong on this implant type</text>
     <text name="CreatingLogin">Creating login...</text>
     <text name="CaseDetails">Case Details</text>
+    <text name="AllProductCodes">All Product Codes</text>
   </texts>
 </localizationDictionary>

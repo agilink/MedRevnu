@@ -53,8 +53,19 @@ namespace ATI.Revenue.Application.Reports
             var asOf = Abp.Timing.Clock.Now;
             var year = asOf.Year;
 
+            // The hospital's own name, so every row says which price list it belongs to.
+            var hospitalName = input.HospitalId.HasValue
+                ? await _facilityRepository.GetAll()
+                    .Where(f => f.Id == input.HospitalId.Value)
+                    .Select(f => f.FacilityName)
+                    .FirstOrDefaultAsync()
+                : null;
+
+            var code = string.IsNullOrWhiteSpace(input.ProductCode) ? null : input.ProductCode.Trim();
+
             var products = await _productRepository.GetAll()
                 .Where(p => p.IsActive && p.ProductCategory != null)
+                .WhereIf(code != null, p => p.ProductCode == code)
                 .Select(p => new
                 {
                     p.Id,
@@ -105,6 +116,7 @@ namespace ATI.Revenue.Application.Reports
 
                     return new RateChartReportDto
                     {
+                        HospitalName = hospitalName ?? L("AllHospitals"),
                         ProductCategoryName = p.ProductCategoryName,
                         ProductCode = p.ProductCode,
                         ProductName = p.ProductName,

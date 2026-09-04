@@ -5,6 +5,13 @@
     /// </summary>
     public class RateChartReportDto
     {
+        /// <summary>
+        /// The hospital this rate chart is for, or "All Hospitals" when none was chosen.
+        /// A rate chart is a price list for a particular hospital, so a row is ambiguous
+        /// without it - on screen and, more importantly, once exported and passed around.
+        /// </summary>
+        public string HospitalName { get; set; }
+
         public string ProductCategoryName { get; set; }
         public string ProductCode { get; set; }
         public string ProductName { get; set; }
@@ -32,5 +39,8 @@
     {
         /// <summary>Optional. Null shows every hospital's catalogue.</summary>
         public int? HospitalId { get; set; }
+
+        /// <summary>Optional. Null or blank means every product code.</summary>
+        public string ProductCode { get; set; }
     }
 }
