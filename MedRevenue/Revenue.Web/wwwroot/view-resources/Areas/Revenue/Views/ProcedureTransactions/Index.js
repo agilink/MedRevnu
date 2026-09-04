@@ -48,42 +48,11 @@
             columnDefs: [
                 {
                     targets: 0,
-                    data: null,
-                    orderable: false,
-                    autoWidth: false,
-                    defaultContent: '',
-                    rowAction: {
-                        cssClass: 'btn btn-sm btn-light btn-active-light-primary',
-                        text: '<i class="fa fa-cog"></i> ' + app.localize('Actions') + ' <span class="caret"></span>',
-                        items: [
-                            {
-                                text: app.localize('Edit'),
-                                visible: function () {
-                                    return _permissions.edit;
-                                },
-                                action: function (data) {
-                                    _createOrEditModal.open({ id: data.record.id });
-                                }
-                            },
-                            {
-                                text: app.localize('Delete'),
-                                visible: function () {
-                                    return _permissions.delete;
-                                },
-                                action: function (data) {
-                                    deleteTransaction(data.record);
-                                }
-                            }
-                        ]
-                    }
-                },
-                {
-                    targets: 1,
                     data: 'caseNumber',
                     name: 'caseNumber'
                 },
                 {
-                    targets: 2,
+                    targets: 1,
                     data: 'hospitalName',
                     name: 'hospitalName',
                     render: function (hospitalName) {
@@ -91,12 +60,12 @@
                     }
                 },
                 {
-                    targets: 3,
+                    targets: 2,
                     data: 'physicianName',
                     name: 'physicianName'
                 },
                 {
-                    targets: 4,
+                    targets: 3,
                     data: 'procedureDate',
                     name: 'procedureDate',
                     render: function (procedureDate) {
@@ -104,7 +73,7 @@
                     }
                 },
                 {
-                    targets: 5,
+                    targets: 4,
                     data: 'implantType',
                     name: 'implantType',
                     render: function (implantType) {
@@ -118,7 +87,7 @@
                     }
                 },
                 {
-                    targets: 6,
+                    targets: 5,
                     data: 'status',
                     name: 'status',
                     render: function (status) {
@@ -130,7 +99,7 @@
                 },
                 {
                     // A case can use several devices, so the grid summarises them.
-                    targets: 7,
+                    targets: 6,
                     data: 'productSummary',
                     name: 'productSummary',
                     orderable: false,
@@ -145,7 +114,7 @@
                     }
                 },
                 {
-                    targets: 8,
+                    targets: 7,
                     data: 'totalAmount',
                     name: 'totalAmount',
                     className: 'text-end',
@@ -155,8 +124,47 @@
                             maximumFractionDigits: 2
                         });
                     }
+                },
+                {
+                    // Icon buttons rather than a dropdown, and last rather than first: the actions
+                    // belong beside the row they act on, and one click instead of two.
+                    targets: 8,
+                    data: null,
+                    orderable: false,
+                    autoWidth: false,
+                    defaultContent: '',
+                    className: 'text-end ati-row-actions',
+                    render: function (unused, type, row) {
+                        var html = '';
+
+                        if ((function (data) { return _permissions.edit; })({ record: row })) {
+                            html += '<button type="button" class="btn btn-sm btn-icon btn-light-primary ms-1 ati-act-edit" '
+                                + 'title="' + app.localize('Edit') + '"><i class="fa fa-pen"></i></button>';
+                        }
+
+                        if ((function (data) { return _permissions.delete; })({ record: row })) {
+                            html += '<button type="button" class="btn btn-sm btn-icon btn-light-danger ms-1 ati-act-delete" '
+                                + 'title="' + app.localize('Delete') + '"><i class="fa fa-trash"></i></button>';
+                        }
+
+                        return html;
+                    }
                 }
             ]
+        });
+
+
+        // Delegated: the grid redraws its rows, so per-row binding would not
+        // survive a page change or a sort.
+
+        _$transactionsTable.on('click', '.ati-act-edit', function () {
+            var data = { record: dataTable.row($(this).closest('tr')).data() };
+            _createOrEditModal.open({ id: data.record.id });
+        });
+
+        _$transactionsTable.on('click', '.ati-act-delete', function () {
+            var data = { record: dataTable.row($(this).closest('tr')).data() };
+            deleteTransaction(data.record);
         });
 
         function getTransactions() {

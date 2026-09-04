@@ -40,43 +40,12 @@
             columnDefs: [
                 {
                     targets: 0,
-                    data: null,
-                    orderable: false,
-                    autoWidth: false,
-                    defaultContent: '',
-                    rowAction: {
-                        cssClass: 'btn btn-sm btn-light btn-active-light-primary',
-                        text: '<i class="fa fa-cog"></i> ' + app.localize('Actions') + ' <span class="caret"></span>',
-                        items: [
-                            {
-                                text: app.localize('Edit'),
-                                visible: function () {
-                                    return _permissions.edit;
-                                },
-                                action: function (data) {
-                                    _createOrEditModal.open({ id: data.record.id });
-                                }
-                            },
-                            {
-                                text: app.localize('Delete'),
-                                visible: function () {
-                                    return _permissions.delete;
-                                },
-                                action: function (data) {
-                                    deleteQuota(data.record);
-                                }
-                            }
-                        ]
-                    }
-                },
-                {
-                    targets: 1,
                     data: 'periodYear',
                     name: 'periodYear',
                     className: 'text-center'
                 },
                 {
-                    targets: 2,
+                    targets: 1,
                     data: 'periodMonth',
                     name: 'periodMonth',
                     className: 'text-center',
@@ -87,12 +56,12 @@
                     }
                 },
                 {
-                    targets: 3,
+                    targets: 2,
                     data: 'productCategoryName',
                     name: 'productCategoryName'
                 },
                 {
-                    targets: 4,
+                    targets: 3,
                     data: 'targetAmount',
                     name: 'targetAmount',
                     render: function (targetAmount) {
@@ -103,20 +72,59 @@
                     }
                 },
                 {
-                    targets: 5,
+                    targets: 4,
                     data: 'hospitalName',
                     name: 'hospitalName'
                 },
                 {
-                    targets: 6,
+                    targets: 5,
                     data: 'targetUnits',
                     name: 'targetUnits',
                     className: 'text-center',
                     render: function (targetUnits) {
                         return targetUnits || '-';
                     }
+                },
+                {
+                    // Icon buttons rather than a dropdown, and last rather than first: the actions
+                    // belong beside the row they act on, and one click instead of two.
+                    targets: 6,
+                    data: null,
+                    orderable: false,
+                    autoWidth: false,
+                    defaultContent: '',
+                    className: 'text-end ati-row-actions',
+                    render: function (unused, type, row) {
+                        var html = '';
+
+                        if ((function (data) { return _permissions.edit; })({ record: row })) {
+                            html += '<button type="button" class="btn btn-sm btn-icon btn-light-primary ms-1 ati-act-edit" '
+                                + 'title="' + app.localize('Edit') + '"><i class="fa fa-pen"></i></button>';
+                        }
+
+                        if ((function (data) { return _permissions.delete; })({ record: row })) {
+                            html += '<button type="button" class="btn btn-sm btn-icon btn-light-danger ms-1 ati-act-delete" '
+                                + 'title="' + app.localize('Delete') + '"><i class="fa fa-trash"></i></button>';
+                        }
+
+                        return html;
+                    }
                 }
             ]
+        });
+
+
+        // Delegated: the grid redraws its rows, so per-row binding would not
+        // survive a page change or a sort.
+
+        _$quotasTable.on('click', '.ati-act-edit', function () {
+            var data = { record: dataTable.row($(this).closest('tr')).data() };
+            _createOrEditModal.open({ id: data.record.id });
+        });
+
+        _$quotasTable.on('click', '.ati-act-delete', function () {
+            var data = { record: dataTable.row($(this).closest('tr')).data() };
+            deleteQuota(data.record);
         });
 
         function getQuotas() {

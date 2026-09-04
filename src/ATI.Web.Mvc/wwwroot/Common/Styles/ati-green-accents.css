@@ -1,5 +1,5 @@
 ﻿/*
- * ATI green theme.
+ * ATI navy theme.
  *
  * The client's first note was that the application was "way too white w/ no header
  * colors (page, grid, modal, etc) so everything looks unorganized"; the second was that
@@ -30,48 +30,28 @@
 
 :root {
     /* Frame */
-    --ati-primary: #0f7a56;          /* deep green - header, modal header, titles */
-    --ati-primary-dark: #0a5c41;     /* footer, hover states */
-    --ati-primary-light: #2eb37f;
+    --ati-primary: #1b365d;          /* navy - header rule, page band, grid header, modal */
+    --ati-primary-dark: #12243d;     /* footer, hover states */
+    --ati-primary-light: #2f5c95;
 
-    /* Metronic's own success, which the existing buttons already use */
-    --ati-accent: #50cd89;
+    /* Action colour. Navy too, deliberately: the brand and the action were both green
+       before, so a green Save button sat on green furniture and stopped standing out. */
+    --ati-accent: #2f5c95;
 
     /* Content */
-    --ati-tint: #eef7f3;             /* card and grid headers */
-    --ati-tint-strong: #ddeee7;      /* section bands */
-    --ati-line: #dde9e4;
-    --ati-canvas: #f4f7f6;           /* page behind the cards */
+    --ati-tint: #eef2f7;             /* card headers, hover */
+    --ati-tint-strong: #dde5ef;      /* section bands */
+    --ati-line: #dce3ec;
+    --ati-canvas: #f4f6f9;           /* page behind the cards */
+    --ati-row-alt: #f7f9fc;          /* every other grid row */
     --ati-ink: #12213b;
 
-    /* Status colours for the dashboard tiles */
-    --ati-info: #3e97ff;
+    /* Dashboard tile accents. Four distinct hues, none of them the navy of the chrome,
+       so a tile's colour identifies the measure rather than repeating the brand. */
+    --ati-info: #0ea5e9;
     --ati-warn: #f6c000;
     --ati-violet: #7239ea;
 }
-
-/* ---------------------------------------------------------------------------------
- * Alternative: navy chrome, green accents
- *
- * Uncomment this block to reshade the whole application. Only the frame changes -
- * header, footer, modal header, titles and tints go navy, while the buttons and the
- * dashboard tile accents stay green, so the action colour and the brand colour stay
- * distinct from each other.
- *
- * Nothing else in this file needs touching, and nothing outside it does either.
- * ------------------------------------------------------------------------------- */
-
-/*
-:root {
-    --ati-primary: #1b365d;
-    --ati-primary-dark: #12243d;
-    --ati-primary-light: #2f5c95;
-    --ati-tint: #eef2f7;
-    --ati-tint-strong: #dde5ef;
-    --ati-line: #dce3ec;
-    --ati-canvas: #f4f6f9;
-}
-*/
 
 /* ---------------------------------------------------------------------------------
  * Canvas
@@ -108,56 +88,39 @@ body,
 #kt_app_header[data-kt-sticky="on"],
 .app-header[data-kt-sticky="on"],
 .header-fixed .header {
-    background-color: var(--ati-primary) !important;
+    background-color: #ffffff !important;
     border-bottom: none !important;
-    box-shadow: 0 1px 12px rgba(10, 92, 65, 0.25);
+    box-shadow: 0 1px 8px rgba(18, 33, 59, 0.06);
 }
 
-/* Menu and icons go white to sit on the green. Scoped by id so it beats Metronic's
-   menu-title-gray-800 without needing !important. */
-#kt_header .menu > .menu-item > .menu-link .menu-title,
-#kt_header .menu > .menu-item > .menu-link .menu-arrow:after,
-#kt_header .header-menu .menu-title,
-#kt_header .btn i,
-#kt_header .btn .svg-icon,
-#kt_header > .container-fluid > div > .d-flex > span,
-#kt_app_header .menu > .menu-item > .menu-link .menu-title,
-.app-header .menu > .menu-item > .menu-link .menu-title {
-    color: rgba(255, 255, 255, 0.9);
+/* The rule between the logo row and the menu row. In this theme a .separator already
+   sits exactly there, so it is coloured and shown rather than a new element added.
+   Scoped to a direct child so the separators inside header dropdowns are untouched. */
+#kt_header > .separator,
+#kt_app_header > .separator,
+.app-header > .separator {
+    display: block !important;
+    height: 2px;
+    background-color: var(--ati-primary);
+    opacity: 1;
+    border: none;
+    margin: 0;
 }
 
-#kt_header .menu > .menu-item > .menu-link:hover .menu-title,
+/* Menu text stays dark on the white bar - the theme's own colour is right here. The
+   active item is marked with the brand colour and an underline instead of a plate,
+   which is what the reference does. */
 #kt_header .menu > .menu-item.here > .menu-link .menu-title,
-#kt_header .menu > .menu-item.show > .menu-link .menu-title {
-    color: #ffffff;
-}
-
-/* The active/hovered item gets a translucent white plate rather than the theme's light
-   grey, which would be invisible here. */
-#kt_header .menu > .menu-item > .menu-link:hover,
-#kt_header .menu > .menu-item.here > .menu-link,
-#kt_header .menu > .menu-item.show > .menu-link {
-    background-color: rgba(255, 255, 255, 0.16) !important;
-}
-
-/* Dropdown panels live inside the header in this theme, so their text has to be put
-   back to dark - they are white panels, not part of the green bar. */
-#kt_header .menu-sub,
-#kt_header .menu-sub .menu-title,
-#kt_header .menu-sub .menu-link,
-#kt_header .dropdown-menu,
-#kt_header .dropdown-menu * {
-    color: var(--ati-ink);
-}
-
-#kt_header .menu-sub .menu-link:hover .menu-title,
-#kt_header .menu-sub .menu-item.here > .menu-link .menu-title {
+#kt_header .menu > .menu-item.show > .menu-link .menu-title,
+#kt_header .menu > .menu-item > .menu-link:hover .menu-title {
     color: var(--ati-primary);
 }
 
-/* The icon buttons carry a border that boxed each one on the green, and the theme puts
-   a rule between the logo row and the menu row. Both were drawing lines across a bar
-   that is already one solid block, so both go. */
+#kt_header .menu > .menu-item.here > .menu-link {
+    box-shadow: inset 0 -3px 0 0 var(--ati-primary);
+}
+
+/* Icon buttons keep no border, as asked, but on white they need no white-out either. */
 #kt_header .btn-icon,
 #kt_header .btn.btn-icon,
 #kt_app_header .btn-icon,
@@ -169,24 +132,7 @@ body,
 #kt_header .btn-icon:hover,
 #kt_app_header .btn-icon:hover,
 .app-header .btn-icon:hover {
-    background-color: rgba(255, 255, 255, 0.16) !important;
-}
-
-#kt_header .separator,
-#kt_app_header .separator,
-.app-header .separator {
-    display: none !important;
-}
-
-/* The brand mark was small enough to read as an afterthought. The active theme's own
-   component is sized directly; this covers the other themes, which each size their own,
-   and only on wide screens so the mobile header is left alone. */
-@media (min-width: 992px) {
-    .brand-logo img,
-    #kt_header .brand-logo img,
-    .app-header .app-sidebar-logo img {
-        height: 45px !important;
-    }
+    background-color: var(--ati-tint) !important;
 }
 
 /* ---------------------------------------------------------------------------------
@@ -215,19 +161,31 @@ body,
  * would fight; the heading's job is to name the page, not to compete.
  * ------------------------------------------------------------------------------- */
 
+/* The page title carries the colour now, not the header. A full-width band names the
+   screen you are on, and the accent rule under it ties the band to the content below
+   rather than letting it float. */
 .app-toolbar {
-    background-color: transparent;
-    border-bottom: none;
+    background-color: var(--ati-primary) !important;
+    border-bottom: 3px solid var(--ati-accent);
+    margin-bottom: 1.5rem;
 }
 
 .app-toolbar .page-title {
-    border-left: 4px solid var(--ati-accent);
-    padding-left: 0.85rem;
+    border-left: none;
+    padding-left: 0;
 }
 
-.app-toolbar .page-heading {
-    color: var(--ati-primary) !important;
+.app-toolbar .page-heading,
+.app-toolbar h1,
+.app-toolbar .page-title .text-muted,
+.app-toolbar .breadcrumb-item,
+.app-toolbar .breadcrumb-item a {
+    color: #ffffff !important;
     letter-spacing: -0.2px;
+}
+
+.app-toolbar .page-title .text-muted {
+    color: rgba(255, 255, 255, 0.75) !important;
 }
 
 /* ---------------------------------------------------------------------------------
@@ -265,30 +223,78 @@ body,
  * this way is most of the difference between a data table and a spreadsheet.
  * ------------------------------------------------------------------------------- */
 
+/* Filled, with white labels. A grid is the densest thing on these pages and a solid
+   header is what stops the first data row reading as part of it. */
 .table > thead > tr > th,
 .table > thead th,
 table.dataTable > thead > tr > th {
-    background-color: var(--ati-tint);
-    color: var(--ati-primary) !important;
-    border-bottom: 2px solid var(--ati-line) !important;
+    background-color: var(--ati-primary) !important;
+    color: #ffffff !important;
+    border-bottom: none !important;
     font-size: 0.78rem;
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
+    vertical-align: middle;
 }
 
-/* The header row usually carries text-muted, which greys out the colour above. */
-.table > thead > tr.fw-bold.text-muted > th {
-    color: var(--ati-primary) !important;
+/* The header row usually carries text-muted, which would grey out the white above. */
+.table > thead > tr.fw-bold.text-muted > th,
+.table > thead > tr > th.sorting,
+.table > thead > tr > th.sorting_asc,
+.table > thead > tr > th.sorting_desc {
+    color: #ffffff !important;
 }
 
-/* Rows stay white so the figures keep their contrast; only the hover is tinted. */
+/* DataTables draws its sort arrows with a dark glyph, which vanishes on the fill. */
+table.dataTable > thead > tr > th.sorting:before,
+table.dataTable > thead > tr > th.sorting:after,
+table.dataTable > thead > tr > th.sorting_asc:before,
+table.dataTable > thead > tr > th.sorting_asc:after,
+table.dataTable > thead > tr > th.sorting_desc:before,
+table.dataTable > thead > tr > th.sorting_desc:after {
+    color: rgba(255, 255, 255, 0.75) !important;
+    opacity: 1;
+}
+
+/* Banded rows. Both the nth-child form and DataTables' own odd/even classes, because
+   which one applies depends on whether the grid is a DataTable. */
 .table > tbody > tr > td {
     background-color: transparent;
 }
 
-.table > tbody > tr:hover > td {
-    background-color: var(--ati-tint);
+.table > tbody > tr:nth-of-type(even) > td,
+table.dataTable > tbody > tr.even > td,
+table.dataTable.table-striped > tbody > tr:nth-of-type(even) > td {
+    background-color: var(--ati-row-alt);
+}
+
+.table > tbody > tr:hover > td,
+table.dataTable > tbody > tr:hover > td {
+    background-color: var(--ati-tint) !important;
+}
+
+/* ---------------------------------------------------------------------------------
+ * Row actions
+ *
+ * A tight row of icon buttons at the right-hand end of the row, replacing the Actions
+ * dropdown that used to sit at the left. Two clicks became one, and the controls now
+ * sit at the end of the row they act on.
+ * ------------------------------------------------------------------------------- */
+
+.ati-row-actions {
+    white-space: nowrap;
+    width: 1%;
+}
+
+.ati-row-actions .btn.btn-icon {
+    height: 30px;
+    width: 30px;
+}
+
+/* The header cell over the icons needs no label shouting at them. */
+.table > thead > tr > th:last-child {
+    text-align: right;
 }
 
 /* ---------------------------------------------------------------------------------
@@ -299,13 +305,18 @@ table.dataTable > thead > tr > th {
  * that happens to be bold.
  * ------------------------------------------------------------------------------- */
 
+/* An underline rather than a filled band, following the reference: a small badged icon,
+   a coloured uppercase label, and a rule across the full width beneath it. The rule is
+   what groups the fields under it, and it does so without adding another block of
+   colour to a page that already has a banded title and a filled grid header. */
 .ati-section-header {
-    background-color: var(--ati-tint-strong);
-    border-left: 4px solid var(--ati-primary);
-    border-radius: 0.5rem;
-    padding: 0.7rem 1rem;
+    background-color: transparent;
+    border-left: none;
+    border-bottom: 2px solid var(--ati-primary);
+    border-radius: 0;
+    padding: 0 0 0.6rem 0;
 
-    /* Clear air above, so the band reads as the start of a new part of the form rather
+    /* Clear air above, so a section reads as the start of a new part of the form rather
        than the last line of the one before it. */
     margin-top: 40px;
 }
@@ -313,9 +324,40 @@ table.dataTable > thead > tr > th {
 .ati-section-title {
     color: var(--ati-primary);
     font-weight: 700;
-    font-size: 0.95rem;
-    letter-spacing: 0.02em;
+    font-size: 0.9rem;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* The leading icon becomes a small filled badge, which is what makes the label read as
+   a section marker rather than as bold text. */
+.ati-section-title > i {
+    background-color: var(--ati-primary);
+    border-radius: 0.35rem;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    font-size: 0.8rem;
+    margin-right: 0.6rem !important;
+}
+
+/* ---------------------------------------------------------------------------------
+ * Headings
+ *
+ * Every heading takes the brand colour, so a heading is never mistaken for body text.
+ * The exceptions are the places that sit on a filled ground - the page band and the
+ * modal header - and they are restated after this so they stay white.
+ * ------------------------------------------------------------------------------- */
+
+h1, h2, h3, h4, h5, h6,
+.card-title,
+.card-label {
+    color: var(--ati-primary);
 }
 
 /* ---------------------------------------------------------------------------------
@@ -361,9 +403,14 @@ table.dataTable > thead > tr > th {
 
 .modal-content > .modal-header,
 .modal-content > .modal-header .modal-title,
+.modal-content > .modal-header h1,
+.modal-content > .modal-header h2,
+.modal-content > .modal-header h3,
+.modal-content > .modal-header h4,
 .modal-content > .modal-header h5,
+.modal-content > .modal-header h6,
 .modal-content > .modal-header .fw-bold {
-    color: #ffffff;
+    color: #ffffff !important;
 }
 
 /* The close button is a dark SVG by default and disappears on the green. */
@@ -436,6 +483,95 @@ select.form-control:disabled,
 }
 
 /* ---------------------------------------------------------------------------------
+ * Buttons
+ *
+ * The theme's primary and success are both green, which is why every button on every
+ * screen was the same colour. They are repointed at the navy family, with success a
+ * step lighter so a secondary action - Export, Refresh - reads as secondary to the
+ * primary one next to it.
+ *
+ * Semantic colours are left alone. Danger stays red and the dashboard's
+ * met/near/missed colouring stays green/amber/red, because those report a state rather
+ * than branding a control.
+ * ------------------------------------------------------------------------------- */
+
+.btn.btn-primary {
+    background-color: var(--ati-primary) !important;
+    border-color: var(--ati-primary) !important;
+    color: #ffffff !important;
+}
+
+.btn.btn-primary:hover,
+.btn.btn-primary:focus,
+.btn.btn-primary:active,
+.btn.btn-primary.active,
+.btn.btn-primary.show {
+    background-color: var(--ati-primary-dark) !important;
+    border-color: var(--ati-primary-dark) !important;
+    color: #ffffff !important;
+}
+
+.btn.btn-success {
+    background-color: var(--ati-primary-light) !important;
+    border-color: var(--ati-primary-light) !important;
+    color: #ffffff !important;
+}
+
+.btn.btn-success:hover,
+.btn.btn-success:focus,
+.btn.btn-success:active {
+    background-color: var(--ati-primary) !important;
+    border-color: var(--ati-primary) !important;
+    color: #ffffff !important;
+}
+
+.btn.btn-light-primary,
+.btn.btn-light-success {
+    background-color: var(--ati-tint) !important;
+    border-color: transparent !important;
+    color: var(--ati-primary) !important;
+}
+
+.btn.btn-light-primary:hover,
+.btn.btn-light-success:hover {
+    background-color: var(--ati-primary) !important;
+    color: #ffffff !important;
+}
+
+.btn.btn-outline-primary {
+    border-color: var(--ati-primary) !important;
+    color: var(--ati-primary) !important;
+}
+
+.btn.btn-outline-primary:hover {
+    background-color: var(--ati-primary) !important;
+    color: #ffffff !important;
+}
+
+/* Links, checked inputs and progress bars all take the theme's primary too. */
+a:not(.btn):not(.menu-link):not(.page-link),
+.text-primary {
+    color: var(--ati-primary) !important;
+}
+
+.form-check-input:checked {
+    background-color: var(--ati-primary) !important;
+    border-color: var(--ati-primary) !important;
+}
+
+.progress-bar.bg-primary {
+    background-color: var(--ati-primary) !important;
+}
+
+/* The login page runs the default theme bundle, where primary is blue rather than the
+   application's colour, so its Log in button was a different colour from every other
+   primary button in the product. */
+.btn.btn-primary,
+#kt_login_signin_form .btn-primary {
+    background-color: var(--ati-primary) !important;
+}
+
+/* ---------------------------------------------------------------------------------
  * Dashboard headline tiles
  *
  * Each figure gets its own accent down the left edge, so the four tiles read as four
@@ -450,7 +586,7 @@ select.form-control:disabled,
 }
 
 .ati-kpi--cases { border-left-color: var(--ati-info); }
-.ati-kpi--sold { border-left-color: var(--ati-primary); }
+.ati-kpi--sold { border-left-color: #12b76a; }
 .ati-kpi--planned { border-left-color: var(--ati-violet); }
 .ati-kpi--achieved { border-left-color: var(--ati-warn); }
 
@@ -499,8 +635,9 @@ select.form-control:disabled,
     --ati-tint-strong: rgba(80, 205, 137, 0.18);
     --ati-line: rgba(255, 255, 255, 0.10);
     --ati-canvas: #131a20;
+    --ati-row-alt: rgba(255, 255, 255, 0.03);
     --ati-ink: #e6eaef;
-    --ati-primary: #2eb37f;
+    --ati-primary: #4a7ab8;
 }
 
 [data-bs-theme="dark"] .form-control,
@@ -513,7 +650,12 @@ select.form-control:disabled,
 [data-bs-theme="dark"] #kt_header,
 [data-bs-theme="dark"] #kt_app_header,
 [data-bs-theme="dark"] .app-header {
-    background-color: #0d5f43 !important;
+    background-color: #1b2430 !important;
+}
+
+[data-bs-theme="dark"] .table > tbody > tr:nth-of-type(even) > td,
+[data-bs-theme="dark"] table.dataTable > tbody > tr.even > td {
+    background-color: rgba(255, 255, 255, 0.03);
 }
 
 [data-bs-theme="dark"] .card {

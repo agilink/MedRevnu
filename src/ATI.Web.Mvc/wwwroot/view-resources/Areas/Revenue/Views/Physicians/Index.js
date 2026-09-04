@@ -45,48 +45,10 @@
                 }
             },
             columnDefs: [
+                { targets: 0, data: 'lastName', name: 'LAST_NAME' },
+                { targets: 1, data: 'firstName', name: 'FIRST_NAME' },
                 {
-                    targets: 0,
-                    data: null,
-                    orderable: false,
-                    autoWidth: false,
-                    defaultContent: '',
-                    rowAction: {
-                        cssClass: 'btn btn-sm btn-light btn-active-light-primary',
-                        text: '<i class="fa fa-cog"></i> ' + app.localize('Actions') + ' <span class="caret"></span>',
-                        items: [
-                            {
-                                text: app.localize('Edit'),
-                                visible: function () { return _permissions.edit; },
-                                action: function (data) {
-                                    _createOrEditModal.open({ id: data.record.id });
-                                }
-                            },
-                            {
-                                text: app.localize('CreateUser'),
-                                // Hidden once they have one - a physician gets one login,
-                                // and the flag column shows which already do.
-                                visible: function (data) {
-                                    return _permissions.edit && !data.record.hasUser;
-                                },
-                                action: function (data) {
-                                    createUserForPhysician(data.record);
-                                }
-                            },
-                            {
-                                text: app.localize('Delete'),
-                                visible: function () { return _permissions.delete; },
-                                action: function (data) {
-                                    deletePhysician(data.record);
-                                }
-                            }
-                        ]
-                    }
-                },
-                { targets: 1, data: 'lastName', name: 'LAST_NAME' },
-                { targets: 2, data: 'firstName', name: 'FIRST_NAME' },
-                {
-                    targets: 3,
+                    targets: 2,
                     data: 'hospitalName',
                     name: 'hospitalName',
                     orderable: false,
@@ -99,25 +61,25 @@
                     }
                 },
                 {
-                    targets: 4,
+                    targets: 3,
                     data: 'employeeId',
                     name: 'EMPLOYEE_ID',
                     render: function (employeeId) { return employeeId || '-'; }
                 },
                 {
-                    targets: 5,
+                    targets: 4,
                     data: 'emailWork',
                     name: 'EMAIL_WORK',
                     render: function (emailWork) { return emailWork || '-'; }
                 },
                 {
-                    targets: 6,
+                    targets: 5,
                     data: 'mobileNumber',
                     name: 'NUMBER_MOBILE',
                     render: function (mobileNumber) { return mobileNumber || '-'; }
                 },
                 {
-                    targets: 7,
+                    targets: 6,
                     data: 'employeeStatus',
                     name: 'EmployeeStatusID',
                     render: function (employeeStatus) {
@@ -130,7 +92,7 @@
                     }
                 },
                 {
-                    targets: 8,
+                    targets: 7,
                     data: 'userName',
                     name: 'UserId',
                     orderable: false,
@@ -145,8 +107,57 @@
 
                         return '<span class="login-cell" data-physician-id="' + row.id + '">' + content + '</span>';
                     }
+                },
+                {
+                    // Icon buttons rather than a dropdown, and last rather than first: the actions
+                    // belong beside the row they act on, and one click instead of two.
+                    targets: 8,
+                    data: null,
+                    orderable: false,
+                    autoWidth: false,
+                    defaultContent: '',
+                    className: 'text-end ati-row-actions',
+                    render: function (unused, type, row) {
+                        var html = '';
+
+                        if ((function (data) { return _permissions.edit; })({ record: row })) {
+                            html += '<button type="button" class="btn btn-sm btn-icon btn-light-primary ms-1 ati-act-edit" '
+                                + 'title="' + app.localize('Edit') + '"><i class="fa fa-pen"></i></button>';
+                        }
+
+                        if ((function (data) { return _permissions.edit && !data.record.hasUser; })({ record: row })) {
+                            html += '<button type="button" class="btn btn-sm btn-icon btn-light-success ms-1 ati-act-createuser" '
+                                + 'title="' + app.localize('CreateUser') + '"><i class="fa fa-user-plus"></i></button>';
+                        }
+
+                        if ((function (data) { return _permissions.delete; })({ record: row })) {
+                            html += '<button type="button" class="btn btn-sm btn-icon btn-light-danger ms-1 ati-act-delete" '
+                                + 'title="' + app.localize('Delete') + '"><i class="fa fa-trash"></i></button>';
+                        }
+
+                        return html;
+                    }
                 }
             ]
+        });
+
+
+        // Delegated: the grid redraws its rows, so per-row binding would not survive
+        // a page change or a sort.
+
+        _$physiciansTable.on('click', '.ati-act-edit', function () {
+            var data = { record: dataTable.row($(this).closest('tr')).data() };
+            _createOrEditModal.open({ id: data.record.id });
+        });
+
+        _$physiciansTable.on('click', '.ati-act-createuser', function () {
+            var data = { record: dataTable.row($(this).closest('tr')).data() };
+            createUserForPhysician(data.record);
+        });
+
+        _$physiciansTable.on('click', '.ati-act-delete', function () {
+            var data = { record: dataTable.row($(this).closest('tr')).data() };
+            deletePhysician(data.record);
         });
 
         function reload() {

@@ -31,72 +31,41 @@
             columnDefs: [
                 {
                     targets: 0,
-                    data: null,
-                    orderable: false,
-                    autoWidth: false,
-                    defaultContent: '',
-                    rowAction: {
-                        cssClass: 'btn btn-sm btn-light btn-active-light-primary',
-                        text: '<i class="fa fa-cog"></i> ' + app.localize('Actions') + ' <span class="caret"></span>',
-                        items: [
-                            {
-                                text: app.localize('Edit'),
-                                action: function (data) {
-                                    _createOrEditModal.open({ id: data.record.id });
-                                }
-                            },
-                            {
-                                text: app.localize('Details'),
-                                action: function (data) {
-                                    _viewModal.open({ id: data.record.id });
-                                }
-                            },
-                            {
-                                text: app.localize('Delete'),
-                                action: function (data) {
-                                    deleteProduct(data.record);
-                                }
-                            }
-                        ]
-                    }
-                },
-                {
-                    targets: 1,
                     data: 'productCode',
                     name: 'productCode',
                     render: function (v) { return v || '-'; }
                 },
                 {
-                    targets: 2,
+                    targets: 1,
                     data: 'name',
                     name: 'name'
                 },
                 {
-                    targets: 3,
+                    targets: 2,
                     data: 'productCategoryName',
                     name: 'productCategoryName',
                     render: function (v) { return v || '-'; }
                 },
                 {
-                    targets: 4,
+                    targets: 3,
                     data: 'subproductCategoryName',
                     name: 'subproductCategoryName',
                     render: function (v) { return v || '-'; }
                 },
                 {
-                    targets: 5,
+                    targets: 4,
                     data: 'manufacturer',
                     name: 'manufacturer',
                     render: function (v) { return v || '-'; }
                 },
                 {
-                    targets: 6,
+                    targets: 5,
                     data: 'modelNo',
                     name: 'modelNo',
                     render: function (v) { return v || '-'; }
                 },
                 {
-                    targets: 7,
+                    targets: 6,
                     data: 'basePrice',
                     name: 'basePrice',
                     className: 'text-end',
@@ -105,7 +74,7 @@
                     }
                 },
                 {
-                    targets: 8,
+                    targets: 7,
                     data: 'cost',
                     name: 'cost',
                     className: 'text-end',
@@ -114,7 +83,7 @@
                     }
                 },
                 {
-                    targets: 9,
+                    targets: 8,
                     data: 'price',
                     name: 'price',
                     className: 'text-end',
@@ -123,7 +92,7 @@
                     }
                 },
                 {
-                    targets: 10,
+                    targets: 9,
                     data: 'isActive',
                     name: 'isActive',
                     className: 'text-center',
@@ -132,8 +101,57 @@
                             ? '<span class="badge badge-light-success">' + app.localize('Active') + '</span>'
                             : '<span class="badge badge-light-danger">' + app.localize('Inactive') + '</span>';
                     }
+                },
+                {
+                    // Icon buttons rather than a dropdown, and last rather than first: the actions
+                    // belong beside the row they act on, and one click instead of two.
+                    targets: 10,
+                    data: null,
+                    orderable: false,
+                    autoWidth: false,
+                    defaultContent: '',
+                    className: 'text-end ati-row-actions',
+                    render: function (unused, type, row) {
+                        var html = '';
+
+                        if (true) {
+                            html += '<button type="button" class="btn btn-sm btn-icon btn-light-primary ms-1 ati-act-edit" '
+                                + 'title="' + app.localize('Edit') + '"><i class="fa fa-pen"></i></button>';
+                        }
+
+                        if (true) {
+                            html += '<button type="button" class="btn btn-sm btn-icon btn-light-info ms-1 ati-act-details" '
+                                + 'title="' + app.localize('Details') + '"><i class="fa fa-eye"></i></button>';
+                        }
+
+                        if (true) {
+                            html += '<button type="button" class="btn btn-sm btn-icon btn-light-danger ms-1 ati-act-delete" '
+                                + 'title="' + app.localize('Delete') + '"><i class="fa fa-trash"></i></button>';
+                        }
+
+                        return html;
+                    }
                 }
             ]
+        });
+
+
+        // Delegated: the grid redraws its rows, so per-row binding would not
+        // survive a page change or a sort.
+
+        _$productsTable.on('click', '.ati-act-edit', function () {
+            var data = { record: dataTable.row($(this).closest('tr')).data() };
+            _createOrEditModal.open({ id: data.record.id });
+        });
+
+        _$productsTable.on('click', '.ati-act-details', function () {
+            var data = { record: dataTable.row($(this).closest('tr')).data() };
+            _viewModal.open({ id: data.record.id });
+        });
+
+        _$productsTable.on('click', '.ati-act-delete', function () {
+            var data = { record: dataTable.row($(this).closest('tr')).data() };
+            deleteProduct(data.record);
         });
 
         function getProducts() {
