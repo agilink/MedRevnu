@@ -20,19 +20,27 @@
     <form name="ProcedureTransactionCreateOrEditForm" role="form" novalidate class="form-validation">
         <input type="hidden" name="Id" value="@(Model.ProcedureTransaction?.Id ?? 0)" />
 
+        @* Row one is the case's identity: what it is called, when it happened, and who
+           and where. Row two is everything descriptive. Grouping them this way puts the
+           four facts that identify a case on one line. *@
         <div class="row">
-            <div class="col-md-4 mb-5">
+            <div class="col-lg-3 col-md-6 mb-5">
                 <label class="form-label required" for="CaseNumber">@L("CaseNumber")</label>
                 <input class="form-control" type="text" name="CaseNumber" id="CaseNumber"
                        value="@Model.ProcedureTransaction?.CaseNumber" required maxlength="50" />
             </div>
-            <div class="col-md-4 mb-5">
-                @* The hospital leads: it narrows the physician list below and prices the
-                   devices. *@
+            <div class="col-lg-3 col-md-6 mb-5">
+                <label class="form-label required" for="ProcedureDate">@L("Date")</label>
+                <input class="form-control" type="date" name="ProcedureDate" id="ProcedureDate"
+                       value="@(Model.ProcedureTransaction?.ProcedureDate.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString("yyyy-MM-dd"))" required />
+            </div>
+            <div class="col-lg-3 col-md-6 mb-5">
+                @* The hospital leads: it narrows the physician list beside it and prices
+                   the devices. *@
                 <label class="form-label" for="HospitalId">@L("Hospital")</label>
                 @* Locked users get their one hospital with no blank option, so it is
                    genuinely preselected rather than merely offered. *@
-                <select class="form-control" id="HospitalId" name="HospitalId">
+                <select class="form-select" id="HospitalId" name="HospitalId">
                     @if (!(bool)ViewBag.IsPhysicianRestricted)
                     {
                         <option value="">@L("SelectHospital")</option>
@@ -46,17 +54,9 @@
                 </select>
                 <small class="form-text text-muted">@L("HospitalDrivesPhysicianList")</small>
             </div>
-            <div class="col-md-4 mb-5">
-                <label class="form-label required" for="ProcedureDate">@L("Date")</label>
-                <input class="form-control" type="date" name="ProcedureDate" id="ProcedureDate"
-                       value="@(Model.ProcedureTransaction?.ProcedureDate.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString("yyyy-MM-dd"))" required />
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6 mb-5">
+            <div class="col-lg-3 col-md-6 mb-5">
                 <label class="form-label required" for="PhysicianId">@L("Physician")</label>
-                <select class="form-control" id="PhysicianId" name="PhysicianId" required>
+                <select class="form-select" id="PhysicianId" name="PhysicianId" required>
                     @if (!(bool)ViewBag.IsPhysicianRestricted)
                     {
                         <option value="">@L("SelectPhysician")</option>
@@ -69,7 +69,15 @@
                     }
                 </select>
             </div>
-            <div class="col-md-6 mb-5">
+        </div>
+
+        <div class="row">
+            <div class="col-lg-6 mb-5">
+                <label class="form-label" for="Description">@L("Description")</label>
+                <textarea class="form-control" name="Description" id="Description" rows="2"
+                          maxlength="1000">@Model.ProcedureTransaction?.Description</textarea>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-5">
                 <label class="form-label required">@L("ImplantType")</label>
                 <div class="pt-2">
                     @{
@@ -89,12 +97,9 @@
                 </div>
                 <small class="form-text text-muted">@L("EveryDeviceMustMatchImplantType")</small>
             </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6 mb-5">
+            <div class="col-lg-3 col-md-6 mb-5">
                 <label class="form-label required" for="Status">@L("CaseStatus")</label>
-                <select class="form-control" id="Status" name="Status" required>
+                <select class="form-select" id="Status" name="Status" required>
                     @{
                         var statuses = new[] { "Open", "Scheduled", "Completed", "Billed", "Paid", "Closed" };
                         var currentStatus = (int)(Model.ProcedureTransaction?.Status ?? CaseStatus.Open);
@@ -107,20 +112,17 @@
                 </select>
                 <small class="form-text text-muted">@L("StatusDoesNotAffectReportsYet")</small>
             </div>
-            <div class="col-md-6 mb-5">
-                <label class="form-label" for="Description">@L("Description")</label>
-                <textarea class="form-control" name="Description" id="Description" rows="2"
-                          maxlength="1000">@Model.ProcedureTransaction?.Description</textarea>
-            </div>
         </div>
 
         @* A procedure can involve two or three devices, so products are lines on the case.
            Each option carries its implant type so the form can flag a device that does not
            belong on this case before the server rejects it. *@
-        <div class="separator separator-dashed my-4"></div>
-
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h6 class="mb-0">@L("DevicesUsed")</h6>
+        @* A banded section header rather than a dashed rule: the devices are a distinct
+           part of the case, and a full-width band is what makes that read at a glance. *@
+        <div class="ati-section-header d-flex justify-content-between align-items-center mb-4">
+            <h5 class="ati-section-title mb-0">
+                <i class="fa fa-microchip me-2"></i>@L("DevicesUsed")
+            </h5>
             <button type="button" id="AddDeviceLineButton" class="btn btn-sm btn-primary">
                 <i class="fa fa-plus"></i> <span>@L("AddDevice")</span>
             </button>

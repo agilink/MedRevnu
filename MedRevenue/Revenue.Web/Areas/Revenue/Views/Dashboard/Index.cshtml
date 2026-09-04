@@ -76,41 +76,42 @@
         </div>
     </div>
 
-    <!-- Headline figures -->
+    @* Headline figures. Each tile carries its own accent down the left edge, so four
+       different measures read as four things rather than one card repeated. *@
     <div class="row g-5 mb-5">
         <div class="col-sm-6 col-xl-3">
-            <div class="card h-100">
+            <div class="card h-100 ati-kpi ati-kpi--cases">
                 <div class="card-body d-flex flex-column justify-content-center">
-                    <span class="text-muted fw-semibold fs-7">@L("TotalCases")</span>
-                    <span class="text-dark fw-bold fs-2hx" id="KpiTotalCases">-</span>
-                    <span class="text-muted fs-8" id="KpiTotalUnits"></span>
+                    <span class="ati-kpi-label">@L("TotalCases")</span>
+                    <span class="ati-kpi-value" id="KpiTotalCases">-</span>
+                    <span class="ati-kpi-note" id="KpiTotalUnits"></span>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <div class="card h-100">
+            <div class="card h-100 ati-kpi ati-kpi--sold">
                 <div class="card-body d-flex flex-column justify-content-center">
-                    <span class="text-muted fw-semibold fs-7">@L("TotalSold")</span>
-                    <span class="text-dark fw-bold fs-2hx" id="KpiTotalSold">-</span>
-                    <span class="text-muted fs-8" id="KpiPeriodLabel"></span>
+                    <span class="ati-kpi-label">@L("TotalSold")</span>
+                    <span class="ati-kpi-value" id="KpiTotalSold">-</span>
+                    <span class="ati-kpi-note" id="KpiPeriodLabel"></span>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <div class="card h-100">
+            <div class="card h-100 ati-kpi ati-kpi--planned">
                 <div class="card-body d-flex flex-column justify-content-center">
-                    <span class="text-muted fw-semibold fs-7">@L("TotalPlanned")</span>
-                    <span class="text-dark fw-bold fs-2hx" id="KpiTotalPlanned">-</span>
-                    <span class="text-muted fs-8" id="KpiPlannedMonths"></span>
+                    <span class="ati-kpi-label">@L("TotalPlanned")</span>
+                    <span class="ati-kpi-value" id="KpiTotalPlanned">-</span>
+                    <span class="ati-kpi-note" id="KpiPlannedMonths"></span>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <div class="card h-100">
+            <div class="card h-100 ati-kpi ati-kpi--achieved">
                 <div class="card-body d-flex flex-column justify-content-center">
-                    <span class="text-muted fw-semibold fs-7">@L("PercentageAchieved")</span>
-                    <span class="fw-bold fs-2hx" id="KpiPercentAchieved">-</span>
-                    <span class="fs-8" id="KpiVariance"></span>
+                    <span class="ati-kpi-label">@L("PercentageAchieved")</span>
+                    <span class="ati-kpi-value" id="KpiPercentAchieved">-</span>
+                    <span class="ati-kpi-note" id="KpiVariance"></span>
                 </div>
             </div>
         </div>
