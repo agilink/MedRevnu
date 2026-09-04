@@ -2,12 +2,20 @@
     ViewData["Title"] = "Rate Chart Report";
 }
 
+<div class="app-toolbar py-3 py-lg-6">
+    <div class="app-container container-fluid d-flex flex-stack">
+        <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
+            <h1 class="page-heading d-flex fw-bold fs-3 flex-column justify-content-center my-0">
+                @L("RateChart")
+            </h1>
+            <span class="text-muted me-4">Products by category, with base and contracted prices</span>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <div class="col-12">
         <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Rate Chart - Products by Category with Prices</h3>
-            </div>
             <div class="card-body">
                 <div class="row mb-3">
                     <div class="col-md-4">

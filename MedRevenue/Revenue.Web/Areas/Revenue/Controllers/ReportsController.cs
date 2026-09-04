@@ -25,19 +25,44 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         private readonly IRepository<ProductCategory, int> _productCategoryRepository;
         private readonly IRepository<Personnel, int> _personnelRepository;
         private readonly IRevenueReportsExcelExporter _excelExporter;
+        private readonly IRepository<ProcedureTransaction, int> _procedureTransactionRepository;
 
         public ReportsController(
             IReportsAppService reportsAppService,
             IRepository<Facility, int> facilityRepository,
             IRepository<ProductCategory, int> productCategoryRepository,
             IRepository<Personnel, int> personnelRepository,
-            IRevenueReportsExcelExporter excelExporter)
+            IRevenueReportsExcelExporter excelExporter,
+            IRepository<ProcedureTransaction, int> procedureTransactionRepository)
         {
             _reportsAppService = reportsAppService;
             _facilityRepository = facilityRepository;
             _productCategoryRepository = productCategoryRepository;
             _personnelRepository = personnelRepository;
             _excelExporter = excelExporter;
+            _procedureTransactionRepository = procedureTransactionRepository;
+        }
+
+        /// <summary>
+        /// The month the monthly report should open on.
+        /// </summary>
+        /// <remarks>
+        /// The latest month that actually has a case, not the current one. This report
+        /// covers a single month, so defaulting to today meant it opened empty for the
+        /// whole of any month before the first case was entered - which is exactly what
+        /// happened: the cases sit in April and August and the report opened on September
+        /// and found nothing.
+        ///
+        /// Falls back to today on an empty database, where there is no better answer.
+        /// </remarks>
+        private async Task<DateTime> GetLatestMonthWithData()
+        {
+            var latest = await _procedureTransactionRepository.GetAll()
+                .OrderByDescending(pt => pt.ProcedureDate)
+                .Select(pt => (DateTime?)pt.ProcedureDate)
+                .FirstOrDefaultAsync();
+
+            return latest ?? DateTime.Now;
         }
 
         // Report 1: Rate Chart - Products by ProductCategory with prices for a hospital
@@ -61,9 +86,11 @@ namespace ATI.Revenue.Web.Areas.Revenue.Controllers
         // Report 2: Monthly Revenue - Daily revenue by ProductCategory for each month
         public async Task<IActionResult> MonthlyRevenue()
         {
+            var openOn = await GetLatestMonthWithData();
+
             ViewBag.Hospitals = await GetHospitalSelectList();
-            ViewBag.CurrentYear = DateTime.Now.Year;
-            ViewBag.CurrentMonth = DateTime.Now.Month;
+            ViewBag.CurrentYear = openOn.Year;
+            ViewBag.CurrentMonth = openOn.Month;
             return View();
         }
 
