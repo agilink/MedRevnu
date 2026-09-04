@@ -624,7 +624,7 @@ a:not(.btn):not(.menu-link):not(.page-link),
    These deliberately do not use --ati-tint: that one tracks the theme and is reused for
    hovers and card headers, and these need to stay distinct from each other. */
 .ati-kpi {
-    border-left: 6px solid var(--ati-primary);
+    border-left: 6px solid var(--ati-primary) !important;
     position: relative;
 
     /* Square the left corners. The card's 9px radius curved the accent away at both
@@ -637,22 +637,22 @@ a:not(.btn):not(.menu-link):not(.page-link),
 }
 
 .ati-kpi--cases {
-    border-left-color: #3b9ae1;
+    border-left-color: #3b9ae1 !important;
     background-color: #eef6fd !important;
 }
 
 .ati-kpi--sold {
-    border-left-color: #2c5aa0;
+    border-left-color: #2c5aa0 !important;
     background-color: #eaf1fb !important;
 }
 
 .ati-kpi--planned {
-    border-left-color: #6b5bd2;
+    border-left-color: #6b5bd2 !important;
     background-color: #f0eefc !important;
 }
 
 .ati-kpi--achieved {
-    border-left-color: #2f8f9d;
+    border-left-color: #2f8f9d !important;
     background-color: #e9f4f6 !important;
 }
 
