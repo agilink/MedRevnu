@@ -208,7 +208,7 @@ body,
 
 .card > .card-header {
     background-color: var(--ati-tint);
-    border-bottom: 3px solid var(--ati-underline);
+    border-bottom: 3px solid var(--ati-primary);
     border-top-left-radius: 0.7rem;
     border-top-right-radius: 0.7rem;
     min-height: 56px;
@@ -338,7 +338,7 @@ table.dataTable > tbody > tr:hover > td {
 .ati-section-header {
     background-color: transparent;
     border-left: none;
-    border-bottom: 3px solid var(--ati-underline);
+    border-bottom: 3px solid var(--ati-primary);
     border-radius: 0;
     padding: 0 0 0.6rem 0;
 

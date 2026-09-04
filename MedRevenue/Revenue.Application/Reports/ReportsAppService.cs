@@ -66,6 +66,9 @@ namespace ATI.Revenue.Application.Reports
                     .FirstOrDefaultAsync()
                 : null;
 
+            // Resolved once rather than per row.
+            var hospitalLabel = hospitalName ?? L("AllHospitals");
+
             var code = string.IsNullOrWhiteSpace(input.ProductCode) ? null : input.ProductCode.Trim();
 
             var products = await _productRepository.GetAll()
@@ -121,7 +124,7 @@ namespace ATI.Revenue.Application.Reports
 
                     return new RateChartReportDto
                     {
-                        HospitalName = hospitalName ?? L("AllHospitals"),
+                        HospitalName = hospitalLabel,
                         ProductCategoryName = p.ProductCategoryName,
                         ProductCode = p.ProductCode,
                         ProductName = p.ProductName,
